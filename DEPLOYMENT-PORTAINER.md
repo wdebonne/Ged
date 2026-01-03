@@ -24,6 +24,8 @@ Ce guide explique comment déployer et mettre à jour l'application GED Courrier
 
 > ⚠️ **Important** : Ce guide utilise `docker-compose.portainer.yml` et `Dockerfile.portainer` qui créent une **image complète** avec tout le code inclus. Pas besoin de monter des fichiers depuis l'hôte !
 
+> 🚨 **Note sur le Build** : Le build d'image directement dans Portainer via Git peut échouer avec certaines configurations Docker (erreur BuildKit/HTTP2). La **méthode recommandée** est de builder l'image manuellement sur le serveur puis de déployer la stack (voir Méthode B).
+
 ---
 
 ## 🏗️ Architecture
@@ -56,7 +58,9 @@ Ce guide explique comment déployer et mettre à jour l'application GED Courrier
 
 ## 🚀 Premier Déploiement
 
-### Méthode A : Déploiement via Git dans Portainer (Recommandé) ⭐
+### Méthode A : Déploiement via Git dans Portainer
+
+> ⚠️ **Attention** : Cette méthode peut échouer avec l'erreur "BuildKit HTTP2 frame too large". Si c'est le cas, utilisez la **Méthode B** (recommandée).
 
 Cette méthode permet à Portainer de cloner directement le repository et de builder l'image.
 
@@ -95,9 +99,9 @@ Cette méthode permet à Portainer de cloner directement le repository et de bui
 
 ---
 
-### Méthode B : Déploiement manuel (fichiers sur le serveur)
+### Méthode B : Déploiement manuel avec image pré-buildée (Recommandé) ⭐
 
-Si vous préférez avoir les fichiers sur le serveur :
+Cette méthode évite les problèmes de build dans Portainer en créant l'image localement sur le serveur.
 
 #### Étape 1 : Cloner le projet sur le serveur
 
@@ -144,11 +148,25 @@ SMTP_PASSWORD=votre_mot_de_passe
 SMTP_FROM=GED Courrier <no-reply@votredomaine.com>
 ```
 
-#### Étape 3 : Déployer via CLI
+#### Étape 3 : Builder l'image Docker
 
 ```bash
-# Depuis le dossier du projet - Builder et démarrer
-docker-compose -f docker-compose.portainer.yml up -d --build
+# Builder l'image localement (IMPORTANT - à faire avant le déploiement Portainer)
+docker build -f Dockerfile.portainer -t ged-app:latest .
+```
+
+#### Étape 4 : Déployer via Portainer ou CLI
+
+**Option A - Via Portainer :**
+1. Créez une stack dans Portainer
+2. Copiez le contenu de `docker-compose.portainer.yml`
+3. Configurez les variables d'environnement
+4. Déployez
+
+**Option B - Via CLI :**
+```bash
+# Démarrer les conteneurs (l'image ged-app:latest doit être buildée)
+docker-compose -f docker-compose.portainer.yml up -d
 ```
 
 #### Étape 4 : Vérifier le déploiement
@@ -164,19 +182,31 @@ L'application devrait être accessible sur `http://votre-serveur:5000`
 
 ## 🔄 Mise à Jour
 
-### Méthode 1 : Via Portainer (Recommandé pour déploiement Git) ⭐
+### Méthode 1 : Via SSH + Portainer (Recommandé) ⭐
 
-Si vous avez déployé via Git dans Portainer :
+Pour mettre à jour l'application :
 
-1. Allez dans **Stacks** → `ged-courrier`
-2. Cliquez sur **Pull and redeploy**
-3. Cochez **Re-pull image** et **Force rebuild**
-4. Cliquez sur **Update**
+1. **Connectez-vous en SSH** au serveur :
+```bash
+ssh user@votre-serveur
+cd /opt/ged
+```
 
-Portainer va :
-- Récupérer les dernières modifications du repository
-- Rebuilder l'image avec le nouveau code
-- Redémarrer les conteneurs
+2. **Récupérez les modifications et rebuildez l'image** :
+```bash
+git pull
+docker build -f Dockerfile.portainer -t ged-app:latest .
+```
+
+3. **Redémarrez via Portainer** :
+   - Allez dans **Stacks** → `ged-courrier`
+   - Cliquez sur **Stop** puis **Start**
+   - Ou cliquez sur **Update the stack**
+
+Alternativement, redémarrez via CLI :
+```bash
+docker-compose -f docker-compose.portainer.yml up -d
+```
 
 ### Méthode 2 : Via SSH (Pour déploiement manuel)
 
@@ -192,7 +222,7 @@ git pull
 docker-compose -f docker-compose.portainer.yml up -d --build
 ```
 
-### Méthode 3 : Script automatique
+### Méthode 3 : Script automatique (Recommandé)
 
 Créez un script `update-portainer.sh` sur votre serveur :
 
@@ -207,7 +237,7 @@ echo "📥 Récupération des mises à jour..."
 git pull
 
 echo "🔨 Rebuild de l'image Docker..."
-docker-compose -f docker-compose.portainer.yml build --no-cache ged-backend
+docker build -f Dockerfile.portainer -t ged-app:latest --no-cache .
 
 echo "🔄 Redémarrage des conteneurs..."
 docker-compose -f docker-compose.portainer.yml up -d
@@ -480,10 +510,11 @@ Configurez des alertes dans Portainer (Business Edition) ou utilisez des outils 
 
 ### Premier déploiement
 
-- [ ] Cloner le repository
-- [ ] Créer le fichier `.env` avec les variables obligatoires
-- [ ] Builder le frontend (`npm run build`)
-- [ ] Créer la stack dans Portainer
+- [ ] Cloner le repository sur le serveur (`git clone`)
+- [ ] Builder l'image Docker (`docker build -f Dockerfile.portainer -t ged-app:latest .`)
+- [ ] Créer la stack dans Portainer avec `docker-compose.portainer.yml`
+- [ ] Configurer les variables d'environnement obligatoires
+- [ ] Déployer la stack
 - [ ] Vérifier que les conteneurs sont running
 - [ ] Tester l'accès à l'application
 - [ ] Configurer le reverse proxy (si nécessaire)
@@ -492,8 +523,8 @@ Configurez des alertes dans Portainer (Business Edition) ou utilisez des outils 
 ### Mise à jour
 
 - [ ] `git pull` pour récupérer les changements
-- [ ] `npm run build` dans frontend (si modifié)
-- [ ] Redémarrer le conteneur backend
+- [ ] Rebuilder l'image (`docker build -f Dockerfile.portainer -t ged-app:latest .`)
+- [ ] Redémarrer les conteneurs (`docker-compose -f docker-compose.portainer.yml up -d`)
 - [ ] Vérifier les logs
 - [ ] Tester l'application
 

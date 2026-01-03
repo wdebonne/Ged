@@ -36,13 +36,14 @@ services:
   # ═══════════════════════════════════════════════════════════════
   # GED BACKEND (avec frontend intégré)
   # ═══════════════════════════════════════════════════════════════
+  # Option 1: Utiliser une image pré-buildée (recommandé pour Portainer)
+  # Builder d'abord sur le serveur: docker build -f Dockerfile.portainer -t ged-app:latest .
   ged-backend:
-    build:
-      context: .
-      dockerfile: Dockerfile.portainer
-      # Désactiver BuildKit pour éviter l'erreur HTTP/2 frame
-      args:
-        - DOCKER_BUILDKIT=0
+    image: ged-app:latest
+    # Option 2: Build dans Portainer (peut échouer selon la config Docker)
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile.portainer
     container_name: ged-backend
     restart: unless-stopped
     ports:

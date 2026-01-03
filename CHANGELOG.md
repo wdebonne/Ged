@@ -7,6 +7,18 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ---
 
+## [3.9.10] - 2026-01-03
+
+### Modifié
+
+- **Docker Compose Portainer - Correction du build** :
+  - Modification de `docker-compose.portainer.yml` pour utiliser une image pré-buildée (`ged-app:latest`)
+  - Correction de l'erreur "BuildKit HTTP2 frame too large" lors du déploiement via Git dans Portainer
+  - Le build de l'image doit maintenant être fait manuellement sur le serveur avant le déploiement
+  - Mise à jour de la documentation `DEPLOYMENT-PORTAINER.md` avec les nouvelles instructions
+
+---
+
 ## [3.9.9] - 2025-12-16
 
 ### Ajouté
