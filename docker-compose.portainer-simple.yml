@@ -1,18 +1,15 @@
 version: '3.8'
 
 # ═══════════════════════════════════════════════════════════════
-# GED Courrier - Docker Compose pour Portainer (Image complète)
+# GED Courrier - Version simple pour Portainer (SANS BUILD)
 # ═══════════════════════════════════════════════════════════════
-# Cette version build une image complète avec tout le code inclus.
-# Idéal pour Portainer car ne nécessite pas de fichiers sur l'hôte.
-#
-# Usage Portainer:
-#   1. Créer une stack depuis ce fichier
-#   2. Configurer les variables d'environnement
-#   3. Déployer
+# Prérequis sur le serveur:
+#   1. Cloner le projet dans /opt/ged
+#   2. Builder le frontend: cd frontend && npm install && npm run build
+#   3. Déployer cette stack dans Portainer
 #
 # Mise à jour:
-#   1. Rebuild la stack dans Portainer (Pull and redeploy)
+#   git pull && cd frontend && npm run build && docker restart ged-backend
 
 services:
   # ═══════════════════════════════════════════════════════════════
@@ -29,24 +26,16 @@ services:
       - mongodb_data:/data/db
     networks:
       - ged-network
-    # Décommenter pour accès externe (debug)
-    # ports:
-    #   - '27017:27017'
 
   # ═══════════════════════════════════════════════════════════════
-  # GED BACKEND (avec frontend intégré)
+  # GED BACKEND
   # ═══════════════════════════════════════════════════════════════
   ged-backend:
-    build:
-      context: .
-      dockerfile: Dockerfile.portainer
-      # Désactiver BuildKit pour éviter l'erreur HTTP/2 frame
-      args:
-        - DOCKER_BUILDKIT=0
-    environment:
-      - DOCKER_BUILDKIT=0
+    image: node:18-alpine
     container_name: ged-backend
     restart: unless-stopped
+    working_dir: /app
+    command: sh -c "cd /app/backend && npm install --omit=dev && node src/server.js"
     ports:
       - '5000:5000'
     environment:
@@ -74,11 +63,6 @@ services:
       - LDAP_BIND_PASSWORD=${LDAP_BIND_PASSWORD}
       - LDAP_SEARCH_BASE=${LDAP_SEARCH_BASE}
       - LDAP_SEARCH_FILTER=${LDAP_SEARCH_FILTER}
-      # Kerberos (optionnel)
-      - KERBEROS_ENABLED=${KERBEROS_ENABLED:-false}
-      - KERBEROS_REALM=${KERBEROS_REALM}
-      - KERBEROS_KDC=${KERBEROS_KDC}
-      - KERBEROS_SERVICE_PRINCIPAL=${KERBEROS_SERVICE_PRINCIPAL}
       # IMAP (optionnel)
       - IMAP_ENABLED=${IMAP_ENABLED:-false}
       - IMAP_HOST=${IMAP_HOST}
@@ -87,11 +71,15 @@ services:
       - IMAP_PASSWORD=${IMAP_PASSWORD}
       - IMAP_TLS=${IMAP_TLS:-true}
       - IMAP_MAILBOX=${IMAP_MAILBOX:-INBOX}
-      - IMAP_PROCESSED_FOLDER=${IMAP_PROCESSED_FOLDER:-Traités}
       - IMAP_CHECK_INTERVAL=${IMAP_CHECK_INTERVAL:-5}
     volumes:
-      # Seul les uploads sont persistés (données utilisateur)
-      - ged_uploads:/app/uploads
+      # Code source (depuis le serveur)
+      - /opt/ged/backend:/app/backend:ro
+      - /opt/ged/frontend/dist:/app/frontend/dist:ro
+      # Uploads (lecture/écriture)
+      - /opt/ged/backend/uploads:/app/uploads
+      # Cache node_modules
+      - backend_modules:/app/backend/node_modules
     depends_on:
       - mongodb
     networks:
@@ -99,9 +87,7 @@ services:
 
 volumes:
   mongodb_data:
-    name: ged_mongodb_data
-  ged_uploads:
-    name: ged_uploads
+  backend_modules:
 
 networks:
   ged-network:
