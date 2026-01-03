@@ -49,7 +49,7 @@ COPY backend/package*.json ./backend/
 
 # Installer les dépendances de production du backend
 WORKDIR /app/backend
-RUN npm ci --only=production
+RUN npm ci --omit=dev
 
 # Revenir au répertoire principal
 WORKDIR /app
