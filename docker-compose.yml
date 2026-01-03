@@ -1,0 +1,114 @@
+version: '3.8'
+
+# ═══════════════════════════════════════════════════════════════
+# GED Courrier - Docker Compose avec Volumes Montés (avec MongoDB)
+# ═══════════════════════════════════════════════════════════════
+# Les fichiers sont montés depuis l'hôte pour faciliter les mises à jour.
+# Pas besoin de reconstruire l'image pour mettre à jour le code !
+#
+# Prérequis:
+#   1. Builder le frontend: cd frontend && npm run build
+#
+# Usage:
+#   docker-compose up -d
+#
+# Mise à jour:
+#   git pull && cd frontend && npm run build && docker-compose restart ged-backend
+
+services:
+  # ═══════════════════════════════════════════════════════════════
+  # MONGODB
+  # ═══════════════════════════════════════════════════════════════
+  mongodb:
+    image: mongo:6
+    container_name: ged-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-changeme}
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - ged-network
+    # Décommenter pour accès externe (debug)
+    # ports:
+    #   - '27017:27017'
+
+  # ═══════════════════════════════════════════════════════════════
+  # GED BACKEND (sert aussi le frontend buildé)
+  # ═══════════════════════════════════════════════════════════════
+  ged-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: ged-backend
+    restart: unless-stopped
+    ports:
+      - '5000:5000'
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - MONGODB_URI=mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-changeme}@mongodb:27017/ged_courrier?authSource=admin
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRE=${JWT_EXPIRE:-7d}
+      - APP_URL=${APP_URL}
+      - APP_NAME=${APP_NAME:-GED Courrier}
+      - CORS_ORIGIN=${CORS_ORIGIN}
+      - UPLOAD_PATH=/app/uploads
+      - MAX_FILE_SIZE=${MAX_FILE_SIZE:-50000000}
+      # SMTP
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_SECURE=${SMTP_SECURE:-false}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_FROM=${SMTP_FROM}
+      # LDAP (optionnel)
+      - LDAP_ENABLED=${LDAP_ENABLED:-false}
+      - LDAP_URL=${LDAP_URL}
+      - LDAP_BIND_DN=${LDAP_BIND_DN}
+      - LDAP_BIND_PASSWORD=${LDAP_BIND_PASSWORD}
+      - LDAP_SEARCH_BASE=${LDAP_SEARCH_BASE}
+      - LDAP_SEARCH_FILTER=${LDAP_SEARCH_FILTER}
+      # Kerberos (optionnel)
+      - KERBEROS_ENABLED=${KERBEROS_ENABLED:-false}
+      - KERBEROS_REALM=${KERBEROS_REALM}
+      - KERBEROS_KDC=${KERBEROS_KDC}
+      - KERBEROS_SERVICE_PRINCIPAL=${KERBEROS_SERVICE_PRINCIPAL}
+      # IMAP (optionnel)
+      - IMAP_ENABLED=${IMAP_ENABLED:-false}
+      - IMAP_HOST=${IMAP_HOST}
+      - IMAP_PORT=${IMAP_PORT:-993}
+      - IMAP_USER=${IMAP_USER}
+      - IMAP_PASSWORD=${IMAP_PASSWORD}
+      - IMAP_TLS=${IMAP_TLS:-true}
+      - IMAP_MAILBOX=${IMAP_MAILBOX:-INBOX}
+      - IMAP_PROCESSED_FOLDER=${IMAP_PROCESSED_FOLDER:-Traités}
+      - IMAP_CHECK_INTERVAL=${IMAP_CHECK_INTERVAL:-5}
+    volumes:
+      # ═══════════════════════════════════════════════════════════
+      # POINTS DE MONTAGE - Fichiers sources
+      # ═══════════════════════════════════════════════════════════
+      # Backend (code source)
+      - ./backend/src:/app/backend/src:ro
+      - ./backend/package.json:/app/backend/package.json:ro
+      - ./backend/package-lock.json:/app/backend/package-lock.json:ro
+      # Frontend (buildé)
+      - ./frontend/dist:/app/frontend/dist:ro
+      # Uploads (lecture/écriture)
+      - ./backend/uploads:/app/uploads
+      # Node modules (volume persistant pour éviter de réinstaller)
+      - backend_node_modules:/app/backend/node_modules
+    depends_on:
+      - mongodb
+    networks:
+      - ged-network
+
+volumes:
+  mongodb_data:
+  backend_node_modules:
+
+networks:
+  ged-network:
+    driver: bridge
+

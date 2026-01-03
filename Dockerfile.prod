@@ -1,0 +1,37 @@
+# ═══════════════════════════════════════════════════════════════
+# Dockerfile de Production avec Volumes Montés
+# ═══════════════════════════════════════════════════════════════
+# Ce Dockerfile installe uniquement les dépendances.
+# Les fichiers sources sont montés via des volumes.
+# Avantage: Mise à jour sans reconstruction de l'image.
+
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Installer les dépendances système nécessaires pour certains packages
+RUN apk add --no-cache python3 make g++
+
+# Créer les dossiers nécessaires avec les bonnes permissions
+RUN mkdir -p /app/backend /app/frontend/dist /app/uploads \
+    && mkdir -p uploads/courriers uploads/responses uploads/avatars \
+    && mkdir -p uploads/pending uploads/archives uploads/branding uploads/temp \
+    && chown -R node:node /app
+
+# Script d'entrée qui installe les dépendances si nécessaire puis démarre
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+# Exposer le port
+EXPOSE 5000
+
+# Utiliser l'utilisateur non-root
+USER node
+
+# Variables d'environnement par défaut
+ENV NODE_ENV=production
+ENV PORT=5000
+
+# Point d'entrée
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["node", "backend/src/server.js"]

@@ -1,0 +1,205 @@
+# ═══════════════════════════════════════════════════════════════
+# .htaccess - GED Courrier pour O2Switch
+# À placer dans : applications/ged-courrier/public/
+# ═══════════════════════════════════════════════════════════════
+
+# ═══════════════════════════════════════════════════════════════
+# MOTEUR DE RÉÉCRITURE
+# ═══════════════════════════════════════════════════════════════
+RewriteEngine On
+
+# ═══════════════════════════════════════════════════════════════
+# REDIRECTION HTTP → HTTPS
+# ═══════════════════════════════════════════════════════════════
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# ═══════════════════════════════════════════════════════════════
+# FILTRAGE IP - LISTE BLANCHE
+# Décommentez et modifiez les IPs pour activer
+# ═══════════════════════════════════════════════════════════════
+ <IfModule mod_authz_core.c>
+     Require ip 82.67.76.120 # IP FRED
+     Require ip 109.234.164.73 # IP o2switch
+#     Require ip 192.168.0.0/16
+ </IfModule>
+
+# ═══════════════════════════════════════════════════════════════
+# FILTRAGE IP - LISTE NOIRE
+# Décommentez et modifiez les IPs pour activer
+# ═══════════════════════════════════════════════════════════════
+# <IfModule mod_authz_core.c>
+#     <RequireAll>
+#         Require all granted
+#         Require not ip 10.20.30.40
+#         Require not ip 50.60.70.0/24
+#     </RequireAll>
+# </IfModule>
+
+# ═══════════════════════════════════════════════════════════════
+# FILTRAGE GEOIP - PAR PAYS
+# Décommentez pour autoriser uniquement certains pays
+# Codes pays : FR (France), BE (Belgique), CH (Suisse), CA (Canada)
+# ═══════════════════════════════════════════════════════════════
+ <IfModule mod_geoip.c>
+     GeoIPEnable On
+     SetEnvIf GEOIP_COUNTRY_CODE FR AllowCountry
+#     SetEnvIf GEOIP_COUNTRY_CODE BE AllowCountry
+#     SetEnvIf GEOIP_COUNTRY_CODE CH AllowCountry
+#     SetEnvIf GEOIP_COUNTRY_CODE CA AllowCountry
+     <IfModule mod_authz_core.c>
+         Require env AllowCountry
+     </IfModule>
+ </IfModule>
+
+# ═══════════════════════════════════════════════════════════════
+# PROXY VERS L'API NODE.JS (PORT 3000)
+# ═══════════════════════════════════════════════════════════════
+RewriteCond %{REQUEST_URI} ^/api [NC]
+RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L]
+
+# Proxy pour les fichiers uploadés
+RewriteCond %{REQUEST_URI} ^/uploads [NC]
+RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L]
+
+# ═══════════════════════════════════════════════════════════════
+# SPA - REDIRECTION VERS INDEX.HTML
+# Toutes les routes frontend sont gérées par React
+# ═══════════════════════════════════════════════════════════════
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ /index.html [L]
+
+# ═══════════════════════════════════════════════════════════════
+# HEADERS DE SÉCURITÉ
+# ═══════════════════════════════════════════════════════════════
+<IfModule mod_headers.c>
+    # Empêche le navigateur de deviner le type MIME
+    Header set X-Content-Type-Options "nosniff"
+    
+    # Protection contre le clickjacking
+    Header set X-Frame-Options "SAMEORIGIN"
+    
+    # Protection XSS
+    Header set X-XSS-Protection "1; mode=block"
+    
+    # Politique de référent
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+    
+    # Désactive certaines fonctionnalités du navigateur
+    Header set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+</IfModule>
+
+# ═══════════════════════════════════════════════════════════════
+# BLOCAGE DES FICHIERS SENSIBLES
+# ═══════════════════════════════════════════════════════════════
+<FilesMatch "\.(env|log|ini|conf|bak|sql|sh|md)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+</FilesMatch>
+
+# Bloquer l'accès aux fichiers et dossiers cachés (.git, .env, etc.)
+<IfModule mod_rewrite.c>
+    RewriteRule (^|/)\.(?!well-known) - [F]
+</IfModule>
+
+# Bloquer l'accès à package.json et autres fichiers de config
+<FilesMatch "^(package|package-lock|tsconfig|vite\.config)\.json$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+</FilesMatch>
+
+# ═══════════════════════════════════════════════════════════════
+# CACHE DES ASSETS STATIQUES
+# ═══════════════════════════════════════════════════════════════
+<IfModule mod_expires.c>
+    ExpiresActive On
+    
+    # Images
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+    ExpiresByType image/webp "access plus 1 month"
+    ExpiresByType image/x-icon "access plus 1 year"
+    
+    # Fonts
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType application/font-woff "access plus 1 year"
+    ExpiresByType application/font-woff2 "access plus 1 year"
+    
+    # CSS & JavaScript
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType text/javascript "access plus 1 month"
+    
+    # Documents
+    ExpiresByType application/pdf "access plus 1 week"
+    
+    # HTML - pas de cache pour les SPA
+    ExpiresByType text/html "access plus 0 seconds"
+</IfModule>
+
+# ═══════════════════════════════════════════════════════════════
+# COMPRESSION GZIP
+# ═══════════════════════════════════════════════════════════════
+<IfModule mod_deflate.c>
+    # Compresser les fichiers texte
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE text/javascript
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/json
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE image/svg+xml
+    AddOutputFilterByType DEFLATE application/font-woff
+    AddOutputFilterByType DEFLATE application/font-woff2
+    
+    # Ne pas compresser les images déjà compressées
+    SetEnvIfNoCase Request_URI \.(?:gif|jpe?g|png|webp)$ no-gzip
+</IfModule>
+
+# ═══════════════════════════════════════════════════════════════
+# PROTECTION CONTRE LES ATTAQUES COURANTES
+# ═══════════════════════════════════════════════════════════════
+
+# Bloquer les requêtes suspectes
+<IfModule mod_rewrite.c>
+    # Bloquer les injections SQL basiques
+    RewriteCond %{QUERY_STRING} (\<|%3C).*script.*(\>|%3E) [NC,OR]
+    RewriteCond %{QUERY_STRING} GLOBALS(=|\[|\%[0-9A-Z]{0,2}) [OR]
+    RewriteCond %{QUERY_STRING} _REQUEST(=|\[|\%[0-9A-Z]{0,2})
+    RewriteRule .* - [F,L]
+</IfModule>
+
+# Limiter les méthodes HTTP autorisées
+<LimitExcept GET POST PUT DELETE OPTIONS>
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+</LimitExcept>
+
+# ═══════════════════════════════════════════════════════════════
+# TYPES MIME PERSONNALISÉS
+# ═══════════════════════════════════════════════════════════════
+<IfModule mod_mime.c>
+    AddType application/javascript .js .mjs
+    AddType application/json .json
+    AddType image/svg+xml .svg .svgz
+    AddType font/woff .woff
+    AddType font/woff2 .woff2
+    AddType application/pdf .pdf
+</IfModule>
+
+# ═══════════════════════════════════════════════════════════════
+# CONFIGURATION DES ERREURS PERSONNALISÉES (optionnel)
+# ═══════════════════════════════════════════════════════════════
+# ErrorDocument 404 /index.html
+# ErrorDocument 403 /index.html
+# ErrorDocument 500 /index.html

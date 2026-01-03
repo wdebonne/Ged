@@ -1,0 +1,45 @@
+{
+  "name": "ged-courrier-backend",
+  "version": "3.9.7",
+  "description": "Backend API pour la Gestion Électronique de Courrier",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "seed": "node src/scripts/seed.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.948.0",
+    "archiver": "^7.0.1",
+    "bcryptjs": "^2.4.3",
+    "canvas": "^3.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-validator": "^7.0.1",
+    "imap": "^0.8.19",
+    "jsonwebtoken": "^9.0.2",
+    "ldapjs": "^3.0.7",
+    "mailparser": "^3.6.6",
+    "mongoose": "^8.0.3",
+    "multer": "^1.4.5-lts.1",
+    "node-cron": "^3.0.3",
+    "nodemailer": "^6.9.7",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "passport-ldapauth": "^3.0.1",
+    "pdf-lib": "^1.17.1",
+    "pdf-parse": "^1.1.1",
+    "pdf-to-img": "^5.0.0",
+    "pdfjs-dist": "^5.4.449",
+    "pdfkit": "^0.14.0",
+    "sharp": "^0.33.5",
+    "tesseract.js": "^5.0.4",
+    "uuid": "^9.0.1",
+    "webdav": "^5.8.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
