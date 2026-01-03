@@ -18,9 +18,11 @@ Ce guide explique comment déployer et mettre à jour l'application GED Courrier
 
 - **Serveur** avec Docker installé
 - **Portainer** installé et accessible (Community ou Business Edition)
-- **Git** installé sur le serveur
-- Accès SSH au serveur (pour les mises à jour)
+- **Git** installé sur le serveur (ou accès au repository)
+- (Optionnel) Accès SSH au serveur
 - (Optionnel) Reverse proxy configuré (Nginx/Traefik)
+
+> ⚠️ **Important** : Ce guide utilise `docker-compose.portainer.yml` et `Dockerfile.portainer` qui créent une **image complète** avec tout le code inclus. Pas besoin de monter des fichiers depuis l'hôte !
 
 ---
 
@@ -54,7 +56,50 @@ Ce guide explique comment déployer et mettre à jour l'application GED Courrier
 
 ## 🚀 Premier Déploiement
 
-### Étape 1 : Cloner le projet sur le serveur
+### Méthode A : Déploiement via Git dans Portainer (Recommandé) ⭐
+
+Cette méthode permet à Portainer de cloner directement le repository et de builder l'image.
+
+1. **Connectez-vous à Portainer**
+
+2. **Créer une nouvelle Stack** :
+   - Allez dans **Stacks** → **Add stack**
+   - Nom de la stack : `ged-courrier`
+
+3. **Configurer le Repository Git** :
+   - Sélectionnez **Repository**
+   - **Repository URL** : `https://votre-repo/ged-courrier.git`
+   - **Repository reference** : `main` (ou `master`)
+   - **Compose path** : `docker-compose.portainer.yml`
+   - (Si repo privé) Ajoutez vos credentials Git
+
+4. **Ajouter les Variables d'environnement** :
+   Cliquez sur **Add environment variable** et ajoutez :
+
+   | Nom | Valeur |
+   |-----|--------|
+   | `MONGO_ROOT_USER` | `admin` |
+   | `MONGO_ROOT_PASSWORD` | `VotreMotDePasseSecurise123!` |
+   | `JWT_SECRET` | `votre_secret_jwt_minimum_32_caracteres` |
+   | `APP_URL` | `https://ged.votredomaine.com` |
+   | `CORS_ORIGIN` | `https://ged.votredomaine.com` |
+
+5. **Déployer** :
+   - Cliquez sur **Deploy the stack**
+   - Attendez que l'image soit buildée (peut prendre 2-5 minutes la première fois)
+
+6. **Vérifier** :
+   - Allez dans **Containers**
+   - Vérifiez que `ged-backend` et `ged-mongodb` sont **running**
+   - L'application est accessible sur `http://votre-serveur:5000`
+
+---
+
+### Méthode B : Déploiement manuel (fichiers sur le serveur)
+
+Si vous préférez avoir les fichiers sur le serveur :
+
+#### Étape 1 : Cloner le projet sur le serveur
 
 ```bash
 # Se connecter au serveur en SSH
@@ -66,16 +111,7 @@ git clone https://votre-repo/ged-courrier.git ged
 cd ged
 ```
 
-### Étape 2 : Builder le frontend
-
-```bash
-cd frontend
-npm install
-npm run build
-cd ..
-```
-
-### Étape 3 : Créer le fichier .env
+#### Étape 2 : Créer le fichier .env
 
 Créez un fichier `.env` à la racine du projet :
 
@@ -108,35 +144,14 @@ SMTP_PASSWORD=votre_mot_de_passe
 SMTP_FROM=GED Courrier <no-reply@votredomaine.com>
 ```
 
-### Étape 4 : Déployer via Portainer
-
-#### Option A : Via l'interface Portainer (Recommandé)
-
-1. Connectez-vous à Portainer
-2. Sélectionnez votre environnement (endpoint)
-3. Allez dans **Stacks** → **Add stack**
-4. Donnez un nom à la stack : `ged-courrier`
-5. Choisissez **Repository** ou **Upload** selon votre préférence :
-
-   **Option Repository (Git):**
-   - Repository URL: `https://votre-repo/ged-courrier.git`
-   - Compose path: `docker-compose.yml`
-   - Cochez "Automatic updates" si souhaité
-
-   **Option Upload:**
-   - Copiez le contenu de `docker-compose.yml`
-
-6. Dans la section **Environment variables**, ajoutez vos variables ou chargez le fichier `.env`
-7. Cliquez sur **Deploy the stack**
-
-#### Option B : Via la ligne de commande
+#### Étape 3 : Déployer via CLI
 
 ```bash
-# Depuis le dossier du projet
-docker-compose up -d
+# Depuis le dossier du projet - Builder et démarrer
+docker-compose -f docker-compose.portainer.yml up -d --build
 ```
 
-### Étape 5 : Vérifier le déploiement
+#### Étape 4 : Vérifier le déploiement
 
 Dans Portainer :
 1. Allez dans **Containers**
@@ -149,7 +164,21 @@ L'application devrait être accessible sur `http://votre-serveur:5000`
 
 ## 🔄 Mise à Jour
 
-### Méthode 1 : Via SSH (Recommandé)
+### Méthode 1 : Via Portainer (Recommandé pour déploiement Git) ⭐
+
+Si vous avez déployé via Git dans Portainer :
+
+1. Allez dans **Stacks** → `ged-courrier`
+2. Cliquez sur **Pull and redeploy**
+3. Cochez **Re-pull image** et **Force rebuild**
+4. Cliquez sur **Update**
+
+Portainer va :
+- Récupérer les dernières modifications du repository
+- Rebuilder l'image avec le nouveau code
+- Redémarrer les conteneurs
+
+### Méthode 2 : Via SSH (Pour déploiement manuel)
 
 ```bash
 # Se connecter au serveur
@@ -159,36 +188,17 @@ cd /opt/ged
 # Récupérer les dernières modifications
 git pull
 
-# Rebuilder le frontend si nécessaire
-cd frontend
-npm install
-npm run build
-cd ..
-
-# Redémarrer le conteneur backend
-docker restart ged-backend
+# Rebuilder l'image et redémarrer
+docker-compose -f docker-compose.portainer.yml up -d --build
 ```
-
-### Méthode 2 : Via Portainer
-
-1. **Mettre à jour le code** (via SSH comme ci-dessus, ou si vous utilisez Git dans Portainer)
-
-2. **Redémarrer le conteneur** :
-   - Portainer → Containers → `ged-backend`
-   - Cliquez sur **Restart**
-
-3. **Si vous avez modifié docker-compose.yml ou Dockerfile** :
-   - Portainer → Stacks → `ged-courrier`
-   - Cliquez sur **Pull and redeploy**
-   - Cochez **Re-pull image and redeploy** si nécessaire
 
 ### Méthode 3 : Script automatique
 
-Créez un script `update.sh` sur votre serveur :
+Créez un script `update-portainer.sh` sur votre serveur :
 
 ```bash
 #!/bin/bash
-# Script de mise à jour GED Courrier
+# Script de mise à jour GED Courrier (version Portainer)
 
 set -e
 cd /opt/ged
@@ -196,14 +206,14 @@ cd /opt/ged
 echo "📥 Récupération des mises à jour..."
 git pull
 
-echo "🔨 Build du frontend..."
-cd frontend
-npm install --production=false
-npm run build
-cd ..
+echo "🔨 Rebuild de l'image Docker..."
+docker-compose -f docker-compose.portainer.yml build --no-cache ged-backend
 
-echo "🔄 Redémarrage du conteneur..."
-docker restart ged-backend
+echo "🔄 Redémarrage des conteneurs..."
+docker-compose -f docker-compose.portainer.yml up -d
+
+echo "🧹 Nettoyage des anciennes images..."
+docker image prune -f
 
 echo "✅ Mise à jour terminée !"
 echo "📋 Logs du conteneur :"
@@ -212,12 +222,12 @@ docker logs --tail 20 ged-backend
 
 Rendez-le exécutable :
 ```bash
-chmod +x update.sh
+chmod +x update-portainer.sh
 ```
 
 Lancez la mise à jour :
 ```bash
-./update.sh
+./update-portainer.sh
 ```
 
 ---
