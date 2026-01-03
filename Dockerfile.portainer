@@ -19,13 +19,16 @@ WORKDIR /app/frontend
 COPY frontend/package*.json ./
 
 # Installer les dépendances (incluant devDependencies pour le build)
-RUN npm ci
+RUN npm install
 
 # Copier le code source du frontend
 COPY frontend/ ./
 
 # Builder le frontend
 RUN npm run build
+
+# Vérifier que le build a réussi
+RUN ls -la /app/frontend/dist && test -f /app/frontend/dist/index.html
 
 # ═══════════════════════════════════════════════════════════════
 # Stage 2: Image de production
@@ -74,6 +77,9 @@ COPY backend/fra.traineddat[a] ./backend/
 
 # Copier le frontend buildé depuis le stage précédent
 COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
+
+# Vérifier que le frontend est bien copié
+RUN ls -la /app/frontend/dist && test -f /app/frontend/dist/index.html
 
 # Définir les permissions
 RUN chown -R node:node /app
