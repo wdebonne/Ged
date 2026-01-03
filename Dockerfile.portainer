@@ -57,8 +57,9 @@ WORKDIR /app
 # Copier le code source du backend
 COPY backend/src ./backend/src
 
-# Copier le fichier traineddata pour l'OCR (si présent)
-COPY backend/fra.traineddata* ./backend/ 2>/dev/null || true
+# Copier le fichier traineddata pour l'OCR (optionnel - ignorer si absent)
+# Note: Ce fichier est nécessaire pour la reconnaissance OCR en français
+COPY backend/fra.traineddat[a] ./backend/
 
 # Copier le frontend buildé depuis le stage précédent
 COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
