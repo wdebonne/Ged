@@ -1,6 +1,7 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
+import rateLimit from 'express-rate-limit';
 import { body, validationResult } from 'express-validator';
 import { User, Group, Settings } from '../models/index.js';
 import { authenticate } from '../middleware/auth.middleware.js';
@@ -11,17 +12,42 @@ import { sendPasswordResetEmail } from '../services/email.service.js';
 
 const router = express.Router();
 
-// Générer un token JWT
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { success: false, message: 'Trop de tentatives de connexion. Réessayez dans 15 minutes.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const forgotPasswordLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  message: { success: false, message: 'Trop de demandes de réinitialisation. Réessayez dans 1 heure.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Générer un token JWT d'accès
 const generateToken = (userId) => {
   return jwt.sign(
     { userId },
     process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRE || '7d' }
+    { expiresIn: process.env.JWT_EXPIRE || '15m' }
+  );
+};
+
+// Générer un refresh token longue durée
+const generateRefreshToken = (userId) => {
+  return jwt.sign(
+    { userId, type: 'refresh' },
+    process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET + '_refresh',
+    { expiresIn: process.env.JWT_REFRESH_EXPIRE || '7d' }
   );
 };
 
 // POST /api/auth/login - Connexion
-router.post('/login', [
+router.post('/login', loginLimiter, [
   body('username').trim().notEmpty().withMessage('Nom d\'utilisateur requis'),
   body('password').notEmpty().withMessage('Mot de passe requis')
 ], async (req, res) => {
@@ -141,12 +167,14 @@ router.post('/login', [
     await user.save();
 
     const token = generateToken(user._id);
+    const refreshToken = generateRefreshToken(user._id);
 
     res.json({
       success: true,
       message: 'Connexion réussie',
       data: {
         token,
+        refreshToken,
         user: {
           id: user._id,
           username: user.username,
@@ -175,6 +203,41 @@ router.post('/login', [
       success: false,
       message: 'Erreur serveur lors de la connexion'
     });
+  }
+});
+
+// POST /api/auth/refresh - Rafraîchir le token d'accès
+router.post('/refresh', async (req, res) => {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    return res.status(401).json({ success: false, message: 'Refresh token manquant' });
+  }
+
+  try {
+    const decoded = jwt.verify(
+      refreshToken,
+      process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET + '_refresh'
+    );
+
+    if (decoded.type !== 'refresh') {
+      return res.status(401).json({ success: false, message: 'Token invalide' });
+    }
+
+    const user = await User.findById(decoded.userId);
+    if (!user || !user.isActive) {
+      return res.status(401).json({ success: false, message: 'Utilisateur introuvable ou inactif' });
+    }
+
+    const newToken = generateToken(user._id);
+    const newRefreshToken = generateRefreshToken(user._id);
+
+    res.json({
+      success: true,
+      data: { token: newToken, refreshToken: newRefreshToken }
+    });
+  } catch (error) {
+    return res.status(401).json({ success: false, message: 'Refresh token expiré ou invalide' });
   }
 });
 
@@ -217,7 +280,7 @@ router.get('/me', authenticate, async (req, res) => {
 });
 
 // POST /api/auth/forgot-password - Mot de passe oublié
-router.post('/forgot-password', [
+router.post('/forgot-password', forgotPasswordLimiter, [
   body('email').isEmail().withMessage('Email invalide')
 ], async (req, res) => {
   try {
@@ -275,7 +338,11 @@ router.post('/forgot-password', [
 
 // POST /api/auth/reset-password/:token - Réinitialiser le mot de passe
 router.post('/reset-password/:token', [
-  body('password').isLength({ min: 6 }).withMessage('Le mot de passe doit contenir au moins 6 caractères')
+  body('password')
+    .isLength({ min: 8 }).withMessage('Le mot de passe doit contenir au moins 8 caractères')
+    .matches(/[A-Z]/).withMessage('Le mot de passe doit contenir au moins une majuscule')
+    .matches(/[a-z]/).withMessage('Le mot de passe doit contenir au moins une minuscule')
+    .matches(/[0-9]/).withMessage('Le mot de passe doit contenir au moins un chiffre')
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -325,7 +392,11 @@ router.post('/reset-password/:token', [
 // POST /api/auth/change-password - Changer le mot de passe
 router.post('/change-password', authenticate, [
   body('currentPassword').notEmpty().withMessage('Mot de passe actuel requis'),
-  body('newPassword').isLength({ min: 6 }).withMessage('Le nouveau mot de passe doit contenir au moins 6 caractères')
+  body('newPassword')
+    .isLength({ min: 8 }).withMessage('Le nouveau mot de passe doit contenir au moins 8 caractères')
+    .matches(/[A-Z]/).withMessage('Le nouveau mot de passe doit contenir au moins une majuscule')
+    .matches(/[a-z]/).withMessage('Le nouveau mot de passe doit contenir au moins une minuscule')
+    .matches(/[0-9]/).withMessage('Le nouveau mot de passe doit contenir au moins un chiffre')
 ], async (req, res) => {
   try {
     const errors = validationResult(req);

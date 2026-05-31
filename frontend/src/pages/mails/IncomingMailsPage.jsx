@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -61,6 +61,7 @@ export default function IncomingMailsPage() {
   const [copySearch, setCopySearch] = useState('');
   const [showCopyDropdown, setShowCopyDropdown] = useState(false);
   const [ocrStatus, setOcrStatus] = useState(null); // null, 'checking', 'processing', 'done'
+  const ocrTimeoutRefs = useRef([]);
 
   // Mutation pour vérifier IMAP
   const checkImapMutation = useMutation({
@@ -112,15 +113,16 @@ export default function IncomingMailsPage() {
         queryClient.invalidateQueries({ queryKey: ['pending-files'] });
         
         // Second rafraîchissement après 2 secondes
-        setTimeout(() => {
+        const t1 = setTimeout(() => {
           queryClient.invalidateQueries({ queryKey: ['pending-files'] });
           setOcrStatus('done');
           toast.dismiss('ocr-status');
           toast.success(`${data.count} nouveau(x) courrier(s) importé(s)${data.filtered ? `, ${data.filtered} filtré(s)` : ''} - OCR terminé !`);
-          
-          // Réinitialiser le statut après affichage
-          setTimeout(() => setOcrStatus(null), 3000);
+
+          const t2 = setTimeout(() => setOcrStatus(null), 3000);
+          ocrTimeoutRefs.current.push(t2);
         }, 2000);
+        ocrTimeoutRefs.current.push(t1);
       } else if (data.filtered > 0) {
         setOcrStatus(null);
         // Toujours rafraîchir la liste
@@ -234,6 +236,13 @@ export default function IncomingMailsPage() {
     return service ? service.name : '';
   };
 
+  // Cleanup des timeouts OCR au démontage
+  useEffect(() => {
+    return () => {
+      ocrTimeoutRefs.current.forEach(clearTimeout);
+    };
+  }, []);
+
   // Fermer les dropdowns quand on clique ailleurs
   useEffect(() => {
     const handleClickOutside = () => {
@@ -255,7 +264,7 @@ export default function IncomingMailsPage() {
         handleSelectFile(file);
       }
     }
-  }, [preselectedFileId, pendingFiles]);
+  }, [preselectedFileId, pendingFiles, handleSelectFile]);
 
   // Mutation pour supprimer un fichier
   const deleteMutation = useMutation({
@@ -295,7 +304,7 @@ export default function IncomingMailsPage() {
     }
   });
 
-  const handleSelectFile = async (file) => {
+  const handleSelectFile = useCallback(async (file) => {
     setSelectedFile(file);
     setPageNumber(1);
     setFormData({
@@ -326,7 +335,7 @@ export default function IncomingMailsPage() {
     } catch (error) {
       console.error('Erreur chargement PDF:', error);
     }
-  };
+  }, [token]);
 
   const handleImport = () => {
     if (!selectedFile || !formData.senderName || !formData.subject || !formData.service || !formData.assignedTo) {

@@ -7,6 +7,118 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ---
 
+## [3.9.17] - 2026-05-31
+
+### Sécurité
+
+- **Algorithme JWT explicite** : tous les appels à `jwt.verify()` spécifient désormais `{ algorithms: ['HS256'] }` dans `auth.middleware.js` (middleware `authenticate` et `optionalAuth`) — protège contre les attaques par confusion d'algorithme (CVE pattern : `alg: none` ou substitution RS256/HS256)
+
+- **Validation des magic bytes sur les uploads** : nouveau middleware exporté `validateMagicBytes(types)` dans `upload.middleware.js` — après que multer a sauvegardé le fichier sur disque, les premiers octets sont lus et comparés aux signatures binaires connues (`%PDF`, `FF D8 FF`, `89 50 4E 47`, `GIF8`, `WEBP`) ; tout fichier dont la signature ne correspond pas est supprimé immédiatement et la requête est rejetée avec 400 — empêche l'upload de fichiers malveillants déguisés en PDF/image via un MIME type falsifié
+
+- **Politique de mot de passe renforcée** : les routes `/api/auth/reset-password` et `/api/auth/change-password` exigent désormais un minimum de 8 caractères avec au moins une majuscule, une minuscule et un chiffre (contre 6 caractères sans contrainte de complexité auparavant)
+
+### Corrigé
+
+- **Fuites mémoire setTimeout (IncomingMailsPage)** : les identifiants des deux `setTimeout` imbriqués déclenchés lors du traitement OCR sont maintenant stockés dans un `useRef` (`ocrTimeoutRefs`) et nettoyés via un `useEffect` de cleanup au démontage du composant — empêche les mises à jour d'état sur un composant démonté
+
+- **Dépendances manquantes dans useEffect (IncomingMailsPage)** : `handleSelectFile` wrappé en `useCallback([token])` et ajouté au tableau de dépendances du `useEffect` de présélection — corrige l'avertissement ESLint `react-hooks/exhaustive-deps` et élimine le risque de closure périmée sur le token
+
+### Amélioré
+
+- **Gestion d'erreur Dashboard** : `isError` exposé sur les 4 `useQuery` du `DashboardPage` ; un écran d'erreur explicite (icône + message) s'affiche si la query principale `dashboard-stats` échoue — les utilisateurs ne voient plus une page blanche en cas d'indisponibilité de l'API
+
+- **Accessibilité Pagination** : ajout des attributs `aria-label="Page précédente"`, `aria-label="Page suivante"`, `aria-label="Page N"` et `aria-current="page"` sur tous les boutons de `Pagination.jsx` — conformité WCAG 2.1 niveau AA pour la navigation clavier et les lecteurs d'écran
+
+- **Performance MainLayout** :
+  - `refetchInterval` des stats de la sidebar porté de 30 s à 60 s — réduit de moitié les requêtes périodiques inutiles
+  - `filteredAdminNav` wrappé en `useMemo([user?.group?.permissions])` — évite le recalcul du filtre de navigation admin à chaque rendu du layout
+
+- **Traçabilité erreur branding** : `brandingStore` expose un champ `isError: boolean` initialisé à `false`, passé à `true` si l'appel à l'API de branding échoue — les composants consommateurs peuvent désormais détecter et réagir à un échec de chargement de la configuration visuelle
+
+---
+
+## [3.9.16] - 2026-05-31
+
+### Amélioré
+
+- **Build frontend — optimisations production** :
+  - **Source maps désactivées** : `sourcemap: false` dans la config Vite — élimine les fichiers `.map` du bundle prod, réduit la taille déployée et n'expose plus le code source
+  - **Code splitting vendors** : découpage en 7 chunks indépendants (`vendor-react`, `vendor-ui`, `vendor-query`, `vendor-charts`, `vendor-pdf`, `vendor-forms`, `vendor-misc`) — le navigateur met chaque chunk en cache séparément ; une mise à jour applicative ne nécessite le re-téléchargement que du chunk `index`, les vendors restent en cache
+
+---
+
+## [3.9.15] - 2026-05-31
+
+### Sécurité / Amélioré
+
+- **Token refresh avec file d'attente de requêtes** :
+  - **Backend** : nouveau endpoint `POST /api/auth/refresh` qui échange un refresh token valide contre un nouveau couple access token / refresh token
+  - **Backend** : introduction des refresh tokens longue durée (défaut `7d`, variable `JWT_REFRESH_EXPIRE`) distincts des access tokens de courte durée (défaut désormais `15m`, variable `JWT_EXPIRE`)
+  - **Backend** : variable d'environnement `JWT_REFRESH_SECRET` pour signer les refresh tokens indépendamment de `JWT_SECRET`
+  - **Frontend** : l'intercepteur axios implémente un mécanisme de file d'attente (`failedQueue`) : lorsqu'un premier 401 déclenche un rafraîchissement, toutes les requêtes simultanées qui reçoivent un 401 sont mises en attente et rejouées automatiquement avec le nouveau token dès que le rafraîchissement aboutit
+  - **Frontend** : si le refresh token est absent ou expiré, toutes les requêtes en attente sont rejetées et l'utilisateur est redirigé vers `/login`
+  - **Frontend** : le `authStore` persiste le `refreshToken` dans `localStorage` et expose `updateTokens()` pour synchroniser les tokens après rafraîchissement
+
+---
+
+## [3.9.14] - 2026-05-31
+
+### Amélioré
+
+- **Frontend — Lazy loading des routes** :
+  - Toutes les pages sont maintenant chargées à la demande via `React.lazy()` + `Suspense`
+  - Les layouts (`MainLayout`, `AuthLayout`) restent en import statique (présents sur toutes les pages)
+  - Un composant `PageLoader` (spinner centré) s'affiche pendant le chargement du chunk JS
+  - Réduit significativement la taille du bundle initial et accélère le premier affichage
+
+- **Frontend — Gestion d'erreur globale sur toutes les queries** :
+  - Ajout d'un `QueryCache.onError` dans le `QueryClient` : toutes les `useQuery` sans gestion d'erreur explicite affichent désormais un toast avec le message de l'API ou un message générique
+  - Ajout d'un `MutationCache.onError` : couvre les mutations sans `onError` défini ; les mutations avec leur propre `onError` ne sont pas doublées
+  - Les erreurs déjà gérées par l'intercepteur axios sont ignorées (401 → redirection login, 5xx → toast "Erreur serveur" existant)
+
+---
+
+## [3.9.13] - 2026-05-31
+
+### Sécurité
+
+- **Path traversal — middleware et routes fichiers** : normalisation et bornage strict de tous les chemins construits à partir d'entrées utilisateur ou de la base de données
+  - `serveMailFiles.middleware.js` : correction du regex d'extraction (le middleware est monté sur `/uploads`, donc `req.path` est déjà sans ce préfixe) + ajout de `path.normalize()` pour résoudre les séquences `../` + vérification que le chemin résolu reste strictement sous `UPLOAD_BASE` avant tout accès disque — rejet avec 403 sinon
+  - `mail.routes.js` — `GET /api/mails/pending/:id/file` : borne le chemin résolu au sous-répertoire `uploads/pending/` ; rejet avec 403 si `filePath` de la BDD sort de cette zone
+  - `mail.routes.js` — `GET /api/mails/:id/pdf` : borne le chemin résolu à `uploadPath` ; rejet avec 404 si `filePath` de la BDD sort de cette zone
+
+---
+
+## [3.9.12] - 2026-05-31
+
+### Sécurité
+
+- **Injection regex MongoDB** : échappement systématique de tous les inputs utilisateur passés à `$regex` MongoDB
+  - Création d'un utilitaire partagé `backend/src/utils/regex.js` exposant `escapeRegex()` — neutralise les caractères spéciaux regex (`. * + ? ^ $ { } ( ) | [ ] \`)
+  - Corrigé dans `user.routes.js` : paramètre `search` (routes `/` et `/recipients`)
+  - Corrigé dans `service.routes.js` : paramètres `search`, `name`, `code` (liste, création, modification)
+  - Corrigé dans `subject.routes.js` : paramètres `search`, `q`, `name` (liste, autocomplétion, création, modification)
+  - Corrigé dans `sender.routes.js` : paramètres `search`, `q` (liste, autocomplétion)
+  - Corrigé dans `mail.routes.js` : paramètre `search` (liste principale)
+
+---
+
+## [3.9.11] - 2026-05-31
+
+### Sécurité
+
+- **JWT_SECRET** : remplacement du placeholder par une clé cryptographique de 64 octets générée via `crypto.randomBytes(64)`
+- **Helmet** : ajout du middleware `helmet` sur le serveur Express — positionne automatiquement les headers HTTP de sécurité (`Content-Security-Policy`, `X-Frame-Options`, `X-Content-Type-Options`, `Strict-Transport-Security`, etc.)
+- **Rate limiting sur les routes sensibles** :
+  - `/api/auth/login` : 10 tentatives maximum par IP sur une fenêtre de 15 minutes (protection brute-force)
+  - `/api/auth/forgot-password` : 5 requêtes maximum par IP sur une fenêtre de 1 heure (protection spam de reset)
+- **Mise à jour des dépendances** :
+  - `nodemailer` mis à jour en v8.0.10 : correction de 4 CVE (injection de commandes SMTP via CRLF, DoS addressparser, routage e-mail non intentionnel)
+  - `minimatch` mis à jour : correction de 3 CVE ReDoS
+  - 32 autres vulnérabilités corrigées via `npm audit fix`
+
+---
+
 ## [3.9.10] - 2026-01-03
 
 ### Modifié

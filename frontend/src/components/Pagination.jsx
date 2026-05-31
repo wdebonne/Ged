@@ -38,20 +38,23 @@ export default function Pagination({ currentPage, totalPages, onPageChange }) {
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
+        aria-label="Page précédente"
         className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         <ChevronLeftIcon className="w-5 h-5" />
       </button>
-      
+
       {pages.map((page, index) => (
         page === '...' ? (
-          <span key={`ellipsis-${index}`} className="px-3 py-2 text-gray-400">
+          <span key={`ellipsis-${index}`} className="px-3 py-2 text-gray-400" aria-hidden="true">
             ...
           </span>
         ) : (
           <button
             key={page}
             onClick={() => onPageChange(page)}
+            aria-label={`Page ${page}`}
+            aria-current={currentPage === page ? 'page' : undefined}
             className={`px-3 py-2 rounded-lg transition-colors ${
               currentPage === page
                 ? 'bg-primary-600 text-white'
@@ -62,10 +65,11 @@ export default function Pagination({ currentPage, totalPages, onPageChange }) {
           </button>
         )
       ))}
-      
+
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
+        aria-label="Page suivante"
         className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         <ChevronRightIcon className="w-5 h-5" />

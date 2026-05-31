@@ -3,6 +3,52 @@ import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 
+// Signatures binaires (magic bytes) des formats autorisés
+const MAGIC_BYTES = {
+  pdf:  { bytes: [0x25, 0x50, 0x44, 0x46], offset: 0 },       // %PDF
+  jpeg: { bytes: [0xFF, 0xD8, 0xFF],        offset: 0 },
+  png:  { bytes: [0x89, 0x50, 0x4E, 0x47], offset: 0 },
+  gif:  { bytes: [0x47, 0x49, 0x46, 0x38], offset: 0 },        // GIF8
+  webp: { bytes: [0x57, 0x45, 0x42, 0x50], offset: 8 },        // WEBP at offset 8
+};
+
+const readMagicBytes = (filePath, length = 12) => new Promise((resolve, reject) => {
+  const buf = Buffer.alloc(length);
+  const fd = fs.openSync(filePath, 'r');
+  try {
+    fs.readSync(fd, buf, 0, length, 0);
+    resolve(buf);
+  } catch (err) {
+    reject(err);
+  } finally {
+    fs.closeSync(fd);
+  }
+});
+
+const matchesSignature = (buf, sig) =>
+  sig.bytes.every((b, i) => buf[sig.offset + i] === b);
+
+// Middleware post-upload : vérifie les magic bytes et supprime le fichier si invalide
+export const validateMagicBytes = (allowedTypes) => async (req, res, next) => {
+  const files = req.files ? Object.values(req.files).flat() : (req.file ? [req.file] : []);
+  if (!files.length) return next();
+
+  for (const file of files) {
+    try {
+      const buf = await readMagicBytes(file.path);
+      const valid = allowedTypes.some(type => MAGIC_BYTES[type] && matchesSignature(buf, MAGIC_BYTES[type]));
+      if (!valid) {
+        fs.unlinkSync(file.path);
+        return res.status(400).json({ success: false, message: 'Format de fichier non autorisé (signature invalide).' });
+      }
+    } catch {
+      fs.unlinkSync(file.path);
+      return res.status(400).json({ success: false, message: 'Impossible de vérifier le fichier.' });
+    }
+  }
+  next();
+};
+
 const uploadPath = process.env.UPLOAD_PATH || './uploads';
 
 // Configuration du stockage pour les courriers

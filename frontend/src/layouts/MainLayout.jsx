@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Outlet, NavLink, useLocation, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../stores/authStore';
@@ -75,7 +75,7 @@ export default function MainLayout() {
       const response = await statsAPI.getStats();
       return response.data.data;
     },
-    refetchInterval: 30000 // Rafraîchir toutes les 30 secondes
+    refetchInterval: 60000 // Rafraîchir toutes les 60 secondes
   });
 
   // Fermer la sidebar sur navigation mobile
@@ -133,7 +133,11 @@ export default function MainLayout() {
     { name: 'Paramètres', href: '/admin/parametres', icon: Cog6ToothIcon, permission: 'view_settings' },
   ];
 
-  const filteredAdminNav = adminNavigation.filter(item => hasPermission(item.permission));
+  const filteredAdminNav = useMemo(
+    () => adminNavigation.filter(item => hasPermission(item.permission)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [user?.group?.permissions]
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">

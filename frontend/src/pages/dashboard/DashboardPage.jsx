@@ -39,7 +39,7 @@ export default function DashboardPage() {
   const [pendingFilesOpen, setPendingFilesOpen] = useState(true);
   const [monthStatsOpen, setMonthStatsOpen] = useState(true);
 
-  const { data: stats, isLoading: statsLoading } = useQuery({
+  const { data: stats, isLoading: statsLoading, isError: statsError } = useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: async () => {
       const response = await statsAPI.getDashboard();
@@ -47,7 +47,7 @@ export default function DashboardPage() {
     }
   });
 
-  const { data: recentMails, isLoading: recentLoading } = useQuery({
+  const { data: recentMails, isLoading: recentLoading, isError: recentError } = useQuery({
     queryKey: ['recent-mails'],
     queryFn: async () => {
       const response = await mailsAPI.getAll({ limit: 5, status: 'pending' });
@@ -55,7 +55,7 @@ export default function DashboardPage() {
     }
   });
 
-  const { data: urgentMails } = useQuery({
+  const { data: urgentMails, isError: urgentError } = useQuery({
     queryKey: ['urgent-mails'],
     queryFn: async () => {
       const response = await mailsAPI.getAll({ limit: 5, priority: 'high', status: 'pending' });
@@ -77,7 +77,7 @@ export default function DashboardPage() {
   const canAccessServiceMails = canViewServiceMails || isServiceSupervisor;
 
   // Récupérer les courriers en attente d'import
-  const { data: pendingFiles, isLoading: pendingLoading } = useQuery({
+  const { data: pendingFiles, isLoading: pendingLoading, isError: pendingError } = useQuery({
     queryKey: ['pending-files'],
     queryFn: async () => {
       const response = await mailsAPI.getPending();
@@ -87,6 +87,14 @@ export default function DashboardPage() {
   });
 
   if (statsLoading) return <LoadingSpinner />;
+  if (statsError) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="text-center">
+        <ExclamationTriangleIcon className="w-12 h-12 text-danger-500 mx-auto mb-3" />
+        <p className="text-gray-600">Impossible de charger le tableau de bord. Veuillez rafraîchir la page.</p>
+      </div>
+    </div>
+  );
 
   // Classes de couleurs pour les cards
   const colorClasses = {
