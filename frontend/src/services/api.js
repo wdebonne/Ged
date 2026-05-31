@@ -4,6 +4,23 @@ import toast from 'react-hot-toast';
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 const UPLOADS_URL = import.meta.env.VITE_UPLOADS_URL || '/uploads';
 
+// File d'attente des requêtes pendant le rafraîchissement du token
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(({ resolve, reject }) => {
+    if (error) reject(error);
+    else resolve(token);
+  });
+  failedQueue = [];
+};
+
+const forceLogout = () => {
+  localStorage.removeItem('auth-storage');
+  window.location.href = '/login';
+};
+
 /**
  * Helper pour construire les URLs des fichiers uploadés
  * @param {string} path - Chemin du fichier (ex: avatars/user.jpg ou courriers/doc.pdf)
@@ -60,15 +77,70 @@ api.interceptors.request.use(
 // Intercepteur de réponses
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     const { response } = error;
-    
-    // Gérer les erreurs d'authentification
-    if (response?.status === 401) {
-      // Token expiré ou invalide
-      localStorage.removeItem('auth-storage');
-      window.location.href = '/login';
-      return Promise.reject(error);
+    const originalRequest = error.config;
+
+    if (response?.status === 401 && !originalRequest._retry) {
+      // Si un rafraîchissement est déjà en cours, mettre la requête en file d'attente
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest.headers['Authorization'] = `Bearer ${token}`;
+            return api(originalRequest);
+          })
+          .catch((err) => Promise.reject(err));
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      // Lire le refresh token depuis le store persisté
+      let storedRefreshToken = null;
+      try {
+        const stored = JSON.parse(localStorage.getItem('auth-storage') || '{}');
+        storedRefreshToken = stored?.state?.refreshToken || null;
+      } catch {
+        // localStorage corrompu
+      }
+
+      if (!storedRefreshToken) {
+        processQueue(error, null);
+        isRefreshing = false;
+        forceLogout();
+        return Promise.reject(error);
+      }
+
+      try {
+        const { data } = await axios.post(`${API_URL}/auth/refresh`, {
+          refreshToken: storedRefreshToken
+        });
+
+        const { token: newToken, refreshToken: newRefreshToken } = data.data;
+
+        // Mettre à jour le store persisté directement
+        try {
+          const stored = JSON.parse(localStorage.getItem('auth-storage') || '{}');
+          stored.state = { ...stored.state, token: newToken, refreshToken: newRefreshToken };
+          localStorage.setItem('auth-storage', JSON.stringify(stored));
+        } catch {
+          // Continuer même si la mise à jour échoue
+        }
+
+        api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+        originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
+
+        processQueue(null, newToken);
+        return api(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+        forceLogout();
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
     }
 
     // Afficher un toast pour les erreurs serveur
@@ -89,6 +161,7 @@ export const authAPI = {
   login: (data) => api.post('/auth/login', data),
   logout: () => api.post('/auth/logout'),
   me: () => api.get('/auth/me'),
+  refresh: (refreshToken) => axios.post(`${API_URL}/auth/refresh`, { refreshToken }),
   forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
   resetPassword: (token, password) => api.post(`/auth/reset-password/${token}`, { password }),
   changePassword: (data) => api.post('/auth/change-password', data),

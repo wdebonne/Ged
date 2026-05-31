@@ -2260,7 +2260,8 @@ Configuration complète de l'application avec onglets organisés.
 
 ## 📄 Licence
 
-MIT - Voir le fichier [LICENSE](LICENSE) pour plus de détails.
+Ce projet est distribué sous licence GNU Affero General Public License v3.0 uniquement (AGPL-3.0-only).
+Voir le fichier [LICENSE](LICENSE) pour le texte complet de la licence.
 
 ## 👨‍💻 Auteur
 

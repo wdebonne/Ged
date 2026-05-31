@@ -71,10 +71,12 @@ MONGODB_URI=mongodb://localhost:27017/ged_courrier
 # ═══════════════════════════════════════════════════════════════
 # AUTHENTIFICATION JWT
 # ═══════════════════════════════════════════════════════════════
-# IMPORTANT: Changez cette valeur en production !
+# IMPORTANT: Changez ces valeurs en production !
 # Générez avec: openssl rand -base64 32
 JWT_SECRET=votre_secret_jwt_tres_long_et_securise_minimum_32_caracteres
-JWT_EXPIRE=7d
+JWT_EXPIRE=15m                 # Durée de vie des access tokens (court : 15m recommandé)
+JWT_REFRESH_SECRET=votre_secret_refresh_different_du_jwt_secret  # Clé séparée pour les refresh tokens
+JWT_REFRESH_EXPIRE=7d          # Durée de vie des refresh tokens (long : 7d recommandé)
 
 # ═══════════════════════════════════════════════════════════════
 # CORS - Domaines autorisés (séparés par des virgules)
@@ -466,7 +468,9 @@ services:
       - PORT=5000
       - MONGODB_URI=${MONGODB_URI:-mongodb://host.docker.internal:27017/ged_courrier}
       - JWT_SECRET=${JWT_SECRET}
-      - JWT_EXPIRE=${JWT_EXPIRE:-7d}
+      - JWT_EXPIRE=${JWT_EXPIRE:-15m}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - JWT_REFRESH_EXPIRE=${JWT_REFRESH_EXPIRE:-7d}
       - APP_URL=${APP_URL}
       - APP_NAME=${APP_NAME:-GED Courrier}
       - CORS_ORIGIN=${CORS_ORIGIN}
@@ -507,7 +511,9 @@ MONGODB_URI=mongodb://host.docker.internal:27017/ged_courrier
 
 # Application
 JWT_SECRET=VotreSecretJWT_TresLong_Minimum32Caracteres
-JWT_EXPIRE=7d
+JWT_EXPIRE=15m
+JWT_REFRESH_SECRET=VotreSecretRefresh_Different_Du_JWT_Secret
+JWT_REFRESH_EXPIRE=7d
 APP_URL=https://ged.mondomaine.com
 APP_NAME=GED Courrier
 CORS_ORIGIN=https://ged.mondomaine.com
@@ -1189,6 +1195,7 @@ networks:
 ### Checklist de sécurité
 
 - [ ] Changer le `JWT_SECRET` par défaut
+- [ ] Définir un `JWT_REFRESH_SECRET` différent de `JWT_SECRET`
 - [ ] Configurer HTTPS avec un certificat valide
 - [ ] Configurer les origines CORS autorisées
 - [ ] Sécuriser MongoDB (authentification, firewall)

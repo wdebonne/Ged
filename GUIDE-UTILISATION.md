@@ -508,5 +508,5 @@ En cas de problème ou question :
 
 ---
 
-*Guide d'utilisation GED Courrier - Version 1.0*
-*Dernière mise à jour : Décembre 2025*
+*Guide d'utilisation GED Courrier - Version 3.9.16*
+*Dernière mise à jour : Mai 2026*

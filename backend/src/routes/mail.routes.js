@@ -11,6 +11,7 @@ import { generateMailReport } from '../services/pdf.service.js';
 import { generateMailHistoryPDF } from '../services/pdf.service.js';
 import archiver from 'archiver';
 import { syncArchivedMail as syncToOneDrive } from '../services/onedrive.service.js';
+import { escapeRegex } from '../utils/regex.js';
 
 const router = express.Router();
 
@@ -244,14 +245,15 @@ router.get('/', authenticate, async (req, res) => {
 
     // Recherche textuelle
     if (search) {
+      const safeSearch = escapeRegex(search);
       query.$and = query.$and || [];
       query.$and.push({
         $or: [
-          { subject: { $regex: search, $options: 'i' } },
-          { senderName: { $regex: search, $options: 'i' } },
-          { ocrContent: { $regex: search, $options: 'i' } },
-          { fileName: { $regex: search, $options: 'i' } },
-          { reference: { $regex: search, $options: 'i' } }
+          { subject: { $regex: safeSearch, $options: 'i' } },
+          { senderName: { $regex: safeSearch, $options: 'i' } },
+          { ocrContent: { $regex: safeSearch, $options: 'i' } },
+          { fileName: { $regex: safeSearch, $options: 'i' } },
+          { reference: { $regex: safeSearch, $options: 'i' } }
         ]
       });
     }
@@ -566,8 +568,12 @@ router.get('/pending/:id/file', authenticate, canImportMails, async (req, res) =
       });
     }
 
-    const filePath = path.join(process.cwd(), pendingMail.filePath);
-    
+    const pendingBase = path.resolve(process.cwd(), 'uploads', 'pending');
+    const filePath = path.resolve(process.cwd(), path.normalize(pendingMail.filePath));
+    if (!filePath.startsWith(pendingBase + path.sep)) {
+      return res.status(403).json({ success: false, message: 'Accès refusé' });
+    }
+
     if (!fs.existsSync(filePath)) {
       return res.status(404).json({
         success: false,
@@ -772,7 +778,11 @@ router.get('/:id/pdf', authenticate, async (req, res) => {
     }
 
     const uploadPath = process.env.UPLOAD_PATH || './uploads';
-    const filePath = path.join(uploadPath, mail.filePath);
+    const uploadBase = path.resolve(uploadPath);
+    const filePath = path.resolve(uploadBase, path.normalize(mail.filePath));
+    if (!filePath.startsWith(uploadBase + path.sep)) {
+      return res.status(404).json({ success: false, message: 'Fichier non trouvé' });
+    }
 
     if (!fs.existsSync(filePath)) {
       return res.status(404).json({
@@ -783,7 +793,7 @@ router.get('/:id/pdf', authenticate, async (req, res) => {
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${mail.reference || mail.fileName}"`);
-    res.sendFile(path.resolve(filePath));
+    res.sendFile(filePath);
   } catch (error) {
     console.error('Erreur téléchargement PDF:', error);
     res.status(500).json({

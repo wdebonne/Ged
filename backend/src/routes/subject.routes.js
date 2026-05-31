@@ -2,6 +2,7 @@ import express from 'express';
 import { body, validationResult } from 'express-validator';
 import { Subject, PERMISSIONS } from '../models/index.js';
 import { authenticate, authorize } from '../middleware/auth.middleware.js';
+import { escapeRegex } from '../utils/regex.js';
 
 const router = express.Router();
 
@@ -14,10 +15,11 @@ router.get('/', authenticate, async (req, res) => {
     const query = {};
 
     if (search) {
+      const safeSearch = escapeRegex(search);
       query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { code: { $regex: search, $options: 'i' } },
-        { category: { $regex: search, $options: 'i' } }
+        { name: { $regex: safeSearch, $options: 'i' } },
+        { code: { $regex: safeSearch, $options: 'i' } },
+        { category: { $regex: safeSearch, $options: 'i' } }
       ];
     }
 
@@ -66,7 +68,7 @@ router.get('/autocomplete', authenticate, async (req, res) => {
 
     const subjects = await Subject.find({
       isActive: true,
-      name: { $regex: q, $options: 'i' }
+      name: { $regex: escapeRegex(q), $options: 'i' }
     })
     .select('name category')
     .sort({ name: 1 })
@@ -102,8 +104,8 @@ router.post('/', authenticate, authorize(PERMISSIONS.CREATE_SENDERS), [
     const { name, code, description, category, color, isActive } = req.body;
 
     // Vérifier si l'objet existe déjà
-    const existingSubject = await Subject.findOne({ 
-      name: { $regex: `^${name}$`, $options: 'i' } 
+    const existingSubject = await Subject.findOne({
+      name: { $regex: `^${escapeRegex(name)}$`, $options: 'i' }
     });
 
     if (existingSubject) {
@@ -189,8 +191,8 @@ router.put('/:id', authenticate, authorize(PERMISSIONS.EDIT_SENDERS), [
     const { name, code, description, category, color, isActive } = req.body;
 
     // Vérifier si un autre objet avec ce nom existe
-    const existingSubject = await Subject.findOne({ 
-      name: { $regex: `^${name}$`, $options: 'i' },
+    const existingSubject = await Subject.findOne({
+      name: { $regex: `^${escapeRegex(name)}$`, $options: 'i' },
       _id: { $ne: req.params.id }
     });
 

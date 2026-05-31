@@ -132,7 +132,9 @@ MONGO_ROOT_PASSWORD=VotreMotDePasseSecurise123!
 
 # JWT - Générer avec: openssl rand -base64 32
 JWT_SECRET=votre_secret_jwt_tres_long_minimum_32_caracteres
-JWT_EXPIRE=7d
+JWT_EXPIRE=15m
+JWT_REFRESH_SECRET=votre_secret_refresh_different_du_jwt_secret
+JWT_REFRESH_EXPIRE=7d
 
 # Application
 APP_URL=https://ged.votredomaine.com
@@ -270,7 +272,8 @@ Lancez la mise à jour :
 |----------|-------------|---------|
 | `MONGO_ROOT_USER` | Utilisateur MongoDB | `admin` |
 | `MONGO_ROOT_PASSWORD` | Mot de passe MongoDB | `SecurePass123!` |
-| `JWT_SECRET` | Secret pour les tokens JWT (min 32 car.) | `openssl rand -base64 32` |
+| `JWT_SECRET` | Secret pour les access tokens JWT (min 32 car.) | `openssl rand -base64 32` |
+| `JWT_REFRESH_SECRET` | Secret pour les refresh tokens (différent de JWT_SECRET) | `openssl rand -base64 32` |
 | `APP_URL` | URL publique de l'application | `https://ged.exemple.com` |
 | `CORS_ORIGIN` | Origines autorisées | `https://ged.exemple.com` |
 
@@ -278,7 +281,8 @@ Lancez la mise à jour :
 
 | Variable | Description | Défaut |
 |----------|-------------|--------|
-| `JWT_EXPIRE` | Durée de validité des tokens | `7d` |
+| `JWT_EXPIRE` | Durée de validité des access tokens | `15m` |
+| `JWT_REFRESH_EXPIRE` | Durée de validité des refresh tokens | `7d` |
 | `APP_NAME` | Nom affiché de l'application | `GED Courrier` |
 | `MAX_FILE_SIZE` | Taille max des fichiers (octets) | `50000000` |
 

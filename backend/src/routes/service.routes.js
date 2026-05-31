@@ -2,6 +2,7 @@ import express from 'express';
 import { body, validationResult } from 'express-validator';
 import { Service, User, Mail, PERMISSIONS } from '../models/index.js';
 import { authenticate, authorize } from '../middleware/auth.middleware.js';
+import { escapeRegex } from '../utils/regex.js';
 
 const router = express.Router();
 
@@ -13,9 +14,10 @@ router.get('/', authenticate, async (req, res) => {
     const query = {};
 
     if (search) {
+      const safeSearch = escapeRegex(search);
       query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { code: { $regex: search, $options: 'i' } }
+        { name: { $regex: safeSearch, $options: 'i' } },
+        { code: { $regex: safeSearch, $options: 'i' } }
       ];
     }
 
@@ -109,8 +111,8 @@ router.post('/', authenticate, authorize(PERMISSIONS.CREATE_SERVICES), [
     // Vérifier si le service existe déjà
     const existingService = await Service.findOne({
       $or: [
-        { name: { $regex: `^${name}$`, $options: 'i' } },
-        ...(code ? [{ code: { $regex: `^${code}$`, $options: 'i' } }] : [])
+        { name: { $regex: `^${escapeRegex(name)}$`, $options: 'i' } },
+        ...(code ? [{ code: { $regex: `^${escapeRegex(code)}$`, $options: 'i' } }] : [])
       ]
     });
 
@@ -168,8 +170,8 @@ router.put('/:id', authenticate, authorize(PERMISSIONS.EDIT_SERVICES), async (re
       const existingService = await Service.findOne({
         _id: { $ne: id },
         $or: [
-          ...(name ? [{ name: { $regex: `^${name}$`, $options: 'i' } }] : []),
-          ...(code ? [{ code: { $regex: `^${code}$`, $options: 'i' } }] : [])
+          ...(name ? [{ name: { $regex: `^${escapeRegex(name)}$`, $options: 'i' } }] : []),
+          ...(code ? [{ code: { $regex: `^${escapeRegex(code)}$`, $options: 'i' } }] : [])
         ]
       });
 

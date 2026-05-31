@@ -2,6 +2,7 @@ import express from 'express';
 import { body, validationResult } from 'express-validator';
 import { Sender, PERMISSIONS } from '../models/index.js';
 import { authenticate, authorize } from '../middleware/auth.middleware.js';
+import { escapeRegex } from '../utils/regex.js';
 
 const router = express.Router();
 
@@ -13,10 +14,11 @@ router.get('/', authenticate, async (req, res) => {
     const query = {};
 
     if (search) {
+      const safeSearch = escapeRegex(search);
       query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { organization: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } }
+        { name: { $regex: safeSearch, $options: 'i' } },
+        { organization: { $regex: safeSearch, $options: 'i' } },
+        { email: { $regex: safeSearch, $options: 'i' } }
       ];
     }
 
@@ -60,8 +62,8 @@ router.get('/autocomplete', authenticate, async (req, res) => {
     const senders = await Sender.find({
       isActive: true,
       $or: [
-        { name: { $regex: q, $options: 'i' } },
-        { organization: { $regex: q, $options: 'i' } }
+        { name: { $regex: escapeRegex(q), $options: 'i' } },
+        { organization: { $regex: escapeRegex(q), $options: 'i' } }
       ]
     })
     .select('name organization email')

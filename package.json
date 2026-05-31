@@ -11,7 +11,7 @@
   },
   "keywords": ["ged", "courrier", "gestion", "documents"],
   "author": "Service Informatique de Pavilly",
-  "license": "MIT",
+  "license": "AGPL-3.0-only",
   "devDependencies": {
     "concurrently": "^8.2.2"
   }

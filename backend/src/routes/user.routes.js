@@ -6,6 +6,7 @@ import { uploadAvatar, handleUploadError } from '../middleware/upload.middleware
 import { PERMISSIONS } from '../models/Group.model.js';
 import fs from 'fs';
 import path from 'path';
+import { escapeRegex } from '../utils/regex.js';
 
 const router = express.Router();
 
@@ -24,11 +25,12 @@ router.get('/', authenticate, authorize(PERMISSIONS.VIEW_USERS), async (req, res
     const query = {};
 
     if (search) {
+      const safeSearch = escapeRegex(search);
       query.$or = [
-        { firstName: { $regex: search, $options: 'i' } },
-        { lastName: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } },
-        { username: { $regex: search, $options: 'i' } }
+        { firstName: { $regex: safeSearch, $options: 'i' } },
+        { lastName: { $regex: safeSearch, $options: 'i' } },
+        { email: { $regex: safeSearch, $options: 'i' } },
+        { username: { $regex: safeSearch, $options: 'i' } }
       ];
     }
 
@@ -82,10 +84,11 @@ router.get('/recipients', authenticate, async (req, res) => {
     const query = { isActive: true };
 
     if (search) {
+      const safeSearch = escapeRegex(search);
       query.$or = [
-        { firstName: { $regex: search, $options: 'i' } },
-        { lastName: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } }
+        { firstName: { $regex: safeSearch, $options: 'i' } },
+        { lastName: { $regex: safeSearch, $options: 'i' } },
+        { email: { $regex: safeSearch, $options: 'i' } }
       ];
     }
 

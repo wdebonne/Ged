@@ -7,6 +7,7 @@ export const useAuthStore = create(
     (set, get) => ({
       user: null,
       token: null,
+      refreshToken: null,
       isAuthenticated: false,
       isLoading: false,
       error: null,
@@ -16,14 +17,14 @@ export const useAuthStore = create(
         set({ isLoading: true, error: null });
         try {
           const response = await api.post('/auth/login', { username, password, authMethod });
-          const { token, user } = response.data.data;
-          
-          // Configurer le token pour les futures requêtes
+          const { token, refreshToken, user } = response.data.data;
+
           api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-          
+
           set({
             user,
             token,
+            refreshToken,
             isAuthenticated: true,
             isLoading: false,
             error: null
@@ -43,9 +44,16 @@ export const useAuthStore = create(
         set({
           user: null,
           token: null,
+          refreshToken: null,
           isAuthenticated: false,
           error: null
         });
+      },
+
+      // Mettre à jour les tokens après un rafraîchissement
+      updateTokens: (token, refreshToken) => {
+        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        set({ token, refreshToken });
       },
 
       // Récupérer l'utilisateur actuel
@@ -106,6 +114,7 @@ export const useAuthStore = create(
       name: 'auth-storage',
       partialize: (state) => ({
         token: state.token,
+        refreshToken: state.refreshToken,
         user: state.user,
         isAuthenticated: state.isAuthenticated
       })

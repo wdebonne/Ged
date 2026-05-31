@@ -20,6 +20,19 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-ui': ['@headlessui/react', '@heroicons/react', 'framer-motion'],
+          'vendor-query': ['@tanstack/react-query'],
+          'vendor-charts': ['chart.js', 'react-chartjs-2'],
+          'vendor-pdf': ['jspdf', 'html2canvas', 'react-pdf'],
+          'vendor-forms': ['react-select', 'react-datepicker', 'react-dropzone'],
+          'vendor-misc': ['axios', 'date-fns', 'zustand', 'react-hot-toast'],
+        }
+      }
+    }
   }
 })

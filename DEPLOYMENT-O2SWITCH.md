@@ -89,7 +89,9 @@ MONGODB_URI=mongodb+srv://ged_user:VOTRE_PASSWORD@cluster0.xxxxx.mongodb.net/ged
 # ═══════════════════════════════════════════════════════════════
 # Générez avec: openssl rand -base64 32
 JWT_SECRET=votre_secret_jwt_tres_long_et_securise_minimum_32_caracteres
-JWT_EXPIRE=7d
+JWT_EXPIRE=15m                 # Durée de vie des access tokens
+JWT_REFRESH_SECRET=votre_secret_refresh_different_du_jwt_secret
+JWT_REFRESH_EXPIRE=7d          # Durée de vie des refresh tokens
 
 # ═══════════════════════════════════════════════════════════════
 # CORS - Domaine O2Switch
@@ -206,7 +208,9 @@ Cliquez sur **ADD VARIABLE** pour chaque variable de votre `.env` :
 | `PORT` | `3000` |
 | `MONGODB_URI` | `mongodb+srv://...` |
 | `JWT_SECRET` | `votre_secret...` |
-| `JWT_EXPIRE` | `7d` |
+| `JWT_EXPIRE` | `15m` |
+| `JWT_REFRESH_SECRET` | `votre_secret_refresh...` |
+| `JWT_REFRESH_EXPIRE` | `7d` |
 | `CORS_ORIGIN` | `https://ged.mondomaine.com` |
 | `APP_URL` | `https://ged.mondomaine.com` |
 | `APP_NAME` | `GED Courrier` |
