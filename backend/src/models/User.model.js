@@ -46,6 +46,19 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Service'
   }],
+  // Services accordés via une correspondance LDAP (Administration > Correspondances LDAP).
+  // Permet de retirer ces services au login suivant si l'utilisateur quitte le groupe AD
+  // correspondant, sans toucher aux services attribués manuellement.
+  ldapManagedServices: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Service'
+  }],
+  // Services dont l'utilisateur est superviseur via une correspondance LDAP "Devient superviseur de".
+  // Permet de retirer cette supervision au login suivant si l'utilisateur quitte le groupe AD correspondant.
+  ldapSupervisedServices: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Service'
+  }],
   ldapUser: {
     type: Boolean,
     default: false
@@ -57,6 +70,14 @@ const userSchema = new mongoose.Schema({
   ldapDN: {
     type: String,
     default: null
+  },
+  // true si isActive=false a été positionné automatiquement par la synchronisation périodique
+  // du groupe LDAP requis (l'utilisateur a quitté LDAP_REQUIRED_GROUP_DN), et non par un
+  // administrateur. Permet de réactiver automatiquement le compte s'il réintègre ce groupe,
+  // sans toucher aux désactivations manuelles (Administration > Utilisateurs).
+  deactivatedByLdapSync: {
+    type: Boolean,
+    default: false
   },
   isActive: {
     type: Boolean,

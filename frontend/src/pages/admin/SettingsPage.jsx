@@ -2114,6 +2114,7 @@ export default function SettingsPage() {
   const [formData, setFormData] = useState({
     smtp: { host: '', port: 587, user: '', password: '', from: '', fromName: '', secure: false },
     ldap: { server: '', baseDn: '', bindDn: '', bindPassword: '', userFilter: '', groupFilter: '' },
+    ldapBackup: { server: '', port: 389, baseDN: '', bindDN: '', bindPassword: '', useTLS: false },
     kerberos: { realm: '', kdc: '', adminServer: '' },
     imap: { 
       host: '', 
@@ -2201,7 +2202,19 @@ export default function SettingsPage() {
           });
         });
       }
-      
+
+      // LDAP de secours (failover)
+      if (data.ldapBackup) {
+        Object.entries(data.ldapBackup).forEach(([key, value]) => {
+          settingsArray.push({
+            key: `ldapBackup_${key}`,
+            value: String(value),
+            category: 'ldap',
+            isSecret: key === 'bindPassword'
+          });
+        });
+      }
+
       // Kerberos
       if (data.kerberos) {
         Object.entries(data.kerberos).forEach(([key, value]) => {
@@ -2304,6 +2317,15 @@ export default function SettingsPage() {
       if (type === 'imap') {
         return settingsAPI.testIMAP(formData.imap);
       }
+      if (type === 'ldap') {
+        return settingsAPI.testLDAP(formData.ldap);
+      }
+      if (type === 'ldapBackup') {
+        return settingsAPI.testLDAP(formData.ldapBackup);
+      }
+      if (type === 'smtp') {
+        return settingsAPI.testSMTP(formData.smtp);
+      }
       return settingsAPI.testConnection(type);
     },
     onSuccess: (response, type) => {
@@ -2321,6 +2343,36 @@ export default function SettingsPage() {
       toast.error(error.response?.data?.message || 'Erreur de connexion');
     }
   });
+
+  // État pour stocker les groupes AD/LDAP disponibles (serveur principal et de secours)
+  const [ldapGroups, setLdapGroups] = useState([]);
+  const [ldapBackupGroups, setLdapBackupGroups] = useState([]);
+
+  // Mutation pour lister les groupes AD/LDAP (target: 'ldap' ou 'ldapBackup')
+  const loadLdapGroupsMutation = useMutation({
+    mutationFn: (target = 'ldap') => settingsAPI.getLDAPGroups(formData[target]),
+    onSuccess: (response, target = 'ldap') => {
+      if (response.data?.success) {
+        const groups = response.data.groups || [];
+        if (target === 'ldapBackup') {
+          setLdapBackupGroups(groups);
+        } else {
+          setLdapGroups(groups);
+        }
+        toast.success(`${groups.length} groupe(s) trouvé(s)`);
+      } else {
+        toast.error(response.data?.message || 'Impossible de récupérer les groupes');
+      }
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Erreur de connexion LDAP');
+    }
+  });
+
+  const copyLdapGroupDN = (dn) => {
+    navigator.clipboard.writeText(dn);
+    toast.success('DN copié');
+  };
 
   // État pour stocker les dossiers IMAP disponibles
   const [imapFolders, setImapFolders] = useState([]);
@@ -3678,6 +3730,184 @@ export default function SettingsPage() {
                   <label htmlFor="ldapTLS" className="text-gray-700">
                     Utiliser TLS/SSL
                   </label>
+                </div>
+
+                <div className="border-t border-gray-200 pt-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-900">Groupes AD/LDAP</h3>
+                      <p className="text-sm text-gray-500">
+                        Récupérez la liste des groupes de l'annuaire pour configurer les{' '}
+                        <a href="/admin/correspondances-ldap" className="text-primary-600 hover:underline">
+                          correspondances groupe AD → rôle GED
+                        </a>.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => loadLdapGroupsMutation.mutate()}
+                      disabled={loadLdapGroupsMutation.isLoading}
+                      className="btn-secondary btn-sm whitespace-nowrap"
+                    >
+                      {loadLdapGroupsMutation.isLoading ? 'Recherche...' : 'Lister les groupes AD'}
+                    </button>
+                  </div>
+
+                  {ldapGroups.length > 0 && (
+                    <div className="border border-gray-200 rounded-lg divide-y divide-gray-100 max-h-64 overflow-y-auto">
+                      {ldapGroups.map((group) => (
+                        <div key={group.dn} className="flex items-center justify-between px-3 py-2 text-sm">
+                          <div className="min-w-0 flex-1 mr-2">
+                            <p className="font-medium text-gray-900 truncate">{group.name || group.dn}</p>
+                            <p className="text-gray-500 truncate">{group.dn}</p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => copyLdapGroupDN(group.dn)}
+                            className="flex items-center gap-1 text-gray-500 hover:text-primary-600 shrink-0"
+                            title="Copier le DN"
+                          >
+                            <ClipboardDocumentIcon className="w-4 h-4" />
+                            Copier le DN
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="border-t border-gray-200 pt-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-900">Configuration LDAP de secours (failover)</h3>
+                      <p className="text-sm text-gray-500">
+                        Utilisée automatiquement à chaque connexion si le serveur principal est inaccessible.
+                        La configuration effective se fait via les variables <code className="text-xs bg-gray-100 px-1 rounded">LDAP_*_BACKUP</code> du
+                        fichier <code className="text-xs bg-gray-100 px-1 rounded">.env</code> ; cette section permet
+                        seulement de tester la connexion et lister les groupes du serveur de secours.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => testConnectionMutation.mutate('ldapBackup')}
+                      disabled={testConnectionMutation.isLoading}
+                      className="btn-secondary btn-sm whitespace-nowrap"
+                    >
+                      {testConnectionMutation.isLoading ? 'Test...' : 'Tester la connexion'}
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 mt-4">
+                    <div>
+                      <label className="label">Serveur LDAP de secours</label>
+                      <input
+                        type="text"
+                        value={formData.ldapBackup?.server || ''}
+                        onChange={(e) => handleChange('ldapBackup', 'server', e.target.value)}
+                        className="input"
+                        placeholder="ldap-secours.exemple.com"
+                      />
+                    </div>
+                    <div>
+                      <label className="label">Port</label>
+                      <input
+                        type="number"
+                        value={formData.ldapBackup?.port || 389}
+                        onChange={(e) => handleChange('ldapBackup', 'port', parseInt(e.target.value))}
+                        className="input"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-4">
+                    <label className="label">Base DN</label>
+                    <input
+                      type="text"
+                      value={formData.ldapBackup?.baseDN || ''}
+                      onChange={(e) => handleChange('ldapBackup', 'baseDN', e.target.value)}
+                      className="input"
+                      placeholder="dc=exemple,dc=com"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 mt-4">
+                    <div>
+                      <label className="label">Bind DN</label>
+                      <input
+                        type="text"
+                        value={formData.ldapBackup?.bindDN || ''}
+                        onChange={(e) => handleChange('ldapBackup', 'bindDN', e.target.value)}
+                        className="input"
+                        placeholder="cn=admin,dc=exemple,dc=com"
+                      />
+                    </div>
+                    <div>
+                      <label className="label">Mot de passe</label>
+                      <div className="relative">
+                        <input
+                          type={showPasswords.ldapBackupPassword ? 'text' : 'password'}
+                          value={formData.ldapBackup?.bindPassword || ''}
+                          onChange={(e) => handleChange('ldapBackup', 'bindPassword', e.target.value)}
+                          className="input pr-10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => togglePasswordVisibility('ldapBackupPassword')}
+                          className="absolute right-3 top-1/2 -translate-y-1/2"
+                        >
+                          {showPasswords.ldapBackupPassword ? (
+                            <EyeSlashIcon className="w-5 h-5 text-gray-400" />
+                          ) : (
+                            <EyeIcon className="w-5 h-5 text-gray-400" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 mt-4">
+                    <input
+                      type="checkbox"
+                      id="ldapBackupTLS"
+                      checked={formData.ldapBackup?.useTLS || false}
+                      onChange={(e) => handleChange('ldapBackup', 'useTLS', e.target.checked)}
+                      className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    />
+                    <label htmlFor="ldapBackupTLS" className="text-gray-700">
+                      Utiliser TLS/SSL
+                    </label>
+                  </div>
+
+                  <div className="flex items-center justify-between mt-4 mb-3">
+                    <p className="text-sm text-gray-500">Récupérer la liste des groupes de l'annuaire de secours</p>
+                    <button
+                      onClick={() => loadLdapGroupsMutation.mutate('ldapBackup')}
+                      disabled={loadLdapGroupsMutation.isLoading}
+                      className="btn-secondary btn-sm whitespace-nowrap"
+                    >
+                      {loadLdapGroupsMutation.isLoading ? 'Recherche...' : 'Lister les groupes AD'}
+                    </button>
+                  </div>
+
+                  {ldapBackupGroups.length > 0 && (
+                    <div className="border border-gray-200 rounded-lg divide-y divide-gray-100 max-h-64 overflow-y-auto">
+                      {ldapBackupGroups.map((group) => (
+                        <div key={group.dn} className="flex items-center justify-between px-3 py-2 text-sm">
+                          <div className="min-w-0 flex-1 mr-2">
+                            <p className="font-medium text-gray-900 truncate">{group.name || group.dn}</p>
+                            <p className="text-gray-500 truncate">{group.dn}</p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => copyLdapGroupDN(group.dn)}
+                            className="flex items-center gap-1 text-gray-500 hover:text-primary-600 shrink-0"
+                            title="Copier le DN"
+                          >
+                            <ClipboardDocumentIcon className="w-4 h-4" />
+                            Copier le DN
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             )}

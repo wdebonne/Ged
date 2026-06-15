@@ -9,3 +9,4 @@ export { default as Settings } from './Settings.model.js';
 export { default as EmailTemplate, EMAIL_ACTIONS } from './EmailTemplate.model.js';
 export { default as Webhook, WEBHOOK_EVENTS } from './Webhook.model.js';
 export { default as Delegation, DELEGATION_STATUS } from './Delegation.model.js';
+export { default as LdapGroupMapping } from './LdapGroupMapping.model.js';

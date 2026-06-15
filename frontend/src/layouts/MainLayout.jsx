@@ -26,7 +26,8 @@ import {
   ChevronRightIcon,
   ChevronDoubleLeftIcon,
   ChevronDoubleRightIcon,
-  ChartBarIcon
+  ChartBarIcon,
+  LinkIcon
 } from '@heroicons/react/24/outline';
 
 export default function MainLayout() {
@@ -131,6 +132,7 @@ export default function MainLayout() {
     { name: 'Expéditeurs', href: '/admin/expediteurs', icon: UserPlusIcon, permission: 'view_senders' },
     { name: 'Objets', href: '/admin/objets', icon: TagIcon, permission: 'view_senders' },
     { name: 'Paramètres', href: '/admin/parametres', icon: Cog6ToothIcon, permission: 'view_settings' },
+    { name: 'Correspondances LDAP', href: '/admin/correspondances-ldap', icon: LinkIcon, permission: 'manage_ldap' },
   ];
 
   const filteredAdminNav = useMemo(

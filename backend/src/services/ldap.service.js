@@ -1,36 +1,61 @@
 import ldap from 'ldapjs';
+import { normalizeDN, buildLdapUrl } from '../utils/ldap.utils.js';
 
-// Authentification LDAP
-export const authenticateLDAP = async (username, password) => {
+// Vérifie que l'utilisateur appartient au groupe requis (via l'attribut memberOf)
+const isMemberOfRequiredGroup = (memberOf, requiredGroupDN) => {
+  if (!requiredGroupDN) return true;
+  const groups = Array.isArray(memberOf) ? memberOf : (memberOf ? [memberOf] : []);
+  const required = normalizeDN(requiredGroupDN);
+  return groups.some((dn) => normalizeDN(dn) === required);
+};
+
+// Erreurs de connexion (serveur inaccessible) vs erreurs d'authentification/autorisation.
+// Seules les premières déclenchent une bascule vers le serveur de secours.
+const CONNECTION_ERROR_CODES = ['ECONNREFUSED', 'ENOTFOUND', 'ETIMEDOUT', 'ECONNRESET', 'EHOSTUNREACH', 'ENETUNREACH'];
+const isConnectionError = (err) => {
+  if (!err) return false;
+  if (CONNECTION_ERROR_CODES.includes(err.code) || CONNECTION_ERROR_CODES.includes(err.errno)) return true;
+  return err.name === 'ConnectionError' || err.name === 'TimeoutError';
+};
+
+// Construit la configuration LDAP depuis les variables d'environnement.
+// suffix = '_BACKUP' pour le serveur de secours : searchBase/searchFilter/requiredGroupDN
+// reprennent la valeur de la configuration principale si la variante de secours est vide.
+const buildLDAPConfigFromEnv = (suffix = '') => ({
+  url: process.env[`LDAP_URL${suffix}`],
+  bindDN: process.env[`LDAP_BIND_DN${suffix}`],
+  bindPassword: process.env[`LDAP_BIND_PASSWORD${suffix}`],
+  searchBase: process.env[`LDAP_SEARCH_BASE${suffix}`] || process.env.LDAP_SEARCH_BASE,
+  searchFilter: process.env[`LDAP_SEARCH_FILTER${suffix}`] || process.env.LDAP_SEARCH_FILTER,
+  requiredGroupDN: process.env[`LDAP_REQUIRED_GROUP_DN${suffix}`] || process.env.LDAP_REQUIRED_GROUP_DN
+});
+
+// Le serveur de secours est considéré comme configuré dès que son URL et son compte de service sont renseignés
+const isBackupLDAPConfigured = () => !!(process.env.LDAP_URL_BACKUP && process.env.LDAP_BIND_DN_BACKUP);
+
+// Tente une authentification LDAP sur le serveur décrit par `config`
+const attemptLDAPAuth = async (config, username, password) => {
   return new Promise((resolve) => {
-    if (process.env.LDAP_ENABLED !== 'true') {
-      return resolve({ success: false, message: 'LDAP désactivé' });
-    }
-
     const client = ldap.createClient({
-      url: process.env.LDAP_URL,
+      url: config.url,
       tlsOptions: { rejectUnauthorized: false }
     });
 
     client.on('error', (err) => {
       console.error('Erreur connexion LDAP:', err);
-      resolve({ success: false, message: 'Erreur de connexion LDAP' });
+      resolve({ success: false, connectionError: true, message: 'Erreur de connexion LDAP' });
     });
 
     // Bind avec le compte de service
-    const bindDN = process.env.LDAP_BIND_DN;
-    const bindPassword = process.env.LDAP_BIND_PASSWORD;
-
-    client.bind(bindDN, bindPassword, (err) => {
+    client.bind(config.bindDN, config.bindPassword, (err) => {
       if (err) {
         console.error('Erreur bind LDAP:', err);
         client.unbind();
-        return resolve({ success: false, message: 'Erreur de connexion LDAP' });
+        return resolve({ success: false, connectionError: isConnectionError(err), message: 'Erreur de connexion LDAP' });
       }
 
       // Rechercher l'utilisateur
-      const searchBase = process.env.LDAP_SEARCH_BASE;
-      const searchFilter = process.env.LDAP_SEARCH_FILTER.replace('{{username}}', username);
+      const searchFilter = config.searchFilter.replace('{{username}}', username);
 
       const searchOptions = {
         filter: searchFilter,
@@ -38,11 +63,11 @@ export const authenticateLDAP = async (username, password) => {
         attributes: ['dn', 'uid', 'cn', 'sn', 'givenName', 'mail', 'memberOf']
       };
 
-      client.search(searchBase, searchOptions, (err, res) => {
+      client.search(config.searchBase, searchOptions, (err, res) => {
         if (err) {
           console.error('Erreur recherche LDAP:', err);
           client.unbind();
-          return resolve({ success: false, message: 'Erreur de recherche utilisateur' });
+          return resolve({ success: false, connectionError: isConnectionError(err), message: 'Erreur de recherche utilisateur' });
         }
 
         let userEntry = null;
@@ -54,7 +79,7 @@ export const authenticateLDAP = async (username, password) => {
         res.on('error', (err) => {
           console.error('Erreur résultat recherche LDAP:', err);
           client.unbind();
-          resolve({ success: false, message: 'Erreur de recherche' });
+          resolve({ success: false, connectionError: isConnectionError(err), message: 'Erreur de recherche' });
         });
 
         res.on('end', (result) => {
@@ -69,7 +94,12 @@ export const authenticateLDAP = async (username, password) => {
           // Extraire les attributs
           if (userEntry.attributes) {
             for (const attr of userEntry.attributes) {
-              userInfo[attr.type] = attr.values[0];
+              if (attr.type === 'memberOf') {
+                // memberOf est multivalué : on garde la liste complète des groupes
+                userInfo.memberOf = attr.values || [];
+              } else {
+                userInfo[attr.type] = attr.values[0];
+              }
             }
           }
 
@@ -79,7 +109,18 @@ export const authenticateLDAP = async (username, password) => {
 
             if (err) {
               console.error('Erreur authentification utilisateur LDAP:', err);
+              if (isConnectionError(err)) {
+                return resolve({ success: false, connectionError: true, message: 'Erreur de connexion LDAP' });
+              }
               return resolve({ success: false, message: 'Mot de passe incorrect' });
+            }
+
+            // Restreindre l'accès aux membres du groupe AD configuré (si défini)
+            if (!isMemberOfRequiredGroup(userInfo.memberOf, config.requiredGroupDN)) {
+              return resolve({
+                success: false,
+                message: 'Accès refusé : vous n\'êtes pas membre du groupe autorisé à utiliser cette application.'
+              });
             }
 
             resolve({
@@ -92,6 +133,112 @@ export const authenticateLDAP = async (username, password) => {
       });
     });
   });
+};
+
+// Authentification LDAP. Le serveur principal est toujours tenté en premier ;
+// en cas d'erreur de connexion (serveur inaccessible), bascule automatiquement
+// sur le serveur de secours s'il est configuré (LDAP_URL_BACKUP / LDAP_BIND_DN_BACKUP).
+export const authenticateLDAP = async (username, password) => {
+  if (process.env.LDAP_ENABLED !== 'true') {
+    return { success: false, message: 'LDAP désactivé' };
+  }
+
+  const primaryResult = await attemptLDAPAuth(buildLDAPConfigFromEnv(), username, password);
+
+  if (primaryResult.connectionError && isBackupLDAPConfigured()) {
+    console.warn('Serveur LDAP principal indisponible, tentative sur le serveur de secours...');
+    const backupResult = await attemptLDAPAuth(buildLDAPConfigFromEnv('_BACKUP'), username, password);
+    if (!backupResult.connectionError) {
+      return backupResult;
+    }
+    return { success: false, message: 'Erreur de connexion : serveurs LDAP principal et de secours indisponibles' };
+  }
+
+  return primaryResult;
+};
+
+// Récupère les membres directs (attributs `member`/`uniqueMember`) du groupe décrit par
+// `config.requiredGroupDN`. Utilisé pour la synchronisation périodique du groupe requis
+// (révocation d'accès si un utilisateur quitte ce groupe).
+const fetchGroupMembers = async (config) => {
+  return new Promise((resolve) => {
+    const client = ldap.createClient({
+      url: config.url,
+      tlsOptions: { rejectUnauthorized: false }
+    });
+
+    client.on('error', (err) => {
+      resolve({ success: false, connectionError: true, message: 'Erreur de connexion LDAP' });
+    });
+
+    client.bind(config.bindDN, config.bindPassword, (err) => {
+      if (err) {
+        client.unbind();
+        return resolve({ success: false, connectionError: isConnectionError(err), message: 'Erreur de connexion LDAP' });
+      }
+
+      const searchOptions = {
+        scope: 'base',
+        attributes: ['member', 'uniqueMember']
+      };
+
+      let entryFound = false;
+      const members = new Set();
+
+      client.search(config.requiredGroupDN, searchOptions, (err, res) => {
+        if (err) {
+          client.unbind();
+          return resolve({ success: false, connectionError: isConnectionError(err), message: 'Erreur de recherche du groupe requis' });
+        }
+
+        res.on('searchEntry', (entry) => {
+          entryFound = true;
+          if (entry.attributes) {
+            for (const attr of entry.attributes) {
+              if (attr.type === 'member' || attr.type === 'uniqueMember') {
+                (attr.values || []).forEach((dn) => members.add(normalizeDN(dn)));
+              }
+            }
+          }
+        });
+
+        res.on('error', (err) => {
+          client.unbind();
+          resolve({ success: false, connectionError: isConnectionError(err), message: 'Erreur de recherche du groupe requis' });
+        });
+
+        res.on('end', () => {
+          client.unbind();
+          if (!entryFound) {
+            // Le groupe requis n'existe pas sur ce serveur (mauvaise config) : ne jamais
+            // remonter un ensemble vide, ce qui désactiverait tous les utilisateurs LDAP.
+            return resolve({ success: false, connectionError: false, message: `Groupe LDAP introuvable: ${config.requiredGroupDN}` });
+          }
+          resolve({ success: true, members });
+        });
+      });
+    });
+  });
+};
+
+// Récupère les membres du groupe requis (LDAP_REQUIRED_GROUP_DN), avec bascule automatique
+// sur le serveur de secours en cas d'erreur de connexion (même logique que authenticateLDAP).
+export const fetchRequiredGroupMembers = async () => {
+  if (process.env.LDAP_ENABLED !== 'true' || !process.env.LDAP_REQUIRED_GROUP_DN) {
+    return { success: false, message: 'LDAP désactivé ou LDAP_REQUIRED_GROUP_DN non configuré' };
+  }
+
+  const primaryResult = await fetchGroupMembers(buildLDAPConfigFromEnv());
+
+  if (primaryResult.connectionError && isBackupLDAPConfigured()) {
+    const backupResult = await fetchGroupMembers(buildLDAPConfigFromEnv('_BACKUP'));
+    if (!backupResult.connectionError) {
+      return backupResult;
+    }
+    return { success: false, connectionError: true, message: 'Erreur de connexion : serveurs LDAP principal et de secours indisponibles' };
+  }
+
+  return primaryResult;
 };
 
 // Tester la connexion LDAP
@@ -186,8 +333,83 @@ export const syncLDAPUsers = async () => {
   });
 };
 
+// Lister les groupes disponibles dans l'annuaire LDAP/AD
+export const fetchLDAPGroups = async ({ server, port, useTLS, bindDN, bindPassword, baseDN }) => {
+  return new Promise((resolve) => {
+    const client = ldap.createClient({
+      url: buildLdapUrl({ server, port, useTLS }),
+      tlsOptions: { rejectUnauthorized: false },
+      connectTimeout: 5000
+    });
+
+    client.on('error', (err) => {
+      resolve({ success: false, message: err.message, groups: [] });
+    });
+
+    client.bind(bindDN, bindPassword, (err) => {
+      if (err) {
+        client.unbind();
+        return resolve({ success: false, message: 'Échec de l\'authentification', groups: [] });
+      }
+
+      const searchOptions = {
+        filter: '(|(objectClass=groupOfNames)(objectClass=group)(objectClass=groupOfUniqueNames)(objectClass=posixGroup))',
+        scope: 'sub',
+        attributes: ['dn', 'cn', 'description']
+      };
+
+      const groups = [];
+
+      client.search(baseDN, searchOptions, (err, res) => {
+        if (err) {
+          client.unbind();
+          return resolve({ success: false, message: 'Erreur de recherche', groups: [] });
+        }
+
+        res.on('searchEntry', (entry) => {
+          const info = {};
+          if (entry.attributes) {
+            for (const attr of entry.attributes) {
+              info[attr.type] = attr.values[0];
+            }
+          }
+          groups.push({
+            dn: entry.objectName || entry.dn,
+            name: info.cn || '',
+            description: info.description || ''
+          });
+        });
+
+        res.on('end', () => {
+          client.unbind();
+          groups.sort((a, b) => a.name.localeCompare(b.name));
+          resolve({ success: true, groups });
+        });
+
+        res.on('error', (err) => {
+          client.unbind();
+          resolve({ success: false, message: err.message, groups: [] });
+        });
+      });
+    });
+
+    // Timeout
+    setTimeout(() => {
+      try {
+        client.unbind();
+      } catch (e) {}
+      resolve({ success: false, message: 'Timeout de connexion', groups: [] });
+    }, 10000);
+  });
+};
+
+export { buildLdapUrl };
+
 export default {
   authenticateLDAP,
   testLDAPConnection,
-  syncLDAPUsers
+  syncLDAPUsers,
+  fetchLDAPGroups,
+  fetchRequiredGroupMembers,
+  buildLdapUrl
 };

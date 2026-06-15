@@ -8,6 +8,7 @@ import { Settings, PERMISSIONS } from '../models/index.js';
 import EmailTemplate from '../models/EmailTemplate.model.js';
 import { authenticate, authorize, isAdmin } from '../middleware/auth.middleware.js';
 import { extractTextFromPDF, extractTextFromImage, getOCRLanguages, isOCRAvailable } from '../services/ocr.service.js';
+import { testLDAPConnection, fetchLDAPGroups, buildLdapUrl } from '../services/ldap.service.js';
 
 const router = express.Router();
 
@@ -383,20 +384,38 @@ router.delete('/:key', authenticate, isAdmin, async (req, res) => {
 // POST /api/settings/ldap/test - Tester la connexion LDAP
 router.post('/ldap/test', authenticate, authorize(PERMISSIONS.MANAGE_LDAP), async (req, res) => {
   try {
-    const { url, bindDN, bindPassword, searchBase } = req.body;
+    const { server, port, useTLS, bindDN, bindPassword } = req.body;
 
-    // Simuler un test de connexion LDAP
-    // En production, vous utiliseriez ldapjs pour tester réellement
-    
-    res.json({
-      success: true,
-      message: 'Connexion LDAP testée avec succès'
+    const result = await testLDAPConnection({
+      url: buildLdapUrl({ server, port, useTLS }),
+      bindDN,
+      bindPassword
     });
+
+    res.json(result);
   } catch (error) {
     console.error('Erreur test LDAP:', error);
     res.status(500).json({
       success: false,
       message: 'Erreur de connexion LDAP'
+    });
+  }
+});
+
+// POST /api/settings/ldap/groups - Lister les groupes disponibles dans l'annuaire LDAP
+router.post('/ldap/groups', authenticate, authorize(PERMISSIONS.MANAGE_LDAP), async (req, res) => {
+  try {
+    const { server, port, useTLS, bindDN, bindPassword, baseDN } = req.body;
+
+    const result = await fetchLDAPGroups({ server, port, useTLS, bindDN, bindPassword, baseDN });
+
+    res.json(result);
+  } catch (error) {
+    console.error('Erreur récupération groupes LDAP:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur de connexion LDAP',
+      groups: []
     });
   }
 });

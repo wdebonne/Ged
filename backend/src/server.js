@@ -24,12 +24,14 @@ import onedriveRoutes from './routes/onedrive.routes.js';
 import s3Routes from './routes/s3.routes.js';
 import nextcloudRoutes from './routes/nextcloud.routes.js';
 import delegationRoutes from './routes/delegation.routes.js';
+import ldapGroupMappingRoutes from './routes/ldapGroupMapping.routes.js';
 
 // Middleware
 import { serveMailFiles } from './middleware/serveMailFiles.middleware.js';
 
 // Services
 import { startImapService } from './services/imap.service.js';
+import { startLdapGroupSyncService } from './services/ldapGroupSync.service.js';
 
 // Configuration
 dotenv.config();
@@ -104,6 +106,7 @@ app.use('/api/onedrive', onedriveRoutes);
 app.use('/api/storage/s3', s3Routes);
 app.use('/api/storage/nextcloud', nextcloudRoutes);
 app.use('/api/delegations', delegationRoutes);
+app.use('/api/ldap/group-mappings', ldapGroupMappingRoutes);
 
 // Route de santé
 app.get('/api/health', (req, res) => {
@@ -180,6 +183,12 @@ const startServer = async () => {
   // Démarrer le service IMAP si activé
   if (process.env.IMAP_ENABLED === 'true') {
     startImapService();
+  }
+
+  // Démarrer la synchronisation périodique du groupe LDAP requis (révoque l'accès des
+  // utilisateurs ayant quitté LDAP_REQUIRED_GROUP_DN, même en session active)
+  if (process.env.LDAP_ENABLED === 'true') {
+    startLdapGroupSyncService();
   }
 };
 

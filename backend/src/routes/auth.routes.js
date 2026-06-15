@@ -3,12 +3,13 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import rateLimit from 'express-rate-limit';
 import { body, validationResult } from 'express-validator';
-import { User, Group, Settings } from '../models/index.js';
+import { User, Group, Service, Settings, LdapGroupMapping } from '../models/index.js';
 import { authenticate } from '../middleware/auth.middleware.js';
 import { uploadAvatar } from '../middleware/upload.middleware.js';
 import { authenticateLDAP } from '../services/ldap.service.js';
 import { authenticateKerberos } from '../services/kerberos.service.js';
 import { sendPasswordResetEmail } from '../services/email.service.js';
+import { normalizeDN } from '../utils/ldap.utils.js';
 
 const router = express.Router();
 
@@ -68,28 +69,130 @@ router.post('/login', loginLimiter, [
     // Authentification LDAP
     if (authMethod === 'ldap' && process.env.LDAP_ENABLED === 'true') {
       const ldapResult = await authenticateLDAP(username, password);
-      if (ldapResult.success) {
-        user = await User.findOne({ 
-          $or: [
-            { username: username.toLowerCase() },
-            { ldapDN: ldapResult.userDN }
-          ]
-        }).populate('group').populate('services');
-        
+
+      if (!ldapResult.success) {
+        return res.status(401).json({
+          success: false,
+          message: ldapResult.message || 'Identifiants incorrects'
+        });
+      }
+
+      user = await User.findOne({
+        $or: [
+          { username: username.toLowerCase() },
+          { ldapDN: ldapResult.userDN }
+        ]
+      }).populate('group').populate('services');
+
+      if (!user) {
         // Créer l'utilisateur s'il n'existe pas
-        if (!user && ldapResult.userInfo) {
-          const defaultGroup = await Group.findOne({ name: 'Utilisateur' });
-          user = new User({
-            username: username.toLowerCase(),
-            email: ldapResult.userInfo.mail || `${username}@ldap.local`,
-            firstName: ldapResult.userInfo.givenName || username,
-            lastName: ldapResult.userInfo.sn || '',
-            ldapUser: true,
-            ldapDN: ldapResult.userDN,
-            group: defaultGroup._id
+        const defaultGroup = await Group.findOne({ name: 'Utilisateur' });
+        user = new User({
+          username: username.toLowerCase(),
+          email: ldapResult.userInfo.mail || `${username}@ldap.local`,
+          firstName: ldapResult.userInfo.givenName || username,
+          lastName: ldapResult.userInfo.sn || '',
+          ldapUser: true,
+          ldapDN: ldapResult.userDN,
+          group: defaultGroup._id
+        });
+        await user.save();
+        user = await User.findById(user._id).populate('group').populate('services');
+      } else {
+        // Synchroniser nom/prénom/email depuis l'annuaire à chaque connexion
+        const updates = {};
+        if (ldapResult.userInfo.givenName && ldapResult.userInfo.givenName !== user.firstName) {
+          updates.firstName = ldapResult.userInfo.givenName;
+        }
+        if (ldapResult.userInfo.sn && ldapResult.userInfo.sn !== user.lastName) {
+          updates.lastName = ldapResult.userInfo.sn;
+        }
+        if (ldapResult.userInfo.mail && ldapResult.userInfo.mail !== user.email) {
+          updates.email = ldapResult.userInfo.mail;
+        }
+
+        if (Object.keys(updates).length > 0) {
+          try {
+            Object.assign(user, updates);
+            await user.save();
+          } catch (syncError) {
+            console.error('Erreur synchronisation infos LDAP:', syncError);
+          }
+        }
+      }
+
+      // Réactiver automatiquement un compte désactivé par la synchronisation périodique du
+      // groupe LDAP requis (LDAP_REQUIRED_GROUP_DN) : l'authentification ci-dessus vient de
+      // confirmer que l'utilisateur en est de nouveau membre.
+      if (user.deactivatedByLdapSync) {
+        user.isActive = true;
+        user.deactivatedByLdapSync = false;
+        await user.save();
+      }
+
+      // Appliquer les correspondances groupe AD -> rôle/services GED
+      if (Array.isArray(ldapResult.userInfo.memberOf)) {
+        try {
+          const memberOfNormalized = ldapResult.userInfo.memberOf.map(normalizeDN);
+          const mappings = await LdapGroupMapping.find({
+            isActive: true,
+            normalizedDN: { $in: memberOfNormalized }
+          }).sort({ priority: -1 }).populate('services').populate('supervisorServices');
+
+          // Rôle : la mapping prioritaire qui définit un gedGroup
+          const roleMapping = mappings.find((m) => m.gedGroup);
+          if (roleMapping && String(user.group?._id || user.group) !== String(roleMapping.gedGroup)) {
+            user.group = roleMapping.gedGroup;
+          }
+
+          // Services accessibles : synchronisés avec les correspondances actives. Les services
+          // attribués manuellement (jamais accordés via LDAP) restent intacts ; seuls les services
+          // précédemment accordés via LDAP et non reconduits par les correspondances actuelles sont retirés.
+          const currentServiceIds = new Set();
+          mappings.forEach((m) => m.services.forEach((s) => currentServiceIds.add(String(s._id))));
+
+          const previousLdapServiceIds = (user.ldapManagedServices || []).map((s) => String(s));
+
+          const userServiceIds = new Set((user.services || []).map((s) => String(s._id || s)));
+          currentServiceIds.forEach((id) => userServiceIds.add(id));
+          previousLdapServiceIds.forEach((id) => {
+            if (!currentServiceIds.has(id)) {
+              userServiceIds.delete(id);
+            }
           });
+
+          user.services = Array.from(userServiceIds);
+          user.ldapManagedServices = Array.from(currentServiceIds);
+
+          // Superviseur : synchronisé avec les correspondances "Devient superviseur de" actives.
+          const currentSupervisorServiceIds = new Set();
+          mappings.forEach((m) => m.supervisorServices.forEach((s) => currentSupervisorServiceIds.add(String(s._id))));
+
+          const previousSupervisorServiceIds = (user.ldapSupervisedServices || []).map((s) => String(s));
+          const servicesToUnsupervise = previousSupervisorServiceIds.filter((id) => !currentSupervisorServiceIds.has(id));
+
+          if (servicesToUnsupervise.length) {
+            // Ne retire la supervision que si elle est toujours détenue par cet utilisateur
+            // (ne touche pas à une réaffectation manuelle effectuée depuis)
+            await Service.updateMany(
+              { _id: { $in: servicesToUnsupervise }, supervisor: user._id },
+              { supervisor: null }
+            );
+          }
+
+          if (currentSupervisorServiceIds.size) {
+            await Service.updateMany(
+              { _id: { $in: Array.from(currentSupervisorServiceIds) } },
+              { supervisor: user._id }
+            );
+          }
+
+          user.ldapSupervisedServices = Array.from(currentSupervisorServiceIds);
+
           await user.save();
           user = await User.findById(user._id).populate('group').populate('services');
+        } catch (mappingError) {
+          console.error('Erreur application correspondances LDAP:', mappingError);
         }
       }
     }

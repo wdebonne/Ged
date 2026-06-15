@@ -244,7 +244,108 @@ Application web complète de gestion de courrier avec authentification LDAP/Kerb
 #### LDAP
 - ✅ Configuration du serveur LDAP
 - ✅ Base DN, filtres utilisateurs/groupes
-- ✅ Test de connexion
+- ✅ Test de connexion (réel, depuis Paramètres > LDAP)
+- ✅ **Liste des groupes AD/LDAP** disponibles dans l'annuaire, avec copie du DN en un clic
+- ✅ **Restriction par groupe AD/LDAP** (`LDAP_REQUIRED_GROUP_DN`) : seuls les membres du groupe configuré peuvent se connecter. Vérifié à **chaque connexion** (un retrait du groupe AD bloque l'accès dès le prochain login), **et en continu** via une synchronisation périodique qui coupe aussi les sessions déjà ouvertes
+- ✅ **Synchronisation des attributs** : prénom (`givenName`), nom (`sn`) et email (`mail`) sont remontés depuis l'annuaire à la création du compte **et mis à jour à chaque connexion**
+- ✅ **Correspondances Groupe AD → Rôle/Services GED** (Administration > Correspondances LDAP) : applique automatiquement un rôle GED et/ou des services accessibles/supervisés en fonction des groupes AD de l'utilisateur, à chaque connexion
+- ✅ **Serveur AD de secours (failover automatique)** : bascule automatiquement sur un second annuaire si le serveur principal est inaccessible, sans configuration ni intervention manuelle au moment de la panne
+
+##### Restreindre l'accès à un groupe AD (ex: groupe "GED")
+
+1. Récupérez le DN du groupe dans votre annuaire. Sur un **Synology** (paquet LDAP Server / Directory Server), ouvrez la console LDAP, sélectionnez le groupe et notez son DN, généralement de la forme :
+   ```
+   cn=GED,ou=group,dc=votredomaine,dc=local
+   ```
+   Vous pouvez aussi le vérifier avec `ldapsearch` :
+   ```bash
+   ldapsearch -x -H ldap://votre-nas:389 -D "cn=admin,dc=votredomaine,dc=local" -W \
+     -b "dc=votredomaine,dc=local" "(cn=GED)" dn
+   ```
+   Ou, plus simplement, depuis **Paramètres > LDAP**, cliquez sur **"Lister les groupes AD"** : la liste des groupes de l'annuaire (avec leur DN) s'affiche, avec un bouton "Copier le DN" pour chaque groupe.
+2. Renseignez `LDAP_REQUIRED_GROUP_DN` dans `backend/.env` avec ce DN.
+3. Assurez-vous que l'attribut `memberOf` est bien renvoyé sur les comptes utilisateurs (l'overlay `memberof` est activé par défaut sur le LDAP Server Synology). Sans cet attribut, aucun utilisateur ne sera reconnu comme membre et l'accès sera refusé.
+4. Laissez `LDAP_REQUIRED_GROUP_DN` vide pour autoriser tous les utilisateurs LDAP authentifiés (comportement précédent).
+
+> **Important : `LDAP_REQUIRED_GROUP_DN` est une porte d'entrée, indépendante des correspondances ci-dessous, et vérifiée en premier.**
+> - Si l'utilisateur **n'est pas membre** du groupe configuré (ex: "GED"), l'authentification échoue immédiatement (`Accès refusé`) — peu importe qu'il soit par ailleurs membre de "Compta", "Responsable Compta", etc. Son compte n'est ni créé ni mis à jour, et les **Correspondances LDAP** décrites ci-dessous ne sont jamais évaluées.
+> - Si l'utilisateur **est membre** du groupe configuré, il peut se connecter ; ses autres groupes AD (Compta, etc.) sont alors traités par les **Correspondances LDAP** ci-dessous pour déterminer son **rôle** (groupe de permissions GED) et ses **services/superviseurs**. Ceux-ci peuvent aussi être attribués manuellement dans Administration > Utilisateurs/Services.
+> - Cette appartenance est vérifiée **en continu**, pas seulement au login : voir [Révocation automatique de l'accès (groupe requis)](#révocation-automatique-de-laccès-groupe-requis) ci-dessous.
+
+##### Correspondances Groupe AD → Rôle/Services GED (Administration > Correspondances LDAP)
+
+Cette page permet de définir, pour chaque groupe AD/LDAP, quel **rôle GED** (groupe de permissions) attribuer et/ou quels **services** rendre accessibles ou superviser. Ces correspondances sont appliquées automatiquement à **chaque connexion LDAP** réussie, en plus de la restriction d'accès et de la synchronisation des attributs décrites ci-dessus.
+
+Pour chaque correspondance :
+- **DN du groupe LDAP** (requis) : récupérez-le via Paramètres > LDAP > "Lister les groupes AD"
+- **Rôle GED à attribuer** (optionnel) : un des groupes de permissions définis dans Administration > Groupes (ex: "Superviseur")
+- **Services accessibles** (optionnel) : services ajoutés à la liste des services de l'utilisateur. **Synchronisés à chaque connexion** : si l'utilisateur quitte le groupe AD (ou que la correspondance est désactivée/modifiée), les services qui n'avaient été accordés que via cette correspondance sont automatiquement retirés. Les services attribués manuellement dans Administration > Utilisateurs ne sont jamais affectés par cette synchronisation.
+- **Devient superviseur de** (optionnel) : services dont l'utilisateur devient le superviseur (champ `supervisor` du service). **Synchronisé à chaque connexion** : si l'utilisateur quitte le groupe AD correspondant, il est automatiquement retiré de la supervision de ces services — sauf si un autre superviseur a été réaffecté manuellement depuis, auquel cas rien n'est modifié.
+- **Priorité** : en cas de correspondances multiples définissant chacune un rôle GED différent (un utilisateur peut appartenir à plusieurs groupes AD), c'est la correspondance avec la priorité la plus élevée qui détermine le rôle attribué
+
+**Exemple : Compta / Responsable Compta**
+
+1. Sur le Synology, créez (ou identifiez) deux groupes AD : `Compta` et `Responsable Compta`.
+2. Depuis Paramètres > LDAP, cliquez sur "Lister les groupes AD" et copiez le DN de chacun (ex: `cn=Compta,ou=group,dc=votredomaine,dc=local` et `cn=Responsable Compta,ou=group,dc=votredomaine,dc=local`).
+3. Dans Administration > Correspondances LDAP, créez deux correspondances :
+   - **Compta** → Services accessibles : `Comptabilité`
+   - **Responsable Compta** → Rôle GED : `Superviseur`, Services accessibles : `Comptabilité`, Devient superviseur de : `Comptabilité`, Priorité : `10` (plus élevée que la correspondance "Compta" pour qu'elle prenne le dessus si l'utilisateur appartient aux deux groupes)
+4. Au prochain login LDAP, un membre du groupe AD "Compta" voit le service Comptabilité ajouté à ses services accessibles. Un membre de "Responsable Compta" devient en plus superviseur du service Comptabilité et reçoit le rôle GED "Superviseur".
+5. Si cet utilisateur est ensuite retiré du groupe AD "Responsable Compta" (mais reste dans "Compta"), au prochain login il perd automatiquement la supervision du service Comptabilité ; il conserve l'accès au service Comptabilité via la correspondance "Compta" toujours active.
+
+**Limites** :
+- Le **rôle GED** attribué via une correspondance n'est pas automatiquement rétrogradé si l'utilisateur quitte le groupe AD correspondant : il reste celui attribué au dernier login où une correspondance définissait un rôle (à ajuster manuellement dans Administration > Utilisateurs si nécessaire).
+- La synchronisation des services et de la supervision repose sur l'attribut `memberOf` renvoyé par l'annuaire à chaque connexion (y compris sous forme de liste vide). Si cet attribut n'est pas renvoyé du tout (overlay `memberof` non actif), ni l'attribution ni le retrait automatiques ne sont effectués.
+
+##### Serveur LDAP de secours (failover automatique)
+
+Si votre annuaire AD principal est hébergé sur un NAS (Synology par exemple) et que vous disposez d'un second NAS avec un annuaire de secours (réplica), GED peut basculer automatiquement sur ce serveur en cas de panne du principal.
+
+**Principe** :
+- À **chaque connexion**, le serveur principal (`LDAP_URL`) est **toujours tenté en premier**.
+- Si le principal répond mais que l'authentification échoue pour une raison normale (mot de passe incorrect, utilisateur introuvable, accès refusé car non membre du groupe requis), **aucune bascule** n'a lieu : l'erreur est renvoyée telle quelle.
+- Si le principal est **inaccessible** (NAS éteint, panne réseau, timeout), et qu'un serveur de secours est configuré, GED retente immédiatement l'authentification sur le serveur de secours.
+- **Aucun état n'est mémorisé** : dès que le serveur principal redevient disponible, les connexions suivantes l'utilisent à nouveau automatiquement, sans aucune action manuelle.
+
+**Configuration** (`backend/.env`) :
+```
+LDAP_URL_BACKUP=ldap://votre-nas-secours:389
+LDAP_BIND_DN_BACKUP=cn=admin,dc=votredomaine,dc=local
+LDAP_BIND_PASSWORD_BACKUP=votre_mot_de_passe
+
+# Optionnels : si laissés vides, reprennent la valeur de la configuration principale
+LDAP_SEARCH_BASE_BACKUP=
+LDAP_SEARCH_FILTER_BACKUP=
+LDAP_REQUIRED_GROUP_DN_BACKUP=
+```
+
+- Laisser `LDAP_URL_BACKUP` vide désactive le failover (comportement actuel, inchangé).
+- `LDAP_REQUIRED_GROUP_DN_BACKUP` doit correspondre au DN du groupe **sur l'annuaire de secours** : si la structure des DN diffère entre les deux NAS (ex: `dc=votredomaine,dc=local` vs un autre suffixe), renseignez-le explicitement plutôt que de laisser le repli sur la valeur principale.
+
+**Tester le serveur de secours** : depuis **Paramètres > LDAP**, la section "Configuration LDAP de secours (failover)" permet de renseigner les mêmes informations (serveur, port, Base DN, Bind DN, mot de passe) pour **tester la connexion** et **lister les groupes AD** du serveur de secours, sans accès SSH. Cette section sert uniquement à vérifier la configuration à saisir dans `.env` ; elle ne remplace pas les variables `.env` ci-dessus, qui restent la source de configuration utilisée au login.
+
+**Limite** : la synchronisation en masse des utilisateurs (`syncLDAPUsers`, hors flux de login) n'utilise pas le serveur de secours.
+
+##### Révocation automatique de l'accès (groupe requis)
+
+Le contrôle de `LDAP_REQUIRED_GROUP_DN` décrit plus haut ne s'applique normalement qu'au moment du login : un utilisateur retiré du groupe "GED" ne peut plus se reconnecter, mais une session déjà ouverte (token JWT valide) restait active jusqu'à son expiration (`JWT_EXPIRE`, 7 jours par défaut). GED ajoute une **synchronisation périodique** qui coupe aussi ces sessions déjà ouvertes.
+
+**Principe** :
+- Toutes les `LDAP_GROUP_CHECK_INTERVAL` minutes (5 par défaut), GED effectue **une seule requête LDAP** pour récupérer la liste des membres directs (`member`/`uniqueMember`) du groupe `LDAP_REQUIRED_GROUP_DN` — un coût constant, quel que soit le nombre d'utilisateurs.
+- Chaque utilisateur LDAP actif dont le DN n'apparaît plus dans cette liste est **désactivé** (`isActive=false`). Le contrôle déjà effectué à chaque requête API (`Compte désactivé`) coupe alors sa session dès son prochain appel — sans attendre l'expiration du token ni une nouvelle tentative de connexion.
+- Si cet utilisateur **réintègre** le groupe par la suite, son compte est **automatiquement réactivé**, soit au cycle de synchronisation suivant, soit immédiatement à sa prochaine connexion réussie. Cette réactivation automatique ne s'applique **que** si la désactivation provient de cette synchronisation : un compte désactivé manuellement dans Administration > Utilisateurs n'est jamais réactivé par ce mécanisme.
+- **Bascule failover** : comme pour le login, la requête est tentée sur le serveur principal puis, en cas d'erreur de connexion, sur le serveur de secours s'il est configuré.
+- **Garde-fou** : si les serveurs LDAP (principal et secours) sont inaccessibles, ou si `LDAP_REQUIRED_GROUP_DN` ne correspond à aucun groupe existant sur le serveur interrogé, le cycle est **entièrement ignoré** (aucune désactivation) — pour éviter qu'une panne réseau ou une erreur de configuration ne déconnecte tous les utilisateurs.
+
+**Configuration** (`backend/.env`) :
+```
+LDAP_GROUP_CHECK_INTERVAL=5
+```
+Sans effet si `LDAP_REQUIRED_GROUP_DN` n'est pas défini (aucune restriction de groupe = rien à synchroniser).
+
+**Limites** :
+- Seuls les membres **directs** du groupe requis sont pris en compte (groupes AD imbriqués non résolus), cohérent avec la vérification `memberOf` effectuée au login.
+- Pour un groupe de plus de 1500 membres directs, la limite native d'Active Directory sur la taille des attributs multivalués (`MaxValRange`) n'est pas paginée.
 
 #### Kerberos
 - ✅ Configuration realm et KDC
@@ -509,6 +610,22 @@ LDAP_BIND_DN=cn=admin,dc=example,dc=com
 LDAP_BIND_PASSWORD=votre_mot_de_passe
 LDAP_SEARCH_BASE=dc=example,dc=com
 LDAP_SEARCH_FILTER=(uid={{username}})  # {{username}} sera remplacé
+# DN du groupe LDAP/AD dont les membres sont seuls autorisés à utiliser l'application (optionnel)
+LDAP_REQUIRED_GROUP_DN=cn=GED,ou=group,dc=example,dc=com
+
+# Serveur LDAP/AD de secours (optionnel) : bascule automatique si le principal est inaccessible
+# Laisser LDAP_URL_BACKUP vide pour désactiver le failover
+LDAP_URL_BACKUP=
+LDAP_BIND_DN_BACKUP=
+LDAP_BIND_PASSWORD_BACKUP=
+# Optionnels : si vides, reprennent la valeur de la configuration principale ci-dessus
+LDAP_SEARCH_BASE_BACKUP=
+LDAP_SEARCH_FILTER_BACKUP=
+LDAP_REQUIRED_GROUP_DN_BACKUP=
+
+# Intervalle (en minutes) de vérification périodique de l'appartenance à LDAP_REQUIRED_GROUP_DN
+# Un utilisateur ayant quitté ce groupe est désactivé au cycle suivant, coupant sa session active
+LDAP_GROUP_CHECK_INTERVAL=5
 
 # ═══════════════════════════════════════════════════════════════
 # KERBEROS - Authentification SSO (optionnel)

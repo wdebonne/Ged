@@ -273,6 +273,7 @@ export const settingsAPI = {
   update: (key, data) => api.put(`/settings/${key}`, data),
   updateMany: (settings) => api.put('/settings', { settings }),
   testLDAP: (data) => api.post('/settings/ldap/test', data),
+  getLDAPGroups: (data) => api.post('/settings/ldap/groups', data),
   testIMAP: (data) => api.post('/settings/imap/test', data),
   testSMTP: (data) => api.post('/settings/smtp/test', data),
   getBranding: () => api.get('/settings/public/branding'),
@@ -363,4 +364,12 @@ export const delegationsAPI = {
   revoke: (id, note) => api.post(`/delegations/${id}/revoke`, { note }),
   delete: (id) => api.delete(`/delegations/${id}`),
   checkOverlap: (userId) => api.get(`/delegations/check/${userId}`)
+};
+
+// Correspondances groupes LDAP/AD -> rôle/services GED
+export const ldapMappingsAPI = {
+  getAll: () => api.get('/ldap/group-mappings'),
+  create: (data) => api.post('/ldap/group-mappings', data),
+  update: (id, data) => api.put(`/ldap/group-mappings/${id}`, data),
+  delete: (id) => api.delete(`/ldap/group-mappings/${id}`)
 };
