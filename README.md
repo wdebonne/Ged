@@ -542,11 +542,32 @@ cp .env.example .env
 # Éditer le fichier .env avec vos paramètres
 
 # Lancer le seed (données initiales)
+# Optionnel : si la base est vide, le serveur l'initialise automatiquement
+# au démarrage (voir "Comptes par défaut" ci-dessous).
 npm run seed
 
 # Retour à la racine
 cd ..
 ```
+
+### Comptes par défaut
+
+Si la base de données ne contient **aucun utilisateur**, le serveur crée automatiquement
+au démarrage les groupes, services et comptes de démonstration suivants (via
+`backend/src/scripts/seed.js`) :
+
+| Utilisateur | Mot de passe | Rôle |
+|---|---|---|
+| `admin` | `admin123` | Administrateur |
+| `superviseur` | `super123` | Superviseur |
+| `archiviste` | `archi123` | Archiviste |
+| `utilisateur` | `user123` | Utilisateur |
+
+⚠️ **Pensez à changer ces mots de passe avant de passer en production.**
+
+Cette initialisation automatique ne se déclenche qu'une seule fois, lorsque la collection
+`users` est vide (premier démarrage). Vous pouvez aussi la lancer manuellement avec
+`npm run seed` (utilisez `npm run seed -- --force` pour réinitialiser une base existante).
 
 ### Variables d'environnement (.env)
 

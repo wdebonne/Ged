@@ -256,16 +256,6 @@ export default function IncomingMailsPage() {
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
-  // Présélectionner un fichier si spécifié dans l'URL
-  useEffect(() => {
-    if (preselectedFileId && pendingFiles) {
-      const file = pendingFiles.find(f => f._id === preselectedFileId);
-      if (file) {
-        handleSelectFile(file);
-      }
-    }
-  }, [preselectedFileId, pendingFiles, handleSelectFile]);
-
   // Mutation pour supprimer un fichier
   const deleteMutation = useMutation({
     mutationFn: (id) => mailsAPI.deletePending(id),
@@ -336,6 +326,16 @@ export default function IncomingMailsPage() {
       console.error('Erreur chargement PDF:', error);
     }
   }, [token]);
+
+  // Présélectionner un fichier si spécifié dans l'URL
+  useEffect(() => {
+    if (preselectedFileId && pendingFiles) {
+      const file = pendingFiles.find(f => f._id === preselectedFileId);
+      if (file) {
+        handleSelectFile(file);
+      }
+    }
+  }, [preselectedFileId, pendingFiles, handleSelectFile]);
 
   const handleImport = () => {
     if (!selectedFile || !formData.senderName || !formData.subject || !formData.service || !formData.assignedTo) {

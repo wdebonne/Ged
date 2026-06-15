@@ -33,6 +33,10 @@ import { serveMailFiles } from './middleware/serveMailFiles.middleware.js';
 import { startImapService } from './services/imap.service.js';
 import { startLdapGroupSyncService } from './services/ldapGroupSync.service.js';
 
+// Initialisation de la base
+import { User } from './models/index.js';
+import { seedDatabase } from './scripts/seed.js';
+
 // Configuration
 dotenv.config();
 
@@ -172,7 +176,20 @@ const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
   await connectDB();
-  
+
+  // Initialiser la base avec les données par défaut si aucun utilisateur n'existe
+  // (premier démarrage, ex: nouveau déploiement Docker)
+  const userCount = await User.countDocuments();
+  if (userCount === 0) {
+    console.log('🌱 Aucun utilisateur trouvé, initialisation de la base de données...');
+    try {
+      await seedDatabase();
+      console.log('✅ Base de données initialisée avec les comptes par défaut');
+    } catch (error) {
+      console.error('❌ Erreur lors de l\'initialisation automatique de la base:', error.message);
+    }
+  }
+
   app.listen(PORT, () => {
     console.log(`🚀 Serveur démarré sur le port ${PORT}`);
     console.log(`📧 IMAP: ${process.env.IMAP_ENABLED === 'true' ? 'Activé' : 'Désactivé'}`);
