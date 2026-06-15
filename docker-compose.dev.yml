@@ -28,7 +28,7 @@ services:
     image: node:18-alpine
     container_name: ged-backend-dev
     working_dir: /app
-    command: sh -c "npm install && npm run dev"
+    command: sh -c "apk add --no-cache python3 make g++ cairo-dev pango-dev jpeg-dev giflib-dev librsvg-dev pixman-dev && npm install && npm run dev"
     ports:
       - '5000:5000'
     environment:
@@ -46,7 +46,7 @@ services:
       # Monter le code source pour hot-reload
       - ./backend/src:/app/src:ro
       - ./backend/package.json:/app/package.json:ro
-      - ./backend/package-lock.json:/app/package-lock.json:ro
+      - ./backend/package-lock.json:/app/package-lock.json
       # Volume persistant pour node_modules (évite les conflits OS)
       - backend_node_modules:/app/node_modules
       # Volume persistant pour les uploads
@@ -75,7 +75,7 @@ services:
       - ./frontend/public:/app/public:ro
       - ./frontend/index.html:/app/index.html:ro
       - ./frontend/package.json:/app/package.json:ro
-      - ./frontend/package-lock.json:/app/package-lock.json:ro
+      - ./frontend/package-lock.json:/app/package-lock.json
       - ./frontend/vite.config.js:/app/vite.config.js:ro
       - ./frontend/tailwind.config.js:/app/tailwind.config.js:ro
       - ./frontend/postcss.config.js:/app/postcss.config.js:ro
