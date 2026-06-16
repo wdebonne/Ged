@@ -246,6 +246,7 @@ export const mailsAPI = {
   
   // Pending mails
   getPending: () => api.get('/mails/pending'),
+  getPendingFile: (id) => api.get(`/mails/pending/${id}/file`, { responseType: 'blob' }),
   uploadPending: (formData) => {
     // Utiliser l'instance api configurée
     return api.post('/mails/pending/upload', formData, {

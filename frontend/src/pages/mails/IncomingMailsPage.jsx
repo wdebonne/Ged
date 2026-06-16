@@ -6,7 +6,6 @@ import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { mailsAPI, sendersAPI, servicesAPI, subjectsAPI, usersAPI, imapAPI } from '../../services/api';
-import { useAuthStore } from '../../stores/authStore';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import toast from 'react-hot-toast';
 import {
@@ -34,10 +33,10 @@ export default function IncomingMailsPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const preselectedFileId = searchParams.get('file');
-  const { token } = useAuthStore();
 
   const [selectedFile, setSelectedFile] = useState(null);
   const [pdfUrl, setPdfUrl] = useState(null);
+  const [pdfError, setPdfError] = useState(null);
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [scale, setScale] = useState(1.0);
@@ -264,6 +263,7 @@ export default function IncomingMailsPage() {
       if (selectedFile) {
         setSelectedFile(null);
         setPdfUrl(null);
+        setPdfError(null);
       }
     }
   });
@@ -277,6 +277,7 @@ export default function IncomingMailsPage() {
       queryClient.invalidateQueries(['dashboard-stats']);
       setSelectedFile(null);
       setPdfUrl(null);
+      setPdfError(null);
       setFormData({
         senderName: '',
         subject: '',
@@ -313,19 +314,27 @@ export default function IncomingMailsPage() {
     setCopySearch('');
 
     // Charger le PDF
+    setPdfUrl(null);
+    setPdfError(null);
     try {
-      const response = await fetch(`/api/mails/pending/${file._id}/file`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
+      const response = await mailsAPI.getPendingFile(file._id);
+      const url = URL.createObjectURL(response.data);
       setPdfUrl(url);
     } catch (error) {
       console.error('Erreur chargement PDF:', error);
+      if (error.response?.data instanceof Blob) {
+        const text = await error.response.data.text();
+        try {
+          const errData = JSON.parse(text);
+          setPdfError(errData.message || `Erreur ${error.response.status} lors du chargement du fichier`);
+        } catch {
+          setPdfError(`Erreur ${error.response?.status || ''} lors du chargement du fichier`);
+        }
+      } else {
+        setPdfError('Impossible de charger le fichier PDF');
+      }
     }
-  }, [token]);
+  }, []);
 
   // Présélectionner un fichier si spécifié dans l'URL
   useEffect(() => {
@@ -536,6 +545,10 @@ export default function IncomingMailsPage() {
               <div className="text-center text-gray-500">
                 <DocumentTextIcon className="w-16 h-16 mx-auto mb-3 opacity-30" />
                 <p className="text-sm">Sélectionnez un fichier pour voir l'aperçu</p>
+              </div>
+            ) : pdfError ? (
+              <div className="text-center text-danger-600 p-4">
+                <p className="text-sm font-medium">{pdfError}</p>
               </div>
             ) : pdfUrl ? (
               <Document
@@ -872,6 +885,7 @@ export default function IncomingMailsPage() {
                 onClick={() => {
                   setSelectedFile(null);
                   setPdfUrl(null);
+                  setPdfError(null);
                 }}
                 className="btn-secondary"
               >

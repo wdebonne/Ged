@@ -69,6 +69,7 @@ services:
     environment:
       - VITE_API_URL=http://localhost:5000/api
       - VITE_UPLOADS_URL=http://localhost:5000/uploads
+      - BACKEND_URL=http://backend:5000
     volumes:
       # Monter le code source pour hot-reload
       - ./frontend/src:/app/src:ro
