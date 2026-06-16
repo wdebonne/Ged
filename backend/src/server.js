@@ -47,7 +47,20 @@ const app = express();
 
 // Sécurité HTTP headers
 app.use(helmet({
-  crossOriginResourcePolicy: { policy: 'cross-origin' }
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "blob:", "data:"],
+      connectSrc: ["'self'", "blob:"],
+      workerSrc: ["'self'", "blob:"],
+      fontSrc: ["'self'", "data:"],
+      objectSrc: ["'none'"],
+      frameSrc: ["'self'", "blob:"],
+    }
+  }
 }));
 
 // Middleware CORS - Configuration complète
