@@ -568,7 +568,8 @@ router.get('/pending/:id/file', authenticate, canImportMails, async (req, res) =
       });
     }
 
-    const pendingBase = path.resolve(process.cwd(), 'uploads', 'pending');
+    const uploadBase = path.resolve(process.cwd(), path.normalize(process.env.UPLOAD_PATH || 'uploads'));
+    const pendingBase = path.join(uploadBase, 'pending');
     const filePath = path.resolve(process.cwd(), path.normalize(pendingMail.filePath));
     if (!filePath.startsWith(pendingBase + path.sep)) {
       return res.status(403).json({ success: false, message: 'Accès refusé' });
@@ -581,15 +582,18 @@ router.get('/pending/:id/file', authenticate, canImportMails, async (req, res) =
       });
     }
 
+    const fileBuffer = await fs.promises.readFile(filePath);
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `inline; filename="${pendingMail.originalName}"`);
-    res.sendFile(filePath);
+    res.setHeader('Content-Disposition', `inline; filename*=UTF-8''${encodeURIComponent(pendingMail.originalName)}`);
+    res.send(fileBuffer);
   } catch (error) {
     console.error('Erreur récupération fichier:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Erreur serveur'
-    });
+    if (!res.headersSent) {
+      res.status(500).json({
+        success: false,
+        message: 'Erreur serveur'
+      });
+    }
   }
 });
 
