@@ -91,7 +91,7 @@ if (!fs.existsSync(path.join(uploadPath, 'pending'))) {
 // D'abord vérifier si le fichier doit être récupéré depuis le stockage externe
 app.use('/uploads', serveMailFiles);
 // Puis servir les fichiers locaux
-app.use('/uploads', express.static(path.join(__dirname, '..', uploadPath)));
+app.use('/uploads', express.static(path.resolve(uploadPath)));
 
 // Routes API
 app.use('/api/auth', authRoutes);

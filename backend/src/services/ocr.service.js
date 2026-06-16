@@ -125,7 +125,8 @@ export const extractTextFromPDF = async (filePath, options = {}) => {
     
     console.log('PDF scanné détecté, conversion en images pour OCR...');
     
-    const tempDir = path.join(process.cwd(), 'uploads', 'temp', `ocr_${Date.now()}`);
+    const uploadBase = path.resolve(process.env.UPLOAD_PATH || path.join(process.cwd(), 'uploads'));
+    const tempDir = path.join(uploadBase, 'temp', `ocr_${Date.now()}`);
     let images = [];
     
     try {
