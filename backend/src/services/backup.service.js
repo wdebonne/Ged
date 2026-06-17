@@ -23,6 +23,8 @@ const ensureBackupDir = () => {
   return dir;
 };
 
+export const ensureBackupDirPublic = ensureBackupDir;
+
 const exportAllCollections = async () => {
   const collections = {};
   const allCollections = await mongoose.connection.db.listCollections().toArray();
@@ -55,6 +57,7 @@ export const createBackup = async ({ includeFiles = true, label = '' } = {}) => 
 
   const stats = {
     courriers: collections.mails?.length ?? 0,
+    'courriers en attente': collections.pendingmails?.length ?? 0,
     expediteurs: collections.senders?.length ?? 0,
     objets: collections.subjects?.length ?? 0,
     services: collections.services?.length ?? 0,
@@ -89,11 +92,11 @@ export const createBackup = async ({ includeFiles = true, label = '' } = {}) => 
 
     if (includeFiles) {
       const uploadPath = getUploadPath();
-      const subDirs = ['courriers', 'responses', 'avatars', 'branding'];
-      for (const subDir of subDirs) {
-        const dirPath = path.join(uploadPath, subDir);
-        if (fs.existsSync(dirPath)) {
-          archive.directory(dirPath, `files/${subDir}`);
+      // Inclure tous les sous-dossiers d'uploads sauf "backups" (évite la récursion)
+      const entries = fs.readdirSync(uploadPath, { withFileTypes: true });
+      for (const entry of entries) {
+        if (entry.isDirectory() && entry.name !== 'backups') {
+          archive.directory(path.join(uploadPath, entry.name), `files/${entry.name}`);
         }
       }
     }

@@ -371,6 +371,17 @@ export const delegationsAPI = {
 export const backupAPI = {
   list: () => api.get('/backup/list'),
   create: (data) => api.post('/backup/create', data),
+  upload: (file, onProgress) => {
+    const form = new FormData();
+    form.append('backup', file);
+    return api.post('/backup/upload', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 0, // pas de timeout pour les gros fichiers
+      onUploadProgress: (e) => {
+        if (onProgress && e.total) onProgress(Math.round((e.loaded * 100) / e.total));
+      },
+    });
+  },
   verify: (filename) => api.post(`/backup/verify/${encodeURIComponent(filename)}`),
   restore: (filename) => api.post(`/backup/restore/${encodeURIComponent(filename)}`),
   delete: (filename) => api.delete(`/backup/${encodeURIComponent(filename)}`),

@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
+import multer from 'multer';
 import { authenticate, authorize } from '../middleware/auth.middleware.js';
 import { PERMISSIONS } from '../models/index.js';
 import {
@@ -12,12 +13,37 @@ import {
   uploadToNextCloud,
   getBackupConfig,
   saveBackupConfig,
+  ensureBackupDirPublic,
 } from '../services/backup.service.js';
 
 const router = express.Router();
 
 router.use(authenticate);
 router.use(authorize(PERMISSIONS.MANAGE_SETTINGS));
+
+// Multer pour l'import de sauvegarde externe
+const backupUpload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => {
+      const dir = ensureBackupDirPublic();
+      cb(null, dir);
+    },
+    filename: (req, file, cb) => {
+      // Conserver le nom original s'il est valide, sinon en générer un
+      const original = path.basename(file.originalname).replace(/[^a-zA-Z0-9._-]/g, '_');
+      const safe = original.endsWith('.zip') ? original : `imported-${Date.now()}.zip`;
+      cb(null, safe);
+    },
+  }),
+  limits: { fileSize: 2 * 1024 * 1024 * 1024 }, // 2 Go max
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'application/zip' || file.mimetype === 'application/x-zip-compressed' || file.originalname.endsWith('.zip')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Seuls les fichiers .zip sont acceptés'));
+    }
+  },
+});
 
 // GET /api/backup/list
 router.get('/list', async (req, res) => {
@@ -38,6 +64,31 @@ router.post('/create', async (req, res) => {
     res.json({ success: true, data: result, message: 'Sauvegarde créée avec succès' });
   } catch (err) {
     console.error('Erreur création sauvegarde:', err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// POST /api/backup/upload - Import d'une sauvegarde externe
+router.post('/upload', backupUpload.single('backup'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'Aucun fichier reçu' });
+    }
+    const stats = fs.statSync(req.file.path);
+    res.json({
+      success: true,
+      message: 'Sauvegarde importée avec succès',
+      data: {
+        filename: req.file.filename,
+        size: stats.size,
+      },
+    });
+  } catch (err) {
+    console.error('Erreur import sauvegarde:', err);
+    // Supprimer le fichier partiel en cas d'erreur
+    if (req.file?.path && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
     res.status(500).json({ success: false, message: err.message });
   }
 });

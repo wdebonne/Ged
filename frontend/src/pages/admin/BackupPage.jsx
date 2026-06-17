@@ -13,14 +13,13 @@ import {
   CloudArrowUpIcon,
   PlayIcon,
   ClockIcon,
-  Cog6ToothIcon,
   EnvelopeIcon,
   CheckCircleIcon,
   ExclamationTriangleIcon,
   InformationCircleIcon,
-  DocumentTextIcon,
   FolderIcon,
   XMarkIcon,
+  ArrowUpTrayIcon,
 } from '@heroicons/react/24/outline';
 
 const CRON_PRESETS = [
@@ -217,6 +216,44 @@ function CreateBackupSection({ onCreated }) {
   );
 }
 
+// Bouton d'import de sauvegarde externe
+function ImportBackupButton({ onImported }) {
+  const [progress, setProgress] = useState(null);
+
+  const handleFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = '';
+
+    setProgress(0);
+    try {
+      await backupAPI.upload(file, setProgress);
+      toast.success(`"${file.name}" importé avec succès`);
+      onImported();
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Erreur lors de l\'import');
+    } finally {
+      setProgress(null);
+    }
+  };
+
+  return (
+    <label className="btn-secondary flex items-center gap-2 cursor-pointer">
+      {progress !== null
+        ? <><ArrowPathIcon className="w-4 h-4 animate-spin" />{progress}%</>
+        : <><ArrowUpTrayIcon className="w-4 h-4" />Importer une sauvegarde</>
+      }
+      <input
+        type="file"
+        accept=".zip"
+        className="hidden"
+        onChange={handleFile}
+        disabled={progress !== null}
+      />
+    </label>
+  );
+}
+
 // Section : Liste des sauvegardes
 function BackupListSection({ nextcloudEnabled }) {
   const queryClient = useQueryClient();
@@ -301,16 +338,19 @@ function BackupListSection({ nextcloudEnabled }) {
   return (
     <>
       <div className="card">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-wrap gap-3">
           <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2">
             <FolderIcon className="w-5 h-5 text-primary-600" />
             Sauvegardes disponibles
             <span className="ml-2 text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{backups.length}</span>
           </h2>
-          <button onClick={() => refetch()} className="btn-secondary text-xs flex items-center gap-1">
-            <ArrowPathIcon className="w-3.5 h-3.5" />
-            Rafraîchir
-          </button>
+          <div className="flex items-center gap-2">
+            <ImportBackupButton onImported={() => { queryClient.invalidateQueries(['backups']); }} />
+            <button onClick={() => refetch()} className="btn-secondary text-xs flex items-center gap-1">
+              <ArrowPathIcon className="w-3.5 h-3.5" />
+              Rafraîchir
+            </button>
+          </div>
         </div>
 
         {backups.length === 0 ? (
