@@ -7,6 +7,32 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ---
 
+## [3.9.18] - 2026-06-17
+
+### Ajouté
+
+- **Rotation du PDF dans l'aperçu des courriers entrants** :
+  - Boutons "Pivoter à gauche" et "Pivoter à droite" (−90° / +90°) dans la barre d'outils de l'aperçu
+  - La rotation est visible immédiatement dans l'aperçu grâce à la prop `rotate` de react-pdf
+  - Si une rotation est appliquée, elle est enregistrée **définitivement dans le fichier PDF** lors de l'import (via `pdf-lib` côté backend, avant le déplacement du fichier)
+
+- **Recadrage manuel du PDF dans l'aperçu des courriers entrants** :
+  - Bouton "Ciseaux" pour activer le mode recadrage : le curseur passe en croix et l'utilisateur trace un rectangle sur l'aperçu (pointillés bleus pendant le tracé, pointillés verts une fois confirmé)
+  - Le recadrage est appliqué **définitivement dans le fichier PDF** lors de l'import (via `page.setCropBox()` de pdf-lib)
+
+- **Recadrage automatique du PDF** :
+  - Bouton "Sparkle" pour détecter automatiquement les bords du contenu en analysant les pixels du canvas rendu
+  - Supprime les marges blanches et bords noirs des scans (seuil configurable à 240/255, padding de 10 px)
+  - Le cropRect automatique est visualisé de la même façon que le recadrage manuel et appliqué à l'import
+
+### Technique
+
+- Coordonnées de recadrage envoyées en fractions normalisées (0–1) depuis le frontend, converties en unités PDF côté backend avec formules de transformation pour chacun des 4 angles de rotation (0°, 90°, 180°, 270°)
+- Les états `rotation`, `cropMode`, `cropRect` et `cropDrag` sont réinitialisés automatiquement à chaque changement de fichier et après chaque import réussi
+- `pdf-lib` déjà installé en backend (v1.17.1) — aucune nouvelle dépendance ajoutée
+
+---
+
 ## [3.9.17] - 2026-05-31
 
 ### Sécurité

@@ -29,6 +29,7 @@ const SendersPage = lazy(() => import('./pages/admin/SendersPage'));
 const SubjectsPage = lazy(() => import('./pages/admin/SubjectsPage'));
 const SettingsPage = lazy(() => import('./pages/admin/SettingsPage'));
 const LdapGroupMappingsPage = lazy(() => import('./pages/admin/LdapGroupMappingsPage'));
+const BackupPage = lazy(() => import('./pages/admin/BackupPage'));
 const OneDriveCallback = lazy(() => import('./pages/OneDriveCallback'));
 
 // Pages Profil
@@ -185,6 +186,14 @@ function App() {
             element={
               <ProtectedRoute permissions={['manage_ldap']}>
                 <LdapGroupMappingsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/sauvegardes"
+            element={
+              <ProtectedRoute permissions={['manage_settings']}>
+                <BackupPage />
               </ProtectedRoute>
             }
           />

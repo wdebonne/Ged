@@ -367,6 +367,19 @@ export const delegationsAPI = {
   checkOverlap: (userId) => api.get(`/delegations/check/${userId}`)
 };
 
+// Sauvegardes
+export const backupAPI = {
+  list: () => api.get('/backup/list'),
+  create: (data) => api.post('/backup/create', data),
+  verify: (filename) => api.post(`/backup/verify/${encodeURIComponent(filename)}`),
+  restore: (filename) => api.post(`/backup/restore/${encodeURIComponent(filename)}`),
+  delete: (filename) => api.delete(`/backup/${encodeURIComponent(filename)}`),
+  downloadUrl: (filename) => `${API_URL}/backup/download/${encodeURIComponent(filename)}`,
+  uploadNextCloud: (filename) => api.post(`/backup/upload-nextcloud/${encodeURIComponent(filename)}`),
+  getConfig: () => api.get('/backup/config'),
+  saveConfig: (data) => api.put('/backup/config', data),
+};
+
 // Correspondances groupes LDAP/AD -> rôle/services GED
 export const ldapMappingsAPI = {
   getAll: () => api.get('/ldap/group-mappings'),
