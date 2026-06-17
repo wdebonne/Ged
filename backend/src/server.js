@@ -47,6 +47,9 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Faire confiance au reverse proxy (Nginx/Traefik) pour X-Forwarded-For
+app.set('trust proxy', 1);
+
 // Sécurité HTTP headers
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },

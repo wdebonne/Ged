@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import archiver from 'archiver';
 import AdmZip from 'adm-zip';
 import mongoose from 'mongoose';
+import { EJSON } from 'bson';
 import nodemailer from 'nodemailer';
 import cron from 'node-cron';
 import { createClient } from 'webdav';
@@ -86,8 +87,9 @@ export const createBackup = async ({ includeFiles = true, label = '' } = {}) => 
 
     archive.append(JSON.stringify(manifest, null, 2), { name: 'manifest.json' });
 
+    // EJSON préserve les types BSON (ObjectId, Date…) pour une restauration fidèle
     for (const [name, docs] of Object.entries(collections)) {
-      archive.append(JSON.stringify(docs, null, 2), { name: `db/${name}.json` });
+      archive.append(EJSON.stringify(docs, null, 2), { name: `db/${name}.json` });
     }
 
     if (includeFiles) {
@@ -217,25 +219,22 @@ export const restoreBackup = async (filename) => {
     const entry = zip.getEntry(`db/${colName}.json`);
     if (!entry) continue;
 
-    const docs = JSON.parse(zip.readAsText(entry));
+    const raw = zip.readAsText(entry);
+    // EJSON.parse restaure les vrais types BSON (ObjectId, Date…)
+    // On retombe sur JSON.parse pour les vieilles sauvegardes sans EJSON
+    let docs;
+    try {
+      docs = EJSON.parse(raw);
+    } catch {
+      docs = JSON.parse(raw);
+    }
     if (!Array.isArray(docs)) continue;
 
     const col = mongoose.connection.db.collection(colName);
     await col.deleteMany({});
 
     if (docs.length > 0) {
-      const cleanDocs = docs.map(doc =>
-        JSON.parse(JSON.stringify(doc), (key, value) => {
-          if (value && typeof value === 'object' && value.$oid) {
-            return new mongoose.Types.ObjectId(value.$oid);
-          }
-          if (value && typeof value === 'object' && value.$date) {
-            return new Date(value.$date);
-          }
-          return value;
-        })
-      );
-      await col.insertMany(cleanDocs, { ordered: false });
+      await col.insertMany(docs, { ordered: false });
     }
 
     restoredCollections[colName] = docs.length;
