@@ -656,7 +656,9 @@ router.post('/import', authenticate, canImportMails, [
       recipientsCopyIds = [],
       receivedDate,
       notes,
-      priority
+      priority,
+      rotation,
+      cropRect
     } = req.body;
 
     // Récupérer le courrier en attente
@@ -698,11 +700,54 @@ router.post('/import', authenticate, canImportMails, [
       await newSubject.save();
     }
 
+    // Appliquer rotation et/ou recadrage si demandés
+    const rotationAngle = Number(rotation) || 0;
+    if (rotationAngle !== 0 || cropRect) {
+      const { PDFDocument, degrees } = await import('pdf-lib');
+      const rawBytes = fs.readFileSync(pendingMail.filePath);
+      const pdfDoc = await PDFDocument.load(rawBytes);
+
+      for (const page of pdfDoc.getPages()) {
+        const { width: W, height: H } = page.getSize();
+
+        if (rotationAngle !== 0) {
+          const current = page.getRotation().angle ?? 0;
+          page.setRotation(degrees((current + rotationAngle) % 360));
+        }
+
+        if (cropRect) {
+          const { x, y, x2, y2 } = cropRect;
+          let cX, cY, cW, cH;
+          switch (rotationAngle % 360) {
+            case 90:
+              cX = y * W;  cY = (1 - x2) * H;
+              cW = (y2 - y) * W;  cH = (x2 - x) * H;
+              break;
+            case 180:
+              cX = (1 - x2) * W;  cY = y * H;
+              cW = (x2 - x) * W;  cH = (y2 - y) * H;
+              break;
+            case 270:
+              cX = (1 - y2) * W;  cY = x * H;
+              cW = (y2 - y) * W;  cH = (x2 - x) * H;
+              break;
+            default:
+              cX = x * W;  cY = (1 - y2) * H;
+              cW = (x2 - x) * W;  cH = (y2 - y) * H;
+          }
+          page.setCropBox(cX, cY, cW, cH);
+        }
+      }
+
+      const modified = await pdfDoc.save();
+      fs.writeFileSync(pendingMail.filePath, Buffer.from(modified));
+    }
+
     // Déplacer le fichier de pending vers courriers
     const uploadPath = process.env.UPLOAD_PATH || './uploads';
     const newFileName = pendingMail.fileName;
     const newFilePath = path.join(uploadPath, 'courriers', newFileName);
-    
+
     fs.renameSync(pendingMail.filePath, newFilePath);
 
     // Créer le courrier

@@ -20,7 +20,11 @@ import {
   XMarkIcon,
   UserIcon,
   EnvelopeIcon,
-  ArrowPathIcon
+  ArrowPathIcon,
+  ArrowUturnLeftIcon,
+  ArrowUturnRightIcon,
+  ScissorsIcon,
+  SparklesIcon
 } from '@heroicons/react/24/outline';
 
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
@@ -40,6 +44,11 @@ export default function IncomingMailsPage() {
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [scale, setScale] = useState(1.0);
+  const [rotation, setRotation] = useState(0);
+  const [cropMode, setCropMode] = useState(false);
+  const [cropRect, setCropRect] = useState(null);
+  const [cropDrag, setCropDrag] = useState(null);
+  const pdfContainerRef = useRef(null);
   const [formData, setFormData] = useState({
     senderName: '',
     subject: '',
@@ -278,6 +287,10 @@ export default function IncomingMailsPage() {
       setSelectedFile(null);
       setPdfUrl(null);
       setPdfError(null);
+      setRotation(0);
+      setCropMode(false);
+      setCropRect(null);
+      setCropDrag(null);
       setFormData({
         senderName: '',
         subject: '',
@@ -298,6 +311,10 @@ export default function IncomingMailsPage() {
   const handleSelectFile = useCallback(async (file) => {
     setSelectedFile(file);
     setPageNumber(1);
+    setRotation(0);
+    setCropMode(false);
+    setCropRect(null);
+    setCropDrag(null);
     setFormData({
       senderName: '',
       subject: '',
@@ -360,13 +377,47 @@ export default function IncomingMailsPage() {
       recipientId: formData.assignedTo,
       recipientsCopyIds: formData.copyTo,
       priority: formData.priority,
-      notes: formData.notes
+      notes: formData.notes,
+      ...(rotation !== 0 && { rotation }),
+      ...(cropRect && { cropRect })
     });
   };
 
   const onDocumentLoadSuccess = ({ numPages }) => {
     setNumPages(numPages);
   };
+
+  const handleAutoCrop = useCallback(() => {
+    const canvas = pdfContainerRef.current?.querySelector('canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const { width, height } = canvas;
+    const data = ctx.getImageData(0, 0, width, height).data;
+    const threshold = 240;
+    const padding = 10;
+    let minX = width, minY = height, maxX = 0, maxY = 0;
+
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const i = (y * width + x) * 4;
+        if (data[i] < threshold || data[i + 1] < threshold || data[i + 2] < threshold) {
+          if (x < minX) minX = x;
+          if (y < minY) minY = y;
+          if (x > maxX) maxX = x;
+          if (y > maxY) maxY = y;
+        }
+      }
+    }
+
+    if (maxX > minX && maxY > minY) {
+      setCropRect({
+        x: Math.max(0, minX - padding) / width,
+        y: Math.max(0, minY - padding) / height,
+        x2: Math.min(width, maxX + padding) / width,
+        y2: Math.min(height, maxY + padding) / height,
+      });
+    }
+  }, []);
 
   const isFormValid = formData.senderName && formData.subject && formData.service && formData.assignedTo;
 
@@ -521,7 +572,7 @@ export default function IncomingMailsPage() {
           <div className="p-3 border-b bg-gray-50 flex items-center justify-between">
             <h2 className="font-semibold text-gray-900 text-sm">Aperçu du document</h2>
             {pdfUrl && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <button
                   onClick={() => setScale(s => Math.max(0.5, s - 0.25))}
                   className="p-1 hover:bg-gray-200 rounded"
@@ -529,7 +580,7 @@ export default function IncomingMailsPage() {
                 >
                   <MagnifyingGlassMinusIcon className="w-4 h-4" />
                 </button>
-                <span className="text-xs text-gray-600">{Math.round(scale * 100)}%</span>
+                <span className="text-xs text-gray-600 w-10 text-center">{Math.round(scale * 100)}%</span>
                 <button
                   onClick={() => setScale(s => Math.min(2, s + 0.25))}
                   className="p-1 hover:bg-gray-200 rounded"
@@ -537,6 +588,45 @@ export default function IncomingMailsPage() {
                 >
                   <MagnifyingGlassPlusIcon className="w-4 h-4" />
                 </button>
+                <div className="w-px h-4 bg-gray-300 mx-1" />
+                <button
+                  onClick={() => setRotation(r => (r - 90 + 360) % 360)}
+                  className="p-1 hover:bg-gray-200 rounded"
+                  title="Pivoter à gauche"
+                >
+                  <ArrowUturnLeftIcon className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setRotation(r => (r + 90) % 360)}
+                  className="p-1 hover:bg-gray-200 rounded"
+                  title="Pivoter à droite"
+                >
+                  <ArrowUturnRightIcon className="w-4 h-4" />
+                </button>
+                <div className="w-px h-4 bg-gray-300 mx-1" />
+                <button
+                  onClick={() => { setCropMode(m => !m); setCropDrag(null); }}
+                  className={`p-1 rounded ${cropMode ? 'bg-primary-100 text-primary-700' : 'hover:bg-gray-200'}`}
+                  title={cropMode ? 'Annuler le mode recadrage' : 'Recadrer manuellement'}
+                >
+                  <ScissorsIcon className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={handleAutoCrop}
+                  className="p-1 hover:bg-gray-200 rounded"
+                  title="Rogner les bords automatiquement"
+                >
+                  <SparklesIcon className="w-4 h-4" />
+                </button>
+                {cropRect && (
+                  <button
+                    onClick={() => setCropRect(null)}
+                    className="p-1 hover:bg-gray-200 rounded text-danger-500"
+                    title="Supprimer le recadrage"
+                  >
+                    <XMarkIcon className="w-4 h-4" />
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -551,19 +641,70 @@ export default function IncomingMailsPage() {
                 <p className="text-sm font-medium">{pdfError}</p>
               </div>
             ) : pdfUrl ? (
-              <Document
-                file={pdfUrl}
-                onLoadSuccess={onDocumentLoadSuccess}
-                loading={<LoadingSpinner />}
-                error={<p className="text-danger-600">Erreur de chargement du PDF</p>}
-              >
-                <Page
-                  pageNumber={pageNumber}
-                  scale={scale}
-                  renderTextLayer={true}
-                  renderAnnotationLayer={true}
-                />
-              </Document>
+              <div ref={pdfContainerRef} className="relative">
+                {cropMode && (
+                  <div
+                    className="absolute inset-0 z-10 cursor-crosshair"
+                    onMouseDown={e => {
+                      const r = e.currentTarget.getBoundingClientRect();
+                      setCropDrag({ startX: e.clientX - r.left, startY: e.clientY - r.top, curX: e.clientX - r.left, curY: e.clientY - r.top });
+                    }}
+                    onMouseMove={e => {
+                      if (!cropDrag) return;
+                      const r = e.currentTarget.getBoundingClientRect();
+                      setCropDrag(d => ({ ...d, curX: e.clientX - r.left, curY: e.clientY - r.top }));
+                    }}
+                    onMouseUp={e => {
+                      if (!cropDrag) return;
+                      const r = e.currentTarget.getBoundingClientRect();
+                      const x  = Math.min(cropDrag.startX, cropDrag.curX) / r.width;
+                      const y  = Math.min(cropDrag.startY, cropDrag.curY) / r.height;
+                      const x2 = Math.max(cropDrag.startX, cropDrag.curX) / r.width;
+                      const y2 = Math.max(cropDrag.startY, cropDrag.curY) / r.height;
+                      if (x2 - x > 0.02 && y2 - y > 0.02) setCropRect({ x, y, x2, y2 });
+                      setCropDrag(null);
+                      setCropMode(false);
+                    }}
+                  >
+                    {cropDrag && (
+                      <div
+                        className="absolute border-2 border-dashed border-blue-500 bg-blue-100/20 pointer-events-none"
+                        style={{
+                          left:   Math.min(cropDrag.startX, cropDrag.curX),
+                          top:    Math.min(cropDrag.startY, cropDrag.curY),
+                          width:  Math.abs(cropDrag.curX - cropDrag.startX),
+                          height: Math.abs(cropDrag.curY - cropDrag.startY),
+                        }}
+                      />
+                    )}
+                  </div>
+                )}
+                {cropRect && !cropMode && (
+                  <div
+                    className="absolute border-2 border-dashed border-green-500 pointer-events-none z-10"
+                    style={{
+                      left:   `${cropRect.x * 100}%`,
+                      top:    `${cropRect.y * 100}%`,
+                      width:  `${(cropRect.x2 - cropRect.x) * 100}%`,
+                      height: `${(cropRect.y2 - cropRect.y) * 100}%`,
+                    }}
+                  />
+                )}
+                <Document
+                  file={pdfUrl}
+                  onLoadSuccess={onDocumentLoadSuccess}
+                  loading={<LoadingSpinner />}
+                  error={<p className="text-danger-600">Erreur de chargement du PDF</p>}
+                >
+                  <Page
+                    pageNumber={pageNumber}
+                    scale={scale}
+                    rotate={rotation}
+                    renderTextLayer={true}
+                    renderAnnotationLayer={true}
+                  />
+                </Document>
+              </div>
             ) : (
               <LoadingSpinner />
             )}
