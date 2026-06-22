@@ -36,7 +36,7 @@ import { startLdapGroupSyncService } from './services/ldapGroupSync.service.js';
 import { initBackupScheduler } from './services/backup.service.js';
 
 // Initialisation de la base
-import { User, Settings } from './models/index.js';
+import { User, Settings, Group, DEFAULT_PERMISSIONS } from './models/index.js';
 import { seedDatabase } from './scripts/seed.js';
 import { buildLdapUrl } from './utils/ldap.utils.js';
 
@@ -208,6 +208,23 @@ const startServer = async () => {
     } catch (error) {
       console.error('❌ Erreur lors de l\'initialisation automatique de la base:', error.message);
     }
+  }
+
+  // Créer le groupe Observateur s'il n'existe pas (migration pour bases existantes)
+  try {
+    const observateurGroup = await Group.findOne({ name: 'Observateur' });
+    if (!observateurGroup) {
+      await Group.create({
+        name: 'Observateur',
+        description: 'Consultation en lecture seule de tous les courriers (DGS, Maire)',
+        permissions: DEFAULT_PERMISSIONS.Observateur,
+        color: '#06B6D4',
+        isSystem: true
+      });
+      console.log('✅ Groupe Observateur créé');
+    }
+  } catch (err) {
+    console.error('Erreur création groupe Observateur:', err.message);
   }
 
   // Charger les settings LDAP de la base vers process.env (priorité sur le .env)

@@ -1,5 +1,6 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import Select from 'react-select';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Chart as ChartJS,
@@ -101,8 +102,8 @@ export default function StatisticsPage() {
   const canViewAll = user?.group?.permissions?.includes('view_all_mails');
   const userId = user?._id?.toString?.() || user?._id || user?.id;
   const isServiceSupervisor = user?.services?.some(s => {
-    const supervisorId = s.supervisor?._id?.toString?.() || s.supervisor?._id || s.supervisor?.toString?.() || s.supervisor;
-    return supervisorId && userId && String(supervisorId) === String(userId);
+    const ids = (s.supervisors || []).map(sup => sup?._id?.toString?.() || sup?._id || sup?.toString?.() || sup);
+    return ids.some(id => id && userId && String(id) === String(userId));
   });
   const canViewService = (user?.group?.permissions?.includes('view_service_mails') || isServiceSupervisor) && user?.services?.length > 0;
   const isServiceResponsible = isServiceSupervisor;
@@ -116,8 +117,14 @@ export default function StatisticsPage() {
     userId: ''
   });
 
+  // IDs des services de l'utilisateur
+  const userServiceIds = useMemo(() =>
+    user?.services?.map(s => s._id?.toString?.() || s._id || s.toString()) || [],
+    [user?.services]
+  );
+
   // Charger les services et utilisateurs pour les filtres
-  const { data: services } = useQuery({
+  const { data: allServices } = useQuery({
     queryKey: ['services'],
     queryFn: async () => {
       const res = await servicesAPI.getAll();
@@ -126,13 +133,40 @@ export default function StatisticsPage() {
     enabled: canViewAll || canViewService
   });
 
+  // Filtrer les services selon le rôle
+  const services = useMemo(() => {
+    if (!allServices) return [];
+    if (canViewAll) return allServices;
+    return allServices.filter(s =>
+      userServiceIds.includes(s._id?.toString?.() || s._id)
+    );
+  }, [allServices, canViewAll, userServiceIds]);
+
   const { data: users } = useQuery({
-    queryKey: ['users'],
+    queryKey: ['users-stats', canViewAll, userServiceIds],
     queryFn: async () => {
-      const res = await usersAPI.getAll({ limit: 500 });
-      return res.data.data.users;
+      if (canViewAll) {
+        const res = await usersAPI.getAll({ limit: 500 });
+        return res.data.data.users;
+      }
+      // Superviseur : charger les utilisateurs de ses services
+      const allUsers = [];
+      const seenIds = new Set();
+      for (const sId of userServiceIds) {
+        const res = await usersAPI.getRecipients({ service: sId, limit: 500 });
+        for (const u of res.data.data || res.data) {
+          const uid = u._id || u.id;
+          if (!seenIds.has(uid)) {
+            seenIds.add(uid);
+            allUsers.push(u);
+          }
+        }
+      }
+      return allUsers.sort((a, b) =>
+        `${a.lastName} ${a.firstName}`.localeCompare(`${b.lastName} ${b.firstName}`)
+      );
     },
-    enabled: canViewAll
+    enabled: canViewAll || canViewService
   });
 
   // Charger les statistiques détaillées
@@ -1132,36 +1166,58 @@ export default function StatisticsPage() {
                   />
                 </div>
 
-                {canViewAll && (
+                {(canViewAll || canViewService) && (
                   <>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1.5">Service</label>
-                      <select
-                        value={filters.serviceId}
-                        onChange={(e) => setFilters(prev => ({ ...prev, serviceId: e.target.value }))}
-                        className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all disabled:opacity-50"
-                        disabled={filters.scope === 'my'}
-                      >
-                        <option value="">Tous les services</option>
-                        {services?.map(service => (
-                          <option key={service._id} value={service._id}>{service.name}</option>
-                        ))}
-                      </select>
+                      <Select
+                        value={filters.serviceId
+                          ? { value: filters.serviceId, label: services?.find(s => (s._id?.toString?.() || s._id) === filters.serviceId)?.name || '' }
+                          : null
+                        }
+                        onChange={(opt) => setFilters(prev => ({ ...prev, serviceId: opt?.value || '', userId: '' }))}
+                        options={services?.map(s => ({ value: s._id?.toString?.() || s._id, label: s.name })) || []}
+                        isClearable
+                        isSearchable
+                        isDisabled={filters.scope === 'my'}
+                        placeholder="Tous les services"
+                        noOptionsMessage={() => 'Aucun service trouvé'}
+                        classNamePrefix="react-select"
+                        className="react-select-container"
+                        styles={{
+                          control: (base) => ({ ...base, minHeight: '42px', borderRadius: '0.75rem', backgroundColor: 'rgb(249,250,251)', borderColor: 'rgb(229,231,235)' }),
+                          menu: (base) => ({ ...base, borderRadius: '0.75rem', zIndex: 50 })
+                        }}
+                      />
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1.5">Utilisateur</label>
-                      <select
-                        value={filters.userId}
-                        onChange={(e) => setFilters(prev => ({ ...prev, userId: e.target.value }))}
-                        className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all disabled:opacity-50"
-                        disabled={filters.scope === 'my'}
-                      >
-                        <option value="">Tous les utilisateurs</option>
-                        {users?.map(u => (
-                          <option key={u._id} value={u._id}>{u.firstName} {u.lastName}</option>
-                        ))}
-                      </select>
+                      <Select
+                        value={filters.userId
+                          ? { value: filters.userId, label: (() => { const u = users?.find(u => (u._id?.toString?.() || u._id || u.id) === filters.userId); return u ? `${u.firstName} ${u.lastName}` : ''; })() }
+                          : null
+                        }
+                        onChange={(opt) => setFilters(prev => ({ ...prev, userId: opt?.value || '' }))}
+                        options={(filters.serviceId
+                          ? users?.filter(u => u.services?.some(s => (s._id?.toString?.() || s._id || s) === filters.serviceId))
+                          : users
+                        )?.map(u => ({
+                          value: u._id?.toString?.() || u._id || u.id,
+                          label: `${u.firstName} ${u.lastName}`
+                        })) || []}
+                        isClearable
+                        isSearchable
+                        isDisabled={filters.scope === 'my'}
+                        placeholder="Tous les utilisateurs"
+                        noOptionsMessage={() => 'Aucun utilisateur trouvé'}
+                        classNamePrefix="react-select"
+                        className="react-select-container"
+                        styles={{
+                          control: (base) => ({ ...base, minHeight: '42px', borderRadius: '0.75rem', backgroundColor: 'rgb(249,250,251)', borderColor: 'rgb(229,231,235)' }),
+                          menu: (base) => ({ ...base, borderRadius: '0.75rem', zIndex: 50 })
+                        }}
+                      />
                     </div>
                   </>
                 )}

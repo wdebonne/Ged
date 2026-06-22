@@ -26,7 +26,7 @@ router.get('/', authenticate, async (req, res) => {
     }
 
     const services = await Service.find(query)
-      .populate('supervisor', 'firstName lastName email')
+      .populate('supervisors', 'firstName lastName email')
       .sort({ name: 1 });
 
     // Calculer les compteurs pour chaque service
@@ -70,7 +70,7 @@ router.get('/', authenticate, async (req, res) => {
 router.get('/:id', authenticate, async (req, res) => {
   try {
     const service = await Service.findById(req.params.id)
-      .populate('supervisor', 'firstName lastName email');
+      .populate('supervisors', 'firstName lastName email');
 
     if (!service) {
       return res.status(404).json({
@@ -128,14 +128,13 @@ router.post('/', authenticate, authorize(PERMISSIONS.CREATE_SERVICES), [
       description,
       code,
       color,
-      supervisor: req.body.supervisor || null,
+      supervisors: req.body.supervisors || [],
       notifySupervisor: req.body.notifySupervisor !== false
     });
 
     await service.save();
-    
-    // Peupler le superviseur pour la réponse
-    await service.populate('supervisor', 'firstName lastName email');
+
+    await service.populate('supervisors', 'firstName lastName email');
 
     res.status(201).json({
       success: true,
@@ -188,13 +187,12 @@ router.put('/:id', authenticate, authorize(PERMISSIONS.EDIT_SERVICES), async (re
     if (code !== undefined) service.code = code;
     if (color) service.color = color;
     if (isActive !== undefined) service.isActive = isActive;
-    if (req.body.supervisor !== undefined) service.supervisor = req.body.supervisor || null;
+    if (req.body.supervisors !== undefined) service.supervisors = req.body.supervisors || [];
     if (req.body.notifySupervisor !== undefined) service.notifySupervisor = req.body.notifySupervisor;
 
     await service.save();
-    
-    // Peupler le superviseur pour la réponse
-    await service.populate('supervisor', 'firstName lastName email');
+
+    await service.populate('supervisors', 'firstName lastName email');
 
     res.json({
       success: true,

@@ -49,7 +49,7 @@ router.get('/', authenticate, authorize(PERMISSIONS.VIEW_USERS), async (req, res
     const total = await User.countDocuments(query);
     const users = await User.find(query)
       .populate('group', 'name color')
-      .populate('services', 'name code supervisor')
+      .populate('services', 'name code supervisors')
       .select('-password -resetPasswordToken -resetPasswordExpires')
       .sort({ lastName: 1, firstName: 1 })
       .skip((page - 1) * limit)
@@ -97,7 +97,7 @@ router.get('/recipients', authenticate, async (req, res) => {
     }
 
     const users = await User.find(query)
-      .populate('services', 'name supervisor')
+      .populate('services', 'name supervisors')
       .select('firstName lastName email avatar services')
       .sort({ lastName: 1, firstName: 1 })
       .limit(parseInt(limit));
@@ -129,7 +129,7 @@ router.get('/:id', authenticate, async (req, res) => {
   try {
     const user = await User.findById(req.params.id)
       .populate('group', 'name permissions color')
-      .populate('services', 'name code color supervisor')
+      .populate('services', 'name code color supervisors')
       .select('-password -resetPasswordToken -resetPasswordExpires');
 
     if (!user) {
@@ -222,7 +222,7 @@ router.post('/', authenticate, authorize(PERMISSIONS.CREATE_USERS), [
 
     const populatedUser = await User.findById(user._id)
       .populate('group', 'name color')
-      .populate('services', 'name code supervisor')
+      .populate('services', 'name code supervisors')
       .select('-password');
 
     res.status(201).json({
@@ -288,7 +288,7 @@ router.put('/:id', authenticate, async (req, res) => {
 
     const updatedUser = await User.findById(id)
       .populate('group', 'name color permissions')
-      .populate('services', 'name code supervisor')
+      .populate('services', 'name code supervisors')
       .select('-password -resetPasswordToken -resetPasswordExpires');
 
     res.json({

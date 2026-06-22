@@ -227,15 +227,15 @@ router.post('/login', loginLimiter, [
 
           if (servicesToUnsupervise.length) {
             await Service.updateMany(
-              { _id: { $in: servicesToUnsupervise }, supervisor: user._id },
-              { supervisor: null }
+              { _id: { $in: servicesToUnsupervise } },
+              { $pull: { supervisors: user._id } }
             );
           }
 
           if (currentSupervisorServiceIds.size) {
             await Service.updateMany(
               { _id: { $in: Array.from(currentSupervisorServiceIds) } },
-              { supervisor: user._id }
+              { $addToSet: { supervisors: user._id } }
             );
           }
 
@@ -314,7 +314,7 @@ router.post('/login', loginLimiter, [
             id: s._id,
             _id: s._id,
             name: s.name,
-            supervisor: s.supervisor
+            supervisors: s.supervisors
           }))
         }
       }
@@ -387,7 +387,7 @@ router.get('/me', authenticate, async (req, res) => {
             id: s._id,
             _id: s._id,
             name: s.name,
-            supervisor: s.supervisor
+            supervisors: s.supervisors
           }))
         }
       }
@@ -627,7 +627,7 @@ router.put('/profile', authenticate, uploadAvatar.single('avatar'), async (req, 
       userId,
       updateData,
       { new: true }
-    ).populate('group', 'name permissions color').populate('services', 'name code color supervisor');
+    ).populate('group', 'name permissions color').populate('services', 'name code color supervisors');
 
     res.json({
       success: true,

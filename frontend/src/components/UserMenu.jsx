@@ -35,7 +35,8 @@ export default function UserMenu() {
     admin: 'Administrateur',
     supervisor: 'Superviseur',
     archiviste: 'Archiviste',
-    utilisateur: 'Utilisateur'
+    utilisateur: 'Utilisateur',
+    observateur: 'Observateur'
   };
 
   return (

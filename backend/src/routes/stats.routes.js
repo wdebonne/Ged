@@ -4,12 +4,12 @@ import { authenticate, authorize } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
 
-// Fonction pour vérifier si l'utilisateur est superviseur d'au moins un service
 function isServiceSupervisor(user) {
   if (!user?.services?.length) return false;
+  const userId = user._id.toString();
   return user.services.some(service => {
-    const supervisorId = service.supervisor?._id?.toString() || service.supervisor?.toString();
-    return supervisorId && supervisorId === user._id.toString();
+    const ids = (service.supervisors || []).map(s => s?._id?.toString() || s?.toString());
+    return ids.includes(userId);
   });
 }
 
@@ -492,9 +492,12 @@ router.get('/detailed', authenticate, async (req, res) => {
       baseQuery = {};
       if (serviceId) baseQuery.service = serviceId;
       if (userId) baseQuery.recipient = userId;
-    } else if (scope === 'service' && (userPermissions.includes(PERMISSIONS.VIEW_SERVICE_MAILS) || userServiceIds.length > 0)) {
+    } else if (scope === 'service' && (userPermissions.includes(PERMISSIONS.VIEW_SERVICE_MAILS) || isServiceSupervisor(req.user) || userServiceIds.length > 0)) {
       // Responsable de service ou utilisateur avec services
-      const targetServiceId = serviceId || (userServiceIds.length > 0 ? userServiceIds[0] : null);
+      const userServiceIdStrings = userServiceIds.map(id => id.toString());
+      const targetServiceId = serviceId && userServiceIdStrings.includes(serviceId)
+        ? serviceId
+        : (userServiceIds.length > 0 ? userServiceIds[0] : null);
       if (targetServiceId) {
         baseQuery.service = targetServiceId;
         if (userId) baseQuery.recipient = userId;
@@ -606,13 +609,17 @@ router.get('/detailed', authenticate, async (req, res) => {
 
     // Statistiques par service
     let serviceStats = [];
-    if (scope === 'all' && userPermissions.includes(PERMISSIONS.VIEW_ALL_MAILS)) {
-      const matchQuery = { ...baseQuery };
-      delete matchQuery.service; // Pour avoir tous les services
+    const showServiceStats = (scope === 'all' && userPermissions.includes(PERMISSIONS.VIEW_ALL_MAILS))
+      || (scope === 'service' && userServiceIds.length > 1 && !serviceId);
+    if (showServiceStats) {
+      const matchQuery = {};
+      if (scope === 'service') {
+        matchQuery.service = { $in: userServiceIds };
+      }
       if (Object.keys(dateFilter).length > 0) {
         matchQuery.receivedDate = dateFilter;
       }
-      
+
       serviceStats = await Mail.aggregate([
         { $match: matchQuery },
         {

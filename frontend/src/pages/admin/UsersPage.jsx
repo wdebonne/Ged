@@ -68,14 +68,16 @@ export default function UsersPage() {
     admin: 'bg-danger-100 text-danger-700',
     supervisor: 'bg-primary-100 text-primary-700',
     archiviste: 'bg-warning-100 text-warning-700',
-    utilisateur: 'bg-gray-100 text-gray-700'
+    utilisateur: 'bg-gray-100 text-gray-700',
+    observateur: 'bg-cyan-100 text-cyan-700'
   };
 
   const roleLabels = {
     admin: 'Administrateur',
     supervisor: 'Superviseur',
     archiviste: 'Archiviste',
-    utilisateur: 'Utilisateur'
+    utilisateur: 'Utilisateur',
+    observateur: 'Observateur'
   };
 
   if (isLoading) return <LoadingSpinner />;

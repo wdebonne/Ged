@@ -111,8 +111,8 @@ export default function MainLayout() {
   const canViewServiceMails = hasPermission('view_service_mails');
   const userId = user?._id?.toString?.() || user?._id || user?.id;
   const isServiceSupervisor = user?.services?.some(s => {
-    const supervisorId = s.supervisor?._id?.toString?.() || s.supervisor?._id || s.supervisor?.toString?.() || s.supervisor;
-    return supervisorId && userId && String(supervisorId) === String(userId);
+    const ids = (s.supervisors || []).map(sup => sup?._id?.toString?.() || sup?._id || sup?.toString?.() || sup);
+    return ids.some(id => id && userId && String(id) === String(userId));
   });
   const canAccessServiceMails = userHasServices && (canViewServiceMails || isServiceSupervisor);
   const serviceCourrierNavigation = canAccessServiceMails ? [

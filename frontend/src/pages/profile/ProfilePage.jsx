@@ -138,7 +138,8 @@ export default function ProfilePage() {
     admin: 'Administrateur',
     supervisor: 'Superviseur',
     archiviste: 'Archiviste',
-    utilisateur: 'Utilisateur'
+    utilisateur: 'Utilisateur',
+    observateur: 'Observateur'
   };
 
   return (

@@ -42,6 +42,13 @@ export const seedDatabase = async () => {
       permissions: DEFAULT_PERMISSIONS.Utilisateur,
       color: '#3B82F6',
       isSystem: true
+    },
+    {
+      name: 'Observateur',
+      description: 'Consultation en lecture seule de tous les courriers (DGS, Maire)',
+      permissions: DEFAULT_PERMISSIONS.Observateur,
+      color: '#06B6D4',
+      isSystem: true
     }
   ]);
 

@@ -15,22 +15,22 @@ import { escapeRegex } from '../utils/regex.js';
 
 const router = express.Router();
 
-// Fonction pour vérifier si l'utilisateur est superviseur d'au moins un service
 function isServiceSupervisor(user) {
   if (!user?.services?.length) return false;
+  const userId = user._id.toString();
   return user.services.some(service => {
-    const supervisorId = service.supervisor?._id?.toString() || service.supervisor?.toString();
-    return supervisorId && supervisorId === user._id.toString();
+    const ids = (service.supervisors || []).map(s => s?._id?.toString() || s?.toString());
+    return ids.includes(userId);
   });
 }
 
-// Fonction pour obtenir les IDs des services dont l'utilisateur est superviseur
 function getSupervisedServiceIds(user) {
   if (!user?.services?.length) return [];
+  const userId = user._id.toString();
   return user.services
     .filter(service => {
-      const supervisorId = service.supervisor?._id?.toString() || service.supervisor?.toString();
-      return supervisorId && supervisorId === user._id.toString();
+      const ids = (service.supervisors || []).map(s => s?._id?.toString() || s?.toString());
+      return ids.includes(userId);
     })
     .map(s => s._id);
 }
@@ -467,20 +467,22 @@ router.post('/', authenticate, canImportMails, uploadCourrier.single('document')
       { path: 'importedBy', select: 'firstName lastName' }
     ]);
 
-    // Notifier le superviseur du service si configuré
     try {
-      const serviceWithSupervisor = await Service.findById(serviceId).populate('supervisor', 'firstName lastName email');
-      if (serviceWithSupervisor?.notifySupervisor && serviceWithSupervisor?.supervisor?.email) {
+      const serviceWithSupervisors = await Service.findById(serviceId).populate('supervisors', 'firstName lastName email');
+      if (serviceWithSupervisors?.notifySupervisor && serviceWithSupervisors?.supervisors?.length) {
         const { sendServiceMailNotification } = await import('../services/email.service.js');
-        const supervisor = serviceWithSupervisor.supervisor;
-        sendServiceMailNotification(
-          supervisor.email,
-          `${supervisor.firstName} ${supervisor.lastName}`,
-          mail,
-          serviceWithSupervisor.name
-        ).catch(err => 
-          console.error('Erreur notification superviseur:', err.message)
-        );
+        for (const supervisor of serviceWithSupervisors.supervisors) {
+          if (supervisor.email) {
+            sendServiceMailNotification(
+              supervisor.email,
+              `${supervisor.firstName} ${supervisor.lastName}`,
+              mail,
+              serviceWithSupervisors.name
+            ).catch(err =>
+              console.error('Erreur notification superviseur:', err.message)
+            );
+          }
+        }
       }
     } catch (notifError) {
       console.error('Erreur notification superviseur:', notifError.message);
@@ -782,20 +784,22 @@ router.post('/import', authenticate, canImportMails, [
       .populate('recipient', 'firstName lastName email')
       .populate('recipientsCopy', 'firstName lastName email');
 
-    // Notifier le superviseur du service si configuré
     try {
-      const serviceWithSupervisor = await Service.findById(serviceId).populate('supervisor', 'firstName lastName email');
-      if (serviceWithSupervisor?.notifySupervisor && serviceWithSupervisor?.supervisor?.email) {
+      const serviceWithSupervisors = await Service.findById(serviceId).populate('supervisors', 'firstName lastName email');
+      if (serviceWithSupervisors?.notifySupervisor && serviceWithSupervisors?.supervisors?.length) {
         const { sendServiceMailNotification } = await import('../services/email.service.js');
-        const supervisor = serviceWithSupervisor.supervisor;
-        sendServiceMailNotification(
-          supervisor.email,
-          `${supervisor.firstName} ${supervisor.lastName}`,
-          populatedMail,
-          serviceWithSupervisor.name
-        ).catch(err => 
-          console.error('Erreur notification superviseur:', err.message)
-        );
+        for (const supervisor of serviceWithSupervisors.supervisors) {
+          if (supervisor.email) {
+            sendServiceMailNotification(
+              supervisor.email,
+              `${supervisor.firstName} ${supervisor.lastName}`,
+              populatedMail,
+              serviceWithSupervisors.name
+            ).catch(err =>
+              console.error('Erreur notification superviseur:', err.message)
+            );
+          }
+        }
       }
     } catch (notifError) {
       console.error('Erreur notification superviseur:', notifError.message);
@@ -1259,11 +1263,10 @@ router.post('/:id/archive', authenticate, async (req, res) => {
     const delegatorIds = delegators.map(d => d._id.toString());
     const hasDelegation = mail.recipient && delegatorIds.includes(mail.recipient._id.toString());
     
-    // Vérifier si l'utilisateur est superviseur du service du courrier
     const isSupervisor = mail.service && req.user.services?.some(s => {
-      const supervisorId = s.supervisor?._id?.toString() || s.supervisor?.toString();
-      return s._id?.toString() === mail.service._id.toString() && 
-             supervisorId === req.user._id.toString();
+      const ids = (s.supervisors || []).map(sup => sup?._id?.toString() || sup?.toString());
+      return s._id?.toString() === mail.service._id.toString() &&
+             ids.includes(req.user._id.toString());
     });
     
     // L'utilisateur peut archiver si:

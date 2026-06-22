@@ -25,11 +25,10 @@ const serviceSchema = new mongoose.Schema({
     type: String,
     default: '#6366F1'
   },
-  supervisor: {
+  supervisors: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    default: null
-  },
+    ref: 'User'
+  }],
   notifySupervisor: {
     type: Boolean,
     default: true

@@ -36,7 +36,10 @@ import {
   DocumentIcon,
   ClockIcon,
   FolderArrowDownIcon,
-  Cog6ToothIcon
+  Cog6ToothIcon,
+  EnvelopeIcon,
+  PhoneIcon,
+  MapPinIcon
 } from '@heroicons/react/24/outline';
 
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
@@ -54,6 +57,7 @@ export default function MailDetailPage() {
   const canSilentView = user?.group?.permissions?.includes('silent_view') || false;
   
   const [showResponseModal, setShowResponseModal] = useState(false);
+  const [showContactModal, setShowContactModal] = useState(false);
   const [responseText, setResponseText] = useState('');
   const [responseType, setResponseType] = useState('courrier');
   const [responseFile, setResponseFile] = useState(null);
@@ -629,7 +633,14 @@ export default function MailDetailPage() {
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div className="flex items-center gap-2 text-gray-600">
                   <UserIcon className="w-4 h-4" />
-                  <span>Expéditeur: <strong>{mail.sender?.name || mail.senderName}</strong></span>
+                  <span>Expéditeur:
+                    <button
+                      onClick={() => setShowContactModal(true)}
+                      className="font-bold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer transition-colors"
+                    >
+                      {mail.sender?.name || mail.senderName}
+                    </button>
+                  </span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-600">
                   <CalendarIcon className="w-4 h-4" />
@@ -1345,6 +1356,131 @@ export default function MailDetailPage() {
       </AnimatePresence>
 
       {/* Modal Ajouter une réponse */}
+      {/* Modal Fiche Contact Expéditeur */}
+      <AnimatePresence>
+        {showContactModal && mail?.sender && (
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowContactModal(false)} />
+            <div className="flex min-h-full items-center justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="relative bg-white rounded-2xl shadow-xl max-w-md w-full"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-lg font-bold text-gray-900">Fiche contact</h3>
+                    <button
+                      onClick={() => setShowContactModal(false)}
+                      className="text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                      <XMarkIcon className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center">
+                      <UserIcon className="w-7 h-7 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-lg font-semibold text-gray-900">{mail.sender.name}</p>
+                      {mail.sender.organization && (
+                        <p className="text-sm text-gray-500">{mail.sender.organization}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    {mail.sender.email ? (
+                      <a
+                        href={`mailto:${mail.sender.email}`}
+                        className="flex items-center gap-3 p-3 rounded-xl bg-blue-50 hover:bg-blue-100 transition-colors group"
+                      >
+                        <div className="w-10 h-10 rounded-full bg-blue-100 group-hover:bg-blue-200 flex items-center justify-center transition-colors">
+                          <EnvelopeIcon className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 font-medium">Email</p>
+                          <p className="text-sm font-medium text-blue-600">{mail.sender.email}</p>
+                        </div>
+                      </a>
+                    ) : (
+                      <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
+                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                          <EnvelopeIcon className="w-5 h-5 text-gray-400" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 font-medium">Email</p>
+                          <p className="text-sm text-gray-400 italic">Non renseigné</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {mail.sender.phone ? (
+                      <a
+                        href={`tel:${mail.sender.phone}`}
+                        className="flex items-center gap-3 p-3 rounded-xl bg-green-50 hover:bg-green-100 transition-colors group"
+                      >
+                        <div className="w-10 h-10 rounded-full bg-green-100 group-hover:bg-green-200 flex items-center justify-center transition-colors">
+                          <PhoneIcon className="w-5 h-5 text-green-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 font-medium">Téléphone</p>
+                          <p className="text-sm font-medium text-green-600">{mail.sender.phone}</p>
+                        </div>
+                      </a>
+                    ) : (
+                      <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
+                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                          <PhoneIcon className="w-5 h-5 text-gray-400" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 font-medium">Téléphone</p>
+                          <p className="text-sm text-gray-400 italic">Non renseigné</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {mail.sender.address ? (
+                      <div className="flex items-center gap-3 p-3 rounded-xl bg-orange-50">
+                        <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
+                          <MapPinIcon className="w-5 h-5 text-orange-600" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-xs text-gray-500 font-medium">Adresse</p>
+                          <p className="text-sm font-medium text-gray-700 whitespace-pre-line">{mail.sender.address}</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
+                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+                          <MapPinIcon className="w-5 h-5 text-gray-400" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 font-medium">Adresse</p>
+                          <p className="text-sm text-gray-400 italic">Non renseignée</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-6 pt-4 border-t">
+                    <button
+                      onClick={() => setShowContactModal(false)}
+                      className="w-full btn-secondary"
+                    >
+                      Fermer
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {showResponseModal && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowResponseModal(false)} />

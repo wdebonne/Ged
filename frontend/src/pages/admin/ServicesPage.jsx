@@ -120,14 +120,14 @@ export default function ServicesPage() {
               </span>
             </div>
 
-            {service.supervisor && (
-              <div className="mt-3 pt-3 border-t flex items-center gap-2">
-                <UserIcon className="w-4 h-4 text-gray-400" />
+            {service.supervisors?.length > 0 && (
+              <div className="mt-3 pt-3 border-t flex items-center gap-2 flex-wrap">
+                <UserIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
                 <span className="text-xs text-gray-600">
-                  Responsable: {service.supervisor.firstName} {service.supervisor.lastName}
+                  Responsable(s) : {service.supervisors.map(s => `${s.firstName} ${s.lastName}`).join(', ')}
                 </span>
                 {service.notifySupervisor && (
-                  <BellIcon className="w-4 h-4 text-green-500" title="Notifications activées" />
+                  <BellIcon className="w-4 h-4 text-green-500 flex-shrink-0" title="Notifications activées" />
                 )}
               </div>
             )}
@@ -210,7 +210,7 @@ function ServiceModal({ service, onClose }) {
     email: service?.email || '',
     color: service?.color || '#6366f1',
     isActive: service?.isActive ?? true,
-    supervisor: service?.supervisor?._id || '',
+    supervisors: service?.supervisors?.map(s => s._id) || [],
     notifySupervisor: service?.notifySupervisor ?? true
   });
   const [errors, setErrors] = useState({});
@@ -237,8 +237,8 @@ function ServiceModal({ service, onClose }) {
   const mutation = useMutation({
     mutationFn: async (data) => {
       const cleanData = { ...data };
-      if (!cleanData.supervisor) {
-        cleanData.supervisor = null;
+      if (!cleanData.supervisors?.length) {
+        cleanData.supervisors = [];
       }
       if (service) {
         return servicesAPI.update(service._id, cleanData);
@@ -358,29 +358,40 @@ function ServiceModal({ service, onClose }) {
             </div>
           </div>
 
-          {/* Responsable */}
+          {/* Responsable(s) */}
           <div>
-            <label className="label">Responsable</label>
-            <select
-              value={formData.supervisor}
-              onChange={(e) => setFormData(prev => ({ ...prev, supervisor: e.target.value }))}
-              className="input"
-              disabled={isLoadingUsers}
-            >
-              <option value="">{isLoadingUsers ? 'Chargement...' : '-- Aucun responsable --'}</option>
-              {Array.isArray(users) && users.map(user => (
-                <option key={user._id} value={user._id}>
-                  {user.firstName} {user.lastName} ({user.email})
-                </option>
-              ))}
-            </select>
+            <label className="label">Responsable(s)</label>
+            {isLoadingUsers ? (
+              <p className="text-sm text-gray-500 p-3">Chargement...</p>
+            ) : (
+              <div className="grid grid-cols-2 gap-2 p-3 bg-gray-50 rounded-lg max-h-48 overflow-y-auto border border-gray-200">
+                {Array.isArray(users) && users.map(u => (
+                  <label key={u._id} className="flex items-center gap-2 cursor-pointer py-1">
+                    <input
+                      type="checkbox"
+                      checked={formData.supervisors.includes(u._id)}
+                      onChange={() => setFormData(prev => ({
+                        ...prev,
+                        supervisors: prev.supervisors.includes(u._id)
+                          ? prev.supervisors.filter(id => id !== u._id)
+                          : [...prev.supervisors, u._id]
+                      }))}
+                      className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    />
+                    <span className="text-sm text-gray-700 truncate">
+                      {u.firstName} {u.lastName}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            )}
             <p className="text-xs text-gray-500 mt-1">
-              Le responsable recevra un email lors de l'arrivée d'un nouveau courrier pour ce service
+              Les responsables recevront un email lors de l'arrivée d'un nouveau courrier pour ce service
             </p>
           </div>
 
-          {/* Notification responsable */}
-          {formData.supervisor && (
+          {/* Notification responsables */}
+          {formData.supervisors.length > 0 && (
             <div className="flex items-center gap-2">
               <input
                 type="checkbox"
@@ -391,7 +402,7 @@ function ServiceModal({ service, onClose }) {
               />
               <label htmlFor="notifySupervisor" className="text-gray-700 flex items-center gap-2">
                 <BellIcon className="w-4 h-4" />
-                Notifier le responsable par email
+                Notifier les responsables par email
               </label>
             </div>
           )}
