@@ -27,7 +27,7 @@ export default function LdapGroupMappingsPage() {
     }
   });
 
-  const { data: groupsData } = useQuery({
+  const { data: groupsData, isLoading: isLoadingGroups } = useQuery({
     queryKey: ['groups'],
     queryFn: async () => {
       const response = await groupsAPI.getAll();
@@ -35,7 +35,7 @@ export default function LdapGroupMappingsPage() {
     }
   });
 
-  const { data: servicesData } = useQuery({
+  const { data: servicesData, isLoading: isLoadingServices } = useQuery({
     queryKey: ['services'],
     queryFn: async () => {
       const response = await servicesAPI.getAll();
@@ -61,7 +61,7 @@ export default function LdapGroupMappingsPage() {
     setShowModal(true);
   };
 
-  if (isLoading) return <LoadingSpinner />;
+  if (isLoading || isLoadingGroups || isLoadingServices) return <LoadingSpinner />;
 
   const mappings = data?.data || [];
   const groups = groupsData?.data || [];
