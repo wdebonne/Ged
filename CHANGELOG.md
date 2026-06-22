@@ -7,6 +7,39 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ---
 
+## [3.10.0] - 2026-06-22
+
+### Ajouté
+
+- **Login unifié (LDAP + Local)** :
+  - Suppression du sélecteur "Local / LDAP" sur la page de connexion
+  - Le backend tente automatiquement l'authentification LDAP en premier (si activé), puis Kerberos, puis locale en fallback
+  - L'utilisateur n'a plus besoin de savoir quel mode d'authentification utiliser : un seul formulaire pour tous
+
+- **Groupe AD requis configurable depuis l'interface** :
+  - Nouveau champ "Groupe AD requis (DN)" dans Paramètres > LDAP
+  - Seuls les utilisateurs membres de ce groupe AD peuvent se connecter via LDAP
+  - Si laissé vide, tous les utilisateurs LDAP authentifiés sont autorisés
+  - Le DN peut être copié directement depuis la liste "Lister les groupes AD"
+  - La restriction est vérifiée à chaque connexion ET en continu via la synchronisation périodique
+
+- **Synchronisation des settings LDAP depuis la base de données** :
+  - Les paramètres LDAP configurés dans l'interface (Paramètres > LDAP) sont désormais chargés au démarrage du serveur et synchronisés vers `process.env` à chaque sauvegarde
+  - Plus besoin de redémarrer le conteneur Docker après modification des paramètres LDAP dans l'interface
+
+### Corrigé
+
+- **Mot de passe LDAP masqué envoyé au test** : les routes de test connexion LDAP et de listing des groupes AD envoyaient le masque `********` au lieu du vrai mot de passe stocké en base — le test échouait systématiquement après un rechargement de page
+- **Objets DN ldapjs non convertis en string** : sur Synology AD (Samba 4), `ldapjs` retourne des objets DN au lieu de simples strings pour `entry.objectName`, `entry.dn` et les valeurs d'attributs — causait des crashs React ("Objects are not valid as a React child") lors de l'affichage des groupes, et une erreur `stringToWrite must be a string` lors du bind utilisateur
+- **Conversion des valeurs `memberOf`** : les DN des groupes dans l'attribut `memberOf` sont maintenant convertis en string, assurant le bon fonctionnement de la restriction par groupe AD sur Synology
+
+### Technique
+
+- Ajout de `docker/setup-buildx-action@v3` dans le workflow GitHub Actions et mise à jour de `build-push-action` v5 → v6 avec cache GHA pour corriger l'erreur "unknown blob" lors du push
+- Les logs de test LDAP incluent désormais le message d'erreur détaillé du serveur (`lde_message`) au lieu du message générique "Échec de l'authentification"
+
+---
+
 ## [3.9.18] - 2026-06-17
 
 ### Ajouté

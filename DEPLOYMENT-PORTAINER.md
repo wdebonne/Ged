@@ -307,6 +307,10 @@ Lancez la mise à jour :
 | `LDAP_BIND_PASSWORD` | Mot de passe LDAP | - |
 | `LDAP_SEARCH_BASE` | Base de recherche | - |
 | `LDAP_SEARCH_FILTER` | Filtre de recherche | - |
+| `LDAP_REQUIRED_GROUP_DN` | DN du groupe AD requis (vide = tous autorisés). Configurable aussi depuis l'interface | - |
+| `LDAP_GROUP_CHECK_INTERVAL` | Intervalle (min) de vérification du groupe requis | `5` |
+
+> **Note** : les paramètres LDAP peuvent aussi être configurés depuis l'interface (Paramètres > LDAP). Les valeurs de l'interface sont prioritaires sur le `.env`.
 
 ### Variables IMAP (import automatique d'emails)
 

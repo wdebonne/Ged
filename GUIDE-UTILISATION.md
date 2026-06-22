@@ -32,7 +32,7 @@ Ce guide vous accompagne dans l'utilisation quotidienne de l'application GED Cou
    - **Mot de passe**
 3. Cliquez sur **Se connecter**
 
-> 💡 **Astuce** : Si votre organisation utilise LDAP ou Kerberos, des boutons de connexion supplémentaires peuvent apparaître.
+> 💡 **Astuce** : Si votre organisation utilise LDAP ou Kerberos, l'authentification est automatique — utilisez simplement vos identifiants d'annuaire, sans rien sélectionner.
 
 ### 1.2 Mot de passe oublié
 

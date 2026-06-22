@@ -1,6 +1,6 @@
 {
   "name": "ged-courrier-backend",
-  "version": "3.9.17",
+  "version": "3.10.0",
   "description": "Backend API pour la Gestion Électronique de Courrier",
   "main": "src/server.js",
   "type": "module",

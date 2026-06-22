@@ -1,6 +1,6 @@
 {
   "name": "ged-courrier",
-  "version": "1.0.0",
+  "version": "3.10.0",
   "description": "Application de Gestion Électronique de Courrier",
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",

@@ -38,9 +38,10 @@ Application web complète de gestion de courrier avec authentification LDAP/Kerb
 
 ### Authentification
 - ✅ Login/Logout avec JWT
+- ✅ **Login unifié** : un seul formulaire de connexion, le backend essaie automatiquement LDAP → Kerberos → local (plus de sélecteur à choisir)
 - ✅ Récupération de mot de passe par email
-- ✅ Support LDAP optionnel (affiché uniquement si activé)
-- ✅ Support Kerberos optionnel (affiché uniquement si activé)
+- ✅ Support LDAP optionnel
+- ✅ Support Kerberos optionnel
 - ✅ Gestion du profil utilisateur
 
 ### Gestion des courriers
@@ -245,30 +246,24 @@ Application web complète de gestion de courrier avec authentification LDAP/Kerb
 - ✅ Aperçu des emails avant envoi
 
 #### LDAP
-- ✅ Configuration du serveur LDAP
+- ✅ Configuration du serveur LDAP **entièrement depuis l'interface** (Paramètres > LDAP) — plus besoin de redémarrer le conteneur après modification
 - ✅ Base DN, filtres utilisateurs/groupes
 - ✅ Test de connexion (réel, depuis Paramètres > LDAP)
 - ✅ **Liste des groupes AD/LDAP** disponibles dans l'annuaire, avec copie du DN en un clic
-- ✅ **Restriction par groupe AD/LDAP** (`LDAP_REQUIRED_GROUP_DN`) : seuls les membres du groupe configuré peuvent se connecter. Vérifié à **chaque connexion** (un retrait du groupe AD bloque l'accès dès le prochain login), **et en continu** via une synchronisation périodique qui coupe aussi les sessions déjà ouvertes
+- ✅ **Restriction par groupe AD/LDAP** configurable depuis l'interface (champ "Groupe AD requis") : seuls les membres du groupe configuré peuvent se connecter. Vérifié à **chaque connexion** (un retrait du groupe AD bloque l'accès dès le prochain login), **et en continu** via une synchronisation périodique qui coupe aussi les sessions déjà ouvertes
+- ✅ **Compatibilité Synology AD** (Samba 4) : conversion automatique des objets DN ldapjs en strings
 - ✅ **Synchronisation des attributs** : prénom (`givenName`), nom (`sn`) et email (`mail`) sont remontés depuis l'annuaire à la création du compte **et mis à jour à chaque connexion**
 - ✅ **Correspondances Groupe AD → Rôle/Services GED** (Administration > Correspondances LDAP) : applique automatiquement un rôle GED et/ou des services accessibles/supervisés en fonction des groupes AD de l'utilisateur, à chaque connexion
 - ✅ **Serveur AD de secours (failover automatique)** : bascule automatiquement sur un second annuaire si le serveur principal est inaccessible, sans configuration ni intervention manuelle au moment de la panne
 
 ##### Restreindre l'accès à un groupe AD (ex: groupe "GED")
 
-1. Récupérez le DN du groupe dans votre annuaire. Sur un **Synology** (paquet LDAP Server / Directory Server), ouvrez la console LDAP, sélectionnez le groupe et notez son DN, généralement de la forme :
-   ```
-   cn=GED,ou=group,dc=votredomaine,dc=local
-   ```
-   Vous pouvez aussi le vérifier avec `ldapsearch` :
-   ```bash
-   ldapsearch -x -H ldap://votre-nas:389 -D "cn=admin,dc=votredomaine,dc=local" -W \
-     -b "dc=votredomaine,dc=local" "(cn=GED)" dn
-   ```
-   Ou, plus simplement, depuis **Paramètres > LDAP**, cliquez sur **"Lister les groupes AD"** : la liste des groupes de l'annuaire (avec leur DN) s'affiche, avec un bouton "Copier le DN" pour chaque groupe.
-2. Renseignez `LDAP_REQUIRED_GROUP_DN` dans `backend/.env` avec ce DN.
+1. Depuis **Paramètres > LDAP**, cliquez sur **"Lister les groupes AD"** : la liste des groupes de l'annuaire (avec leur DN) s'affiche. Cliquez sur **"Copier le DN"** à côté du groupe souhaité (ex: "GED").
+2. Collez le DN dans le champ **"Groupe AD requis (DN)"** de la même page et cliquez sur **Enregistrer**.
 3. Assurez-vous que l'attribut `memberOf` est bien renvoyé sur les comptes utilisateurs (l'overlay `memberof` est activé par défaut sur le LDAP Server Synology). Sans cet attribut, aucun utilisateur ne sera reconnu comme membre et l'accès sera refusé.
-4. Laissez `LDAP_REQUIRED_GROUP_DN` vide pour autoriser tous les utilisateurs LDAP authentifiés (comportement précédent).
+4. Laissez le champ vide pour autoriser tous les utilisateurs LDAP authentifiés.
+
+> **Alternative** : vous pouvez aussi renseigner `LDAP_REQUIRED_GROUP_DN` directement dans `backend/.env` ; la valeur configurée dans l'interface est prioritaire.
 
 > **Important : `LDAP_REQUIRED_GROUP_DN` est une porte d'entrée, indépendante des correspondances ci-dessous, et vérifiée en premier.**
 > - Si l'utilisateur **n'est pas membre** du groupe configuré (ex: "GED"), l'authentification échoue immédiatement (`Accès refusé`) — peu importe qu'il soit par ailleurs membre de "Compta", "Responsable Compta", etc. Son compte n'est ni créé ni mis à jour, et les **Correspondances LDAP** décrites ci-dessous ne sont jamais évaluées.
