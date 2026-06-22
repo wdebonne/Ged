@@ -43,12 +43,23 @@ const PERMISSIONS = {
   edit_services: 'Modifier des services',
   delete_services: 'Supprimer des services',
   
-  // Expéditeurs
-  view_senders: 'Voir les expéditeurs',
-  create_senders: 'Créer des expéditeurs',
-  edit_senders: 'Modifier des expéditeurs',
-  delete_senders: 'Supprimer des expéditeurs',
+  // Contacts
+  view_contacts: 'Voir les contacts',
+  create_contacts: 'Créer des contacts',
+  edit_contacts: 'Modifier des contacts',
+  delete_contacts: 'Supprimer des contacts',
   
+  // Courrier départ
+  view_own_outgoing: 'Voir ses courriers départ',
+  view_service_outgoing: 'Voir les courriers départ du service',
+  view_all_outgoing: 'Voir tous les courriers départ',
+  create_outgoing: 'Créer un courrier départ',
+  edit_outgoing: 'Modifier un courrier départ',
+  send_outgoing: 'Envoyer un courrier départ',
+  archive_outgoing: 'Archiver un courrier départ',
+  delete_outgoing: 'Supprimer un courrier départ',
+  export_outgoing: 'Exporter les courriers départ',
+
   // Paramètres
   view_settings: 'Voir les paramètres',
   edit_settings: 'Modifier les paramètres',

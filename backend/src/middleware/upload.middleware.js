@@ -119,6 +119,24 @@ const pendingStorage = multer.diskStorage({
   }
 });
 
+// Configuration du stockage pour les courriers départ
+const outgoingStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const destPath = path.join(uploadPath, 'outgoing');
+    if (!fs.existsSync(destPath)) {
+      fs.mkdirSync(destPath, { recursive: true });
+    }
+    cb(null, destPath);
+  },
+  filename: (req, file, cb) => {
+    const date = new Date();
+    const dateStr = date.toISOString().slice(0, 10);
+    const timeStr = date.toTimeString().slice(0, 8).replace(/:/g, '-');
+    const uniqueName = `Courrier Depart - le ${dateStr} a ${timeStr}-${uuidv4().slice(0, 8)}${path.extname(file.originalname)}`;
+    cb(null, uniqueName);
+  }
+});
+
 // Filtre pour les fichiers PDF
 const pdfFilter = (req, file, cb) => {
   if (file.mimetype === 'application/pdf') {
@@ -168,6 +186,12 @@ export const uploadAvatar = multer({
   storage: avatarsStorage,
   fileFilter: imageFilter,
   limits: { fileSize: 5 * 1024 * 1024 } // 5MB pour les avatars
+});
+
+export const uploadOutgoing = multer({
+  storage: outgoingStorage,
+  fileFilter: pdfFilter,
+  limits: { fileSize: maxFileSize }
 });
 
 export const uploadPending = multer({

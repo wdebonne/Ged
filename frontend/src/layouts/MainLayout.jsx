@@ -28,7 +28,10 @@ import {
   ChevronDoubleRightIcon,
   ChartBarIcon,
   LinkIcon,
-  CircleStackIcon
+  CircleStackIcon,
+  PaperAirplaneIcon,
+  PlusIcon,
+  DocumentTextIcon
 } from '@heroicons/react/24/outline';
 
 export default function MainLayout() {
@@ -45,6 +48,7 @@ export default function MainLayout() {
   const [mesCourrierOpen, setMesCourrierOpen] = useState(true);
   const [delegatedOpen, setDelegatedOpen] = useState(true);
   const [importOpen, setImportOpen] = useState(true);
+  const [courrierDepartOpen, setCourrierDepartOpen] = useState(true);
   const [serviceOpen, setServiceOpen] = useState(true);
   const [adminOpen, setAdminOpen] = useState(true);
   const location = useLocation();
@@ -126,12 +130,20 @@ export default function MainLayout() {
     { name: 'Courriers entrants', href: '/courriers/entrants', icon: ArrowDownTrayIcon, permission: 'import_mails', badge: statsData?.pendingImport },
   ] : [];
 
+  // Navigation Courrier Départ
+  const outgoingNavigation = [
+    { name: 'Nouveau', href: '/courriers/depart/nouveau', icon: PlusIcon, permission: 'create_outgoing' },
+    { name: 'Brouillons', href: '/courriers/depart/brouillons', icon: DocumentTextIcon, badge: statsData?.outgoing?.draft },
+    { name: 'Envoyés', href: '/courriers/depart/envoyes', icon: PaperAirplaneIcon, badge: statsData?.outgoing?.sent },
+    { name: 'Archivés', href: '/courriers/depart/archives', icon: ArchiveBoxIcon },
+  ];
+
   const adminNavigation = [
     { name: 'Utilisateurs', href: '/admin/utilisateurs', icon: UsersIcon, permission: 'view_users' },
     { name: 'Groupes', href: '/admin/groupes', icon: UserGroupIcon, permission: 'view_groups' },
     { name: 'Services', href: '/admin/services', icon: BuildingOfficeIcon, permission: 'view_services' },
-    { name: 'Expéditeurs', href: '/admin/expediteurs', icon: UserPlusIcon, permission: 'view_senders' },
-    { name: 'Objets', href: '/admin/objets', icon: TagIcon, permission: 'view_senders' },
+    { name: 'Contacts', href: '/admin/contacts', icon: UserPlusIcon, permission: 'view_contacts' },
+    { name: 'Objets', href: '/admin/objets', icon: TagIcon, permission: 'view_contacts' },
     { name: 'Paramètres', href: '/admin/parametres', icon: Cog6ToothIcon, permission: 'view_settings' },
     { name: 'Sauvegardes', href: '/admin/sauvegardes', icon: CircleStackIcon, permission: 'manage_settings' },
     { name: 'Correspondances LDAP', href: '/admin/correspondances-ldap', icon: LinkIcon, permission: 'manage_ldap' },
@@ -265,6 +277,59 @@ export default function MainLayout() {
                           )}
                         </NavLink>
                       ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
+
+            {/* Courrier Départ */}
+            {(hasPermission('view_own_outgoing') || hasPermission('view_all_outgoing') || hasPermission('create_outgoing')) && (
+              <div className="pt-3">
+                {!sidebarCollapsed ? (
+                  <button
+                    onClick={() => setCourrierDepartOpen(!courrierDepartOpen)}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider hover:text-gray-600 transition-colors"
+                  >
+                    {courrierDepartOpen ? (
+                      <ChevronDownIcon className="w-4 h-4" />
+                    ) : (
+                      <ChevronRightIcon className="w-4 h-4" />
+                    )}
+                    <span>Courrier Départ</span>
+                  </button>
+                ) : (
+                  <div className="hidden lg:block border-t border-gray-200 my-2"></div>
+                )}
+                <AnimatePresence initial={false}>
+                  {(courrierDepartOpen || sidebarCollapsed) && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
+                    >
+                      {outgoingNavigation
+                        .filter(item => !item.permission || hasPermission(item.permission))
+                        .map((item) => (
+                          <NavLink
+                            key={item.name + item.href}
+                            to={item.href}
+                            title={sidebarCollapsed ? item.name : undefined}
+                            className={({ isActive }) =>
+                              `${isActive ? 'sidebar-link-active' : 'sidebar-link'} ${sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''}`
+                            }
+                          >
+                            <item.icon className="w-5 h-5 flex-shrink-0" />
+                            {!sidebarCollapsed && <span className="flex-1 lg:inline">{item.name}</span>}
+                            {item.badge > 0 && !sidebarCollapsed && (
+                              <span className="bg-primary-100 text-primary-700 text-xs font-semibold px-2 py-0.5 rounded-full">
+                                {item.badge}
+                              </span>
+                            )}
+                          </NavLink>
+                        ))}
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -578,11 +643,18 @@ function getPageTitle(pathname) {
     '/admin/utilisateurs': 'Gestion des utilisateurs',
     '/admin/groupes': 'Gestion des groupes',
     '/admin/services': 'Gestion des services',
-    '/admin/expediteurs': 'Gestion des expéditeurs',
+    '/admin/contacts': 'Gestion des contacts',
+    '/courriers/depart/nouveau': 'Nouveau courrier départ',
+    '/courriers/depart/brouillons': 'Brouillons',
+    '/courriers/depart/envoyes': 'Courriers envoyés',
+    '/courriers/depart/archives': 'Courriers départ archivés',
     '/admin/parametres': 'Paramètres',
   };
-  
+
   // Gérer les routes dynamiques
+  if (pathname.startsWith('/courriers/depart/') && !titles[pathname]) {
+    return 'Détails du courrier départ';
+  }
   if (pathname.startsWith('/courriers/') && !titles[pathname]) {
     return 'Détails du courrier';
   }

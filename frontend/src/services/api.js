@@ -201,14 +201,33 @@ export const servicesAPI = {
   delete: (id) => api.delete(`/services/${id}`)
 };
 
-// Senders
-export const sendersAPI = {
-  getAll: (params) => api.get('/senders', { params }),
-  autocomplete: (q) => api.get('/senders/autocomplete', { params: { q } }),
-  getOne: (id) => api.get(`/senders/${id}`),
-  create: (data) => api.post('/senders', data),
-  update: (id, data) => api.put(`/senders/${id}`, data),
-  delete: (id) => api.delete(`/senders/${id}`)
+// Contacts (expéditeurs / destinataires)
+export const contactsAPI = {
+  getAll: (params) => api.get('/contacts', { params }),
+  autocomplete: (q) => api.get('/contacts/autocomplete', { params: { q } }),
+  getOne: (id) => api.get(`/contacts/${id}`),
+  create: (data) => api.post('/contacts', data),
+  update: (id, data) => api.put(`/contacts/${id}`, data),
+  delete: (id) => api.delete(`/contacts/${id}`)
+};
+
+export const sendersAPI = contactsAPI;
+
+// Outgoing Mails (Courrier Départ)
+export const outgoingMailsAPI = {
+  getAll: (params) => api.get('/outgoing-mails', { params }),
+  getOne: (id) => api.get(`/outgoing-mails/${id}`),
+  create: (formData) => api.post('/outgoing-mails', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  update: (id, formData) => api.put(`/outgoing-mails/${id}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  markAsSent: (id) => api.post(`/outgoing-mails/${id}/send`),
+  archive: (id) => api.post(`/outgoing-mails/${id}/archive`),
+  delete: (id) => api.delete(`/outgoing-mails/${id}`),
+  getPDF: (id) => api.get(`/outgoing-mails/${id}/pdf`, { responseType: 'blob' }),
+  markAsRead: (id) => api.post(`/outgoing-mails/${id}/read`),
 };
 
 // Subjects
@@ -294,6 +313,14 @@ export const imapAPI = {
   start: () => api.post('/imap/start'),
   stop: () => api.post('/imap/stop'),
   check: () => api.post('/imap/check')
+};
+
+// IMAP Email-PDF
+export const imapMailAPI = {
+  getStatus: () => api.get('/imap-mail/status'),
+  start: () => api.post('/imap-mail/start'),
+  stop: () => api.post('/imap-mail/stop'),
+  check: () => api.post('/imap-mail/check')
 };
 
 // Email Templates

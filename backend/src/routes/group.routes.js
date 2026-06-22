@@ -52,11 +52,12 @@ router.get('/permissions', authenticate, authorize(PERMISSIONS.VIEW_GROUPS), asy
 
     // Grouper par catégorie
     const categories = {
-      courriers: permissionsList.filter(p => p.value.includes('mail')),
+      courriers: permissionsList.filter(p => p.value.includes('mail') && !p.value.includes('outgoing')),
+      courriersDepart: permissionsList.filter(p => p.value.includes('outgoing')),
       utilisateurs: permissionsList.filter(p => p.value.includes('user')),
       groupes: permissionsList.filter(p => p.value.includes('group')),
       services: permissionsList.filter(p => p.value.includes('service')),
-      expediteurs: permissionsList.filter(p => p.value.includes('sender')),
+      contacts: permissionsList.filter(p => p.value.includes('contact')),
       parametres: permissionsList.filter(p => p.value.includes('setting') || p.value.includes('ldap') || p.value.includes('kerberos') || p.value.includes('imap')),
       statistiques: permissionsList.filter(p => p.value.includes('stat'))
     };
@@ -238,10 +239,10 @@ function formatPermissionLabel(key) {
     CREATE_SERVICES: 'Créer des services',
     EDIT_SERVICES: 'Modifier des services',
     DELETE_SERVICES: 'Supprimer des services',
-    VIEW_SENDERS: 'Voir les expéditeurs',
-    CREATE_SENDERS: 'Créer des expéditeurs',
-    EDIT_SENDERS: 'Modifier des expéditeurs',
-    DELETE_SENDERS: 'Supprimer des expéditeurs',
+    VIEW_CONTACTS: 'Voir les contacts',
+    CREATE_CONTACTS: 'Créer des contacts',
+    EDIT_CONTACTS: 'Modifier des contacts',
+    DELETE_CONTACTS: 'Supprimer des contacts',
     VIEW_SETTINGS: 'Voir les paramètres',
     EDIT_SETTINGS: 'Modifier les paramètres',
     MANAGE_LDAP: 'Gérer LDAP',

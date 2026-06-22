@@ -13,7 +13,9 @@ import userRoutes from './routes/user.routes.js';
 import groupRoutes from './routes/group.routes.js';
 import mailRoutes from './routes/mail.routes.js';
 import serviceRoutes from './routes/service.routes.js';
-import senderRoutes from './routes/sender.routes.js';
+import contactRoutes from './routes/contact.routes.js';
+import outgoingMailRoutes from './routes/outgoingMail.routes.js';
+import imapMailRoutes from './routes/imapMail.routes.js';
 import subjectRoutes from './routes/subject.routes.js';
 import settingsRoutes from './routes/settings.routes.js';
 import statsRoutes from './routes/stats.routes.js';
@@ -32,6 +34,7 @@ import { serveMailFiles } from './middleware/serveMailFiles.middleware.js';
 
 // Services
 import { startImapService } from './services/imap.service.js';
+import { startImapMailService } from './services/imapMail.service.js';
 import { startLdapGroupSyncService } from './services/ldapGroupSync.service.js';
 import { initBackupScheduler } from './services/backup.service.js';
 
@@ -105,6 +108,9 @@ if (!fs.existsSync(path.join(uploadPath, 'avatars'))) {
 if (!fs.existsSync(path.join(uploadPath, 'pending'))) {
   fs.mkdirSync(path.join(uploadPath, 'pending'), { recursive: true });
 }
+if (!fs.existsSync(path.join(uploadPath, 'outgoing'))) {
+  fs.mkdirSync(path.join(uploadPath, 'outgoing'), { recursive: true });
+}
 
 // Servir les fichiers statiques
 // D'abord vérifier si le fichier doit être récupéré depuis le stockage externe
@@ -118,7 +124,10 @@ app.use('/api/users', userRoutes);
 app.use('/api/groups', groupRoutes);
 app.use('/api/mails', mailRoutes);
 app.use('/api/services', serviceRoutes);
-app.use('/api/senders', senderRoutes);
+app.use('/api/contacts', contactRoutes);
+app.use('/api/senders', contactRoutes);
+app.use('/api/outgoing-mails', outgoingMailRoutes);
+app.use('/api/imap-mail', imapMailRoutes);
 app.use('/api/subjects', subjectRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/stats', statsRoutes);
@@ -197,6 +206,40 @@ const PORT = process.env.PORT || 5000;
 const startServer = async () => {
   await connectDB();
 
+  // Migration : renommer la collection 'senders' en 'contacts'
+  try {
+    const collections = await mongoose.connection.db.listCollections({ name: 'senders' }).toArray();
+    if (collections.length > 0) {
+      const contactsExists = await mongoose.connection.db.listCollections({ name: 'contacts' }).toArray();
+      if (contactsExists.length === 0) {
+        await mongoose.connection.db.collection('senders').rename('contacts');
+        console.log('✅ Migration: collection senders renommée en contacts');
+      }
+    }
+  } catch (err) {
+    console.error('Erreur migration senders -> contacts:', err.message);
+  }
+
+  // Migration : renommer les permissions senders -> contacts dans les groupes existants
+  try {
+    const permissionMap = {
+      'view_senders': 'view_contacts',
+      'create_senders': 'create_contacts',
+      'edit_senders': 'edit_contacts',
+      'delete_senders': 'delete_contacts'
+    };
+    const groups = await Group.find({ permissions: { $in: Object.keys(permissionMap) } });
+    for (const group of groups) {
+      group.permissions = group.permissions.map(p => permissionMap[p] || p);
+      await group.save();
+    }
+    if (groups.length > 0) {
+      console.log(`✅ Migration: permissions contacts mises à jour pour ${groups.length} groupe(s)`);
+    }
+  } catch (err) {
+    console.error('Erreur migration permissions contacts:', err.message);
+  }
+
   // Initialiser la base avec les données par défaut si aucun utilisateur n'existe
   // (premier démarrage, ex: nouveau déploiement Docker)
   const userCount = await User.countDocuments();
@@ -257,6 +300,16 @@ const startServer = async () => {
   // Démarrer le service IMAP si activé
   if (process.env.IMAP_ENABLED === 'true') {
     startImapService();
+  }
+
+  // Démarrer le service IMAP Email-PDF si activé
+  try {
+    const imapMailEnabled = await Settings.getValue('imap_mail_enabled', false);
+    if (imapMailEnabled === true || imapMailEnabled === 'true') {
+      startImapMailService();
+    }
+  } catch (e) {
+    console.error('Erreur démarrage IMAP Email-PDF:', e.message);
   }
 
   // Démarrer la synchronisation périodique du groupe LDAP requis (révoque l'accès des

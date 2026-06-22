@@ -7,6 +7,42 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ---
 
+## [3.11.0] - 2026-06-22
+
+### Ajouté
+
+- **Courrier Départ (Gestion du courrier sortant)** :
+  - Nouveau module complet pour gérer le courrier sortant indépendamment du courrier entrant
+  - Modèle OutgoingMail avec cycle de vie : Brouillon -> Envoyé -> Archivé
+  - Référence auto-générée format `CRD-YYYYMMDD-RANDOM`
+  - Support de différentes méthodes d'envoi : courrier postal, email, fax, remise en main propre
+  - Lien optionnel vers un courrier entrant existant
+  - Numéro de suivi postal optionnel
+  - OCR automatique du PDF joint pour recherche plein texte
+  - Archivage avec déplacement dans une arborescence organisée par service/année/mois
+  - 9 nouvelles permissions dédiées (view_own_outgoing, create_outgoing, send_outgoing, etc.)
+  - Interface complète : création, liste par statut (brouillons/envoyés/archivés), détail avec visionneuse PDF
+  - Section dédiée dans la sidebar avec badges de comptage
+
+- **IMAP Email-to-PDF (Conversion automatique des emails en PDF)** :
+  - Nouveau service IMAP indépendant avec sa propre configuration (serveur, port, credentials, filtres)
+  - Conversion automatique du corps des emails sans pièce jointe PDF en document PDF
+  - Import des pièces jointes PDF existantes (même comportement que l'IMAP actuel)
+  - Toggle configurable : générer le PDF du corps systématiquement ou seulement quand il n'y a pas de PJ
+  - Les PDF générés incluent les métadonnées (De, À, Cc, Objet, Date) et le corps du mail
+  - Filtres configurables : domaines, emails, mots-clés sujet/corps
+  - Post-traitement : marquer comme lu, déplacer vers un dossier, ou supprimer
+  - Nouvel onglet "IMAP Email-PDF" dans les paramètres d'administration
+
+- **Renommage Expéditeurs -> Contacts** :
+  - Le modèle Sender est renommé en Contact pour un usage bidirectionnel (expéditeur pour le courrier entrant, destinataire pour le sortant)
+  - Migration automatique de la collection MongoDB `senders` -> `contacts` au démarrage
+  - Migration automatique des permissions `view_senders` -> `view_contacts`, etc.
+  - Routes API `/api/contacts` (avec alias `/api/senders` pour compatibilité)
+  - Interface renommée : page "Contacts" au lieu de "Expéditeurs"
+
+---
+
 ## [3.10.0] - 2026-06-22
 
 ### Ajouté

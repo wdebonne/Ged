@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { sendersAPI } from '../../services/api';
+import { contactsAPI } from '../../services/api';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import Pagination from '../../components/Pagination';
 import {
@@ -18,7 +18,7 @@ import {
   MapPinIcon
 } from '@heroicons/react/24/outline';
 
-export default function SendersPage() {
+export default function ContactsPage() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
@@ -27,15 +27,15 @@ export default function SendersPage() {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
 
   const { data, isLoading } = useQuery({
-    queryKey: ['senders', page, search],
+    queryKey: ['contacts', page, search],
     queryFn: async () => {
-      const response = await sendersAPI.getAll({ page, limit: 20, search });
+      const response = await contactsAPI.getAll({ page, limit: 20, search });
       return response.data;
     }
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => sendersAPI.delete(id),
+    mutationFn: (id) => contactsAPI.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries(['senders']);
       setDeleteConfirm(null);
@@ -62,14 +62,14 @@ export default function SendersPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Gestion des expéditeurs</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Gestion des contacts</h1>
           <p className="text-gray-600 mt-1">
-            {pagination?.total || 0} expéditeur(s) au total
+            {pagination?.total || 0} contact(s) au total
           </p>
         </div>
         <button onClick={openCreateModal} className="btn-primary flex items-center gap-2">
           <UserPlusIcon className="w-5 h-5" />
-          Nouvel expéditeur
+          Nouveau contact
         </button>
       </div>
 
@@ -79,7 +79,7 @@ export default function SendersPage() {
           <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
           <input
             type="text"
-            placeholder="Rechercher un expéditeur..."
+            placeholder="Rechercher un contact..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="input pl-10"
@@ -94,7 +94,7 @@ export default function SendersPage() {
             <thead className="bg-gray-50 border-b">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Expéditeur
+                  Contact
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Organisation
@@ -114,7 +114,7 @@ export default function SendersPage() {
               {senders.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
-                    Aucun expéditeur trouvé
+                    Aucun contact trouvé
                   </td>
                 </tr>
               ) : (
@@ -195,7 +195,7 @@ export default function SendersPage() {
       {/* Sender Modal */}
       <AnimatePresence>
         {showModal && (
-          <SenderModal
+          <ContactModal
             sender={editingSender}
             onClose={() => setShowModal(false)}
           />
@@ -220,7 +220,7 @@ export default function SendersPage() {
                     <ExclamationTriangleIcon className="w-6 h-6 text-danger-600" />
                   </div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    Supprimer l'expéditeur ?
+                    Supprimer le contact ?
                   </h3>
                   <p className="text-gray-600 mb-6">
                     Êtes-vous sûr de vouloir supprimer <strong>{deleteConfirm.name}</strong> ?
@@ -251,8 +251,8 @@ export default function SendersPage() {
   );
 }
 
-// Sender Modal Component
-function SenderModal({ sender, onClose }) {
+// Contact Modal Component
+function ContactModal({ sender, onClose }) {
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
     name: sender?.name || '',
@@ -267,9 +267,9 @@ function SenderModal({ sender, onClose }) {
   const mutation = useMutation({
     mutationFn: async (data) => {
       if (sender) {
-        return sendersAPI.update(sender._id, data);
+        return contactsAPI.update(sender._id, data);
       }
-      return sendersAPI.create(data);
+      return contactsAPI.create(data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries(['senders']);
@@ -307,7 +307,7 @@ function SenderModal({ sender, onClose }) {
         >
           <div className="p-6 border-b flex items-center justify-between">
             <h2 className="text-xl font-bold text-gray-900">
-              {sender ? 'Modifier l\'expéditeur' : 'Nouvel expéditeur'}
+              {sender ? 'Modifier le contact' : 'Nouveau contact'}
             </h2>
             <button onClick={onClose} className="btn-icon">
               <XMarkIcon className="w-6 h-6" />
@@ -322,7 +322,7 @@ function SenderModal({ sender, onClose }) {
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                 className={`input ${errors.name ? 'border-danger-500' : ''}`}
-                placeholder="Nom de l'expéditeur"
+                placeholder="Nom du contact"
               />
               {errors.name && <p className="text-sm text-danger-600 mt-1">{errors.name}</p>}
             </div>
@@ -379,7 +379,7 @@ function SenderModal({ sender, onClose }) {
                 onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
                 className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
               />
-              <label htmlFor="isActive" className="text-gray-700">Expéditeur actif</label>
+              <label htmlFor="isActive" className="text-gray-700">Contact actif</label>
             </div>
 
             {errors.submit && (

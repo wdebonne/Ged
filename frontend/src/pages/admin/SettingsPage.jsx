@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { settingsAPI, emailTemplatesAPI, webhooksAPI, onedriveAPI, s3API, nextcloudAPI } from '../../services/api';
+import { settingsAPI, emailTemplatesAPI, webhooksAPI, onedriveAPI, s3API, nextcloudAPI, imapMailAPI } from '../../services/api';
 import useBrandingStore from '../../stores/brandingStore';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import toast from 'react-hot-toast';
@@ -48,9 +48,287 @@ const TABS = [
   { id: 'ldap', name: 'LDAP', icon: ShieldCheckIcon },
   { id: 'kerberos', name: 'Kerberos', icon: KeyIcon },
   { id: 'imap', name: 'IMAP', icon: EnvelopeIcon },
+  { id: 'imap-mail', name: 'IMAP Email-PDF', icon: EnvelopeIcon },
   { id: 'smtp', name: 'SMTP', icon: EnvelopeIcon },
   { id: 'database', name: 'Base de données', icon: ServerIcon }
 ];
+
+// Composant IMAP Email-PDF (second IMAP pour conversion email -> PDF)
+function ImapMailSettings() {
+  const queryClient = useQueryClient();
+  const [formData, setFormData] = useState({
+    enabled: false,
+    host: '', port: 993, user: '', password: '',
+    tls: true, mailbox: 'INBOX', checkInterval: 5,
+    autoImport: true,
+    filterDomains: '', filterEmails: '', filterSubjectKeywords: '', filterBodyKeywords: '',
+    processedFolder: 'Traités', markAsRead: true, deleteAfterProcess: false, processAllMails: false,
+    alwaysGenerateBodyPdf: false
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [status, setStatus] = useState(null);
+
+  const { data: settingsData } = useQuery({
+    queryKey: ['settings', 'imap_mail'],
+    queryFn: async () => {
+      const res = await settingsAPI.getAll('imap_mail');
+      return res.data?.data || [];
+    }
+  });
+
+  useEffect(() => {
+    if (settingsData && Array.isArray(settingsData)) {
+      const newData = { ...formData };
+      settingsData.forEach(s => {
+        const key = s.key.replace('imap_mail_', '');
+        let value = s.value;
+        if (value === 'true') value = true;
+        else if (value === 'false') value = false;
+        else if (!isNaN(value) && value !== '') value = Number(value);
+        if (key in newData) newData[key] = value;
+      });
+      setFormData(newData);
+    }
+  }, [settingsData]);
+
+  const fetchStatus = async () => {
+    try {
+      const res = await imapMailAPI.getStatus();
+      setStatus(res.data?.data);
+    } catch { /* ignore */ }
+  };
+
+  useEffect(() => { fetchStatus(); }, []);
+
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      const secretKeys = ['password'];
+      const settings = Object.entries(formData).map(([key, value]) => ({
+        key: `imap_mail_${key}`,
+        value,
+        category: 'imap_mail',
+        isSecret: secretKeys.includes(key)
+      }));
+      return settingsAPI.updateMany(settings);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['settings', 'imap_mail']);
+      toast.success('Paramètres IMAP Email-PDF sauvegardés');
+    },
+    onError: () => toast.error('Erreur de sauvegarde')
+  });
+
+  const handleStart = async () => {
+    try { await imapMailAPI.start(); toast.success('Service démarré'); fetchStatus(); }
+    catch { toast.error('Erreur au démarrage'); }
+  };
+  const handleStop = async () => {
+    try { await imapMailAPI.stop(); toast.success('Service arrêté'); fetchStatus(); }
+    catch { toast.error('Erreur à l\'arrêt'); }
+  };
+  const handleCheck = async () => {
+    try {
+      const res = await imapMailAPI.check();
+      toast.success(res.data?.message || 'Vérification terminée');
+      fetchStatus();
+    } catch { toast.error('Erreur de vérification'); }
+  };
+
+  const update = (key, value) => setFormData(prev => ({ ...prev, [key]: value }));
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <EnvelopeIcon className="w-5 h-5" />
+          IMAP Email-to-PDF
+        </h2>
+        <div className="flex items-center gap-2">
+          {status?.running ? (
+            <button onClick={handleStop} className="btn-danger btn-sm">Arrêter</button>
+          ) : (
+            <button onClick={handleStart} className="btn-primary btn-sm" disabled={!formData.enabled}>Démarrer</button>
+          )}
+          <button onClick={handleCheck} className="btn-secondary btn-sm">Vérifier maintenant</button>
+        </div>
+      </div>
+
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <p className="text-sm text-blue-800">
+          Ce service IMAP convertit automatiquement les emails en documents PDF pour import dans la GED.
+          Si l'email contient des pièces jointes PDF, elles sont importées directement.
+          Si l'email n'a pas de PJ PDF, le corps du mail est converti en PDF.
+        </p>
+      </div>
+
+      {status && (
+        <div className="card p-4">
+          <div className="flex items-center gap-4 text-sm">
+            <span className={`px-2 py-1 rounded-full ${status.running ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
+              {status.running ? 'En cours' : 'Arrêté'}
+            </span>
+            {status.lastCheck && (
+              <span className="text-gray-500">
+                Dernière vérification: {new Date(status.lastCheck).toLocaleString('fr-FR')}
+              </span>
+            )}
+            <span className="text-gray-500">{status.messagesProcessed} document(s) traité(s)</span>
+            {status.lastError && (
+              <span className="text-red-600">Erreur: {status.lastError}</span>
+            )}
+          </div>
+        </div>
+      )}
+
+      <div className="card p-6 space-y-4">
+        <div className="flex items-center gap-3">
+          <input type="checkbox" id="imap_mail_enabled" checked={formData.enabled}
+            onChange={(e) => update('enabled', e.target.checked)}
+            className="w-4 h-4 rounded border-gray-300 text-primary-600" />
+          <label htmlFor="imap_mail_enabled" className="font-medium text-gray-700">Activer le service IMAP Email-PDF</label>
+        </div>
+
+        <div className="grid grid-cols-3 gap-4">
+          <div className="col-span-2">
+            <label className="label">Serveur IMAP</label>
+            <input type="text" value={formData.host} onChange={(e) => update('host', e.target.value)}
+              className="input" placeholder="imap.exemple.com" />
+          </div>
+          <div>
+            <label className="label">Port</label>
+            <input type="number" value={formData.port} onChange={(e) => update('port', parseInt(e.target.value))}
+              className="input" />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="label">Utilisateur</label>
+            <input type="text" value={formData.user} onChange={(e) => update('user', e.target.value)}
+              className="input" placeholder="user@exemple.com" />
+          </div>
+          <div>
+            <label className="label">Mot de passe</label>
+            <div className="relative">
+              <input type={showPassword ? 'text' : 'password'} value={formData.password}
+                onChange={(e) => update('password', e.target.value)} className="input pr-10" />
+              <button type="button" onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs">
+                {showPassword ? 'Masquer' : 'Afficher'}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="label">Dossier</label>
+            <input type="text" value={formData.mailbox} onChange={(e) => update('mailbox', e.target.value)}
+              className="input" placeholder="INBOX" />
+          </div>
+          <div>
+            <label className="label">Intervalle (minutes)</label>
+            <input type="number" value={formData.checkInterval} min="1"
+              onChange={(e) => update('checkInterval', parseInt(e.target.value))} className="input" />
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <input type="checkbox" id="imap_mail_tls" checked={formData.tls}
+            onChange={(e) => update('tls', e.target.checked)}
+            className="w-4 h-4 rounded border-gray-300 text-primary-600" />
+          <label htmlFor="imap_mail_tls" className="text-gray-700">Utiliser TLS</label>
+        </div>
+
+        <div className="border-t pt-4">
+          <h3 className="font-medium text-gray-900 mb-3">Conversion Email-PDF</h3>
+          <div className="flex items-center gap-3">
+            <input type="checkbox" id="imap_mail_alwaysBody" checked={formData.alwaysGenerateBodyPdf}
+              onChange={(e) => update('alwaysGenerateBodyPdf', e.target.checked)}
+              className="w-4 h-4 rounded border-gray-300 text-primary-600" />
+            <label htmlFor="imap_mail_alwaysBody" className="text-gray-700">
+              Toujours générer le PDF du corps du mail (même si l'email a des pièces jointes PDF)
+            </label>
+          </div>
+          <p className="text-xs text-gray-500 mt-1 ml-7">
+            Si désactivé, le PDF du corps est généré uniquement quand l'email n'a pas de pièce jointe PDF.
+          </p>
+        </div>
+
+        <div className="border-t pt-4">
+          <h3 className="font-medium text-gray-900 mb-3">Filtres</h3>
+          <div className="flex items-center gap-3 mb-3">
+            <input type="checkbox" id="imap_mail_autoImport" checked={formData.autoImport}
+              onChange={(e) => update('autoImport', e.target.checked)}
+              className="w-4 h-4 rounded border-gray-300 text-primary-600" />
+            <label htmlFor="imap_mail_autoImport" className="text-gray-700">Importer tous les emails</label>
+          </div>
+
+          {!formData.autoImport && (
+            <div className="grid grid-cols-2 gap-4 ml-7">
+              <div>
+                <label className="label">Domaines</label>
+                <input type="text" value={formData.filterDomains} onChange={(e) => update('filterDomains', e.target.value)}
+                  className="input" placeholder="exemple.com, domaine.fr" />
+              </div>
+              <div>
+                <label className="label">Emails</label>
+                <input type="text" value={formData.filterEmails} onChange={(e) => update('filterEmails', e.target.value)}
+                  className="input" placeholder="user@exemple.com" />
+              </div>
+              <div>
+                <label className="label">Mots-clés sujet</label>
+                <input type="text" value={formData.filterSubjectKeywords} onChange={(e) => update('filterSubjectKeywords', e.target.value)}
+                  className="input" placeholder="facture, commande" />
+              </div>
+              <div>
+                <label className="label">Mots-clés corps</label>
+                <input type="text" value={formData.filterBodyKeywords} onChange={(e) => update('filterBodyKeywords', e.target.value)}
+                  className="input" placeholder="important, urgent" />
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="border-t pt-4">
+          <h3 className="font-medium text-gray-900 mb-3">Post-traitement</h3>
+          <div className="space-y-3">
+            <div>
+              <label className="label">Dossier des traités</label>
+              <input type="text" value={formData.processedFolder} onChange={(e) => update('processedFolder', e.target.value)}
+                className="input w-64" placeholder="Traités" />
+            </div>
+            <div className="flex items-center gap-3">
+              <input type="checkbox" checked={formData.markAsRead}
+                onChange={(e) => update('markAsRead', e.target.checked)}
+                className="w-4 h-4 rounded border-gray-300 text-primary-600" />
+              <span className="text-gray-700">Marquer comme lu après traitement</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <input type="checkbox" checked={formData.processAllMails}
+                onChange={(e) => update('processAllMails', e.target.checked)}
+                className="w-4 h-4 rounded border-gray-300 text-primary-600" />
+              <span className="text-gray-700">Traiter tous les emails (pas seulement les non lus)</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <input type="checkbox" checked={formData.deleteAfterProcess}
+                onChange={(e) => update('deleteAfterProcess', e.target.checked)}
+                className="w-4 h-4 rounded border-gray-300 text-primary-600" />
+              <span className="text-gray-700">Supprimer au lieu de déplacer</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-end pt-4 border-t">
+          <button onClick={() => saveMutation.mutate()} disabled={saveMutation.isLoading}
+            className="btn-primary">
+            {saveMutation.isLoading ? 'Enregistrement...' : 'Enregistrer'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 // Composant Stockage externe (OneDrive, S3, NextCloud)
 function StorageSettings() {
@@ -4363,6 +4641,11 @@ export default function SettingsPage() {
                   </div>
                 </div>
               </div>
+            )}
+
+            {/* IMAP Email-PDF Settings */}
+            {activeTab === 'imap-mail' && (
+              <ImapMailSettings />
             )}
 
             {/* SMTP Settings */}

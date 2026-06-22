@@ -21,11 +21,18 @@ const MailDetailPage = lazy(() => import('./pages/mails/MailDetailPage'));
 const IncomingMailsPage = lazy(() => import('./pages/mails/IncomingMailsPage'));
 const StatisticsPage = lazy(() => import('./pages/stats/StatisticsPage'));
 
+// Pages Courrier Départ
+const CreateOutgoingMailPage = lazy(() => import('./pages/outgoing/CreateOutgoingMailPage'));
+const OutgoingMailDetailPage = lazy(() => import('./pages/outgoing/OutgoingMailDetailPage'));
+const OutgoingMailsDraftPage = lazy(() => import('./pages/outgoing/OutgoingMailsDraftPage'));
+const OutgoingMailsSentPage = lazy(() => import('./pages/outgoing/OutgoingMailsSentPage'));
+const OutgoingMailsArchivedPage = lazy(() => import('./pages/outgoing/OutgoingMailsArchivedPage'));
+
 // Pages Admin
 const UsersPage = lazy(() => import('./pages/admin/UsersPage'));
 const GroupsPage = lazy(() => import('./pages/admin/GroupsPage'));
 const ServicesPage = lazy(() => import('./pages/admin/ServicesPage'));
-const SendersPage = lazy(() => import('./pages/admin/SendersPage'));
+const ContactsPage = lazy(() => import('./pages/admin/SendersPage'));
 const SubjectsPage = lazy(() => import('./pages/admin/SubjectsPage'));
 const SettingsPage = lazy(() => import('./pages/admin/SettingsPage'));
 const LdapGroupMappingsPage = lazy(() => import('./pages/admin/LdapGroupMappingsPage'));
@@ -126,6 +133,20 @@ function App() {
           <Route path="/courriers/archives" element={<MailsArchivedPage />} />
           <Route path="/courriers/:id" element={<MailDetailPage />} />
 
+          {/* Courrier Départ */}
+          <Route
+            path="/courriers/depart/nouveau"
+            element={
+              <ProtectedRoute permissions={['create_outgoing']}>
+                <CreateOutgoingMailPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/courriers/depart/brouillons" element={<OutgoingMailsDraftPage />} />
+          <Route path="/courriers/depart/envoyes" element={<OutgoingMailsSentPage />} />
+          <Route path="/courriers/depart/archives" element={<OutgoingMailsArchivedPage />} />
+          <Route path="/courriers/depart/:id" element={<OutgoingMailDetailPage />} />
+
           {/* Statistiques */}
           <Route path="/statistiques" element={<StatisticsPage />} />
 
@@ -158,17 +179,17 @@ function App() {
             }
           />
           <Route
-            path="/admin/expediteurs"
+            path="/admin/contacts"
             element={
-              <ProtectedRoute permissions={['view_senders']}>
-                <SendersPage />
+              <ProtectedRoute permissions={['view_contacts']}>
+                <ContactsPage />
               </ProtectedRoute>
             }
           />
           <Route
             path="/admin/objets"
             element={
-              <ProtectedRoute permissions={['view_senders']}>
+              <ProtectedRoute permissions={['view_contacts']}>
                 <SubjectsPage />
               </ProtectedRoute>
             }

@@ -80,7 +80,7 @@ const mailSchema = new mongoose.Schema({
   },
   sender: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Sender',
+    ref: 'Contact',
     required: true
   },
   senderName: {

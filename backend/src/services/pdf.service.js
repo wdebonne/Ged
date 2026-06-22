@@ -581,8 +581,90 @@ export const generateMailHistoryPDF = async (mail, options = {}) => {
   });
 };
 
+const stripHtml = (html) => {
+  if (!html) return '';
+  return html
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n\n')
+    .replace(/<\/div>/gi, '\n')
+    .replace(/<\/li>/gi, '\n')
+    .replace(/<[^>]*>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+};
+
+export const generateEmailPDF = async (emailData) => {
+  return new Promise((resolve, reject) => {
+    try {
+      const doc = new PDFDocument({
+        size: 'A4',
+        margin: 50,
+        info: {
+          Title: `Email - ${emailData.subject || 'Sans objet'}`,
+          Author: 'GED Courrier - IMAP Email-to-PDF',
+          Creator: 'Service Informatique de Pavilly'
+        }
+      });
+
+      const buffers = [];
+      doc.on('data', buffers.push.bind(buffers));
+      doc.on('end', () => resolve(Buffer.concat(buffers)));
+
+      // En-tête
+      doc.fontSize(16).font('Helvetica-Bold')
+        .text('Email recu', { align: 'center' });
+      doc.moveDown(0.5);
+
+      // Ligne séparatrice
+      doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke('#3B82F6');
+      doc.moveDown(0.8);
+
+      // Métadonnées
+      const metaFields = [
+        { label: 'De', value: emailData.from || '' },
+        { label: 'A', value: emailData.to || '' },
+      ];
+      if (emailData.cc) metaFields.push({ label: 'Cc', value: emailData.cc });
+      metaFields.push(
+        { label: 'Objet', value: emailData.subject || '(Sans objet)' },
+        { label: 'Date', value: emailData.date ? new Date(emailData.date).toLocaleString('fr-FR') : '' }
+      );
+
+      for (const field of metaFields) {
+        doc.fontSize(10).font('Helvetica-Bold').text(`${field.label}: `, { continued: true });
+        doc.font('Helvetica').text(field.value);
+      }
+
+      doc.moveDown(0.5);
+      doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke('#e5e7eb');
+      doc.moveDown(0.8);
+
+      // Corps du mail
+      const bodyText = emailData.text || stripHtml(emailData.html) || '(Pas de contenu)';
+      doc.fontSize(10).font('Helvetica').text(bodyText, { width: 495 });
+
+      // Pied de page
+      doc.moveDown(2);
+      doc.fontSize(7).fillColor('#9CA3AF')
+        .text(`Généré automatiquement par GED Courrier - IMAP Email-to-PDF le ${new Date().toLocaleString('fr-FR')}`,
+          50, doc.page.height - 40, { align: 'center' });
+
+      doc.end();
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 export default {
   generateMailReport,
   generateMailDetailPDF,
-  generateMailHistoryPDF
+  generateMailHistoryPDF,
+  generateEmailPDF
 };

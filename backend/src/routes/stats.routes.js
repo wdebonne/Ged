@@ -1,5 +1,5 @@
 import express from 'express';
-import { Mail, User, Service, PendingMail, Delegation, MAIL_STATUS, PERMISSIONS } from '../models/index.js';
+import { Mail, OutgoingMail, User, Service, PendingMail, Delegation, MAIL_STATUS, OUTGOING_MAIL_STATUS, PERMISSIONS } from '../models/index.js';
 import { authenticate, authorize } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
@@ -134,6 +134,25 @@ router.get('/', authenticate, async (req, res) => {
 
       stats.pendingImport = pendingImport;
     }
+
+    // Stats courrier départ
+    const outgoingQuery = userPermissions.includes(PERMISSIONS.VIEW_ALL_OUTGOING)
+      ? {}
+      : (userPermissions.includes(PERMISSIONS.VIEW_SERVICE_OUTGOING) && userServiceIds.length > 0)
+        ? { $or: [{ sender: req.user._id }, { service: { $in: userServiceIds } }] }
+        : { sender: req.user._id };
+
+    const [outDraft, outSent, outArchived] = await Promise.all([
+      OutgoingMail.countDocuments({ ...outgoingQuery, status: OUTGOING_MAIL_STATUS.DRAFT }),
+      OutgoingMail.countDocuments({ ...outgoingQuery, status: OUTGOING_MAIL_STATUS.SENT }),
+      OutgoingMail.countDocuments({ ...outgoingQuery, status: OUTGOING_MAIL_STATUS.ARCHIVED })
+    ]);
+
+    stats.outgoing = {
+      draft: outDraft,
+      sent: outSent,
+      archived: outArchived
+    };
 
     res.json({
       success: true,
@@ -703,7 +722,7 @@ router.get('/detailed', authenticate, async (req, res) => {
       },
       {
         $lookup: {
-          from: 'senders',
+          from: 'contacts',
           localField: '_id',
           foreignField: '_id',
           as: 'sender'

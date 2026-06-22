@@ -59,7 +59,7 @@ export const createBackup = async ({ includeFiles = true, label = '' } = {}) => 
   const stats = {
     courriers: collections.mails?.length ?? 0,
     'courriers en attente': collections.pendingmails?.length ?? 0,
-    expediteurs: collections.senders?.length ?? 0,
+    contacts: collections.contacts?.length ?? 0,
     objets: collections.subjects?.length ?? 0,
     services: collections.services?.length ?? 0,
     utilisateurs: collections.users?.length ?? 0,

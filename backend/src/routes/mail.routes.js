@@ -3,7 +3,7 @@ import { body, validationResult, query } from 'express-validator';
 import mongoose from 'mongoose';
 import fs from 'fs';
 import path from 'path';
-import { Mail, PendingMail, Sender, Subject, User, Settings, Service, MAIL_STATUS, RESPONSE_TYPE, PERMISSIONS, Delegation } from '../models/index.js';
+import { Mail, PendingMail, Contact, Subject, User, Settings, Service, MAIL_STATUS, RESPONSE_TYPE, PERMISSIONS, Delegation } from '../models/index.js';
 import { authenticate, authorize, canImportMails, isAdmin } from '../middleware/auth.middleware.js';
 import { uploadCourrier, uploadResponse, uploadPending, handleUploadError } from '../middleware/upload.middleware.js';
 import { extractTextFromPDF } from '../services/ocr.service.js';
@@ -384,14 +384,14 @@ router.post('/', authenticate, canImportMails, uploadCourrier.single('document')
     // Gérer l'expéditeur
     let sender;
     if (senderId && mongoose.Types.ObjectId.isValid(senderId)) {
-      sender = await Sender.findById(senderId);
+      sender = await Contact.findById(senderId);
     }
     
     if (!sender && senderName) {
       // Chercher par nom ou créer
-      sender = await Sender.findOne({ name: senderName });
+      sender = await Contact.findOne({ name: senderName });
       if (!sender) {
-        sender = new Sender({ name: senderName, isActive: true });
+        sender = new Contact({ name: senderName, isActive: true });
         await sender.save();
       }
     }
@@ -675,19 +675,19 @@ router.post('/import', authenticate, canImportMails, [
     // Vérifier ou créer l'expéditeur
     let sender;
     if (mongoose.Types.ObjectId.isValid(senderId)) {
-      sender = await Sender.findById(senderId);
+      sender = await Contact.findById(senderId);
     }
     
     if (!sender) {
       // Chercher par nom (insensible à la casse)
       const senderName = senderId || customSenderName;
-      sender = await Sender.findOne({ 
+      sender = await Contact.findOne({ 
         name: { $regex: new RegExp(`^${senderName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
       });
       
       // Créer seulement si l'expéditeur n'existe pas
       if (!sender) {
-        sender = new Sender({
+        sender = new Contact({
           name: senderName,
           isActive: true
         });

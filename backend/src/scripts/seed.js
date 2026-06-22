@@ -6,7 +6,7 @@ import path from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-import { User, Group, Service, Sender, Settings, DEFAULT_PERMISSIONS, PERMISSIONS } from '../models/index.js';
+import { User, Group, Service, Contact, Settings, DEFAULT_PERMISSIONS, PERMISSIONS } from '../models/index.js';
 
 // Crée les groupes, services, comptes par défaut, expéditeurs et paramètres de démonstration.
 // Suppose une base vide (pas de vérification d'existants ni de suppression) : appelée à la fois
@@ -131,7 +131,7 @@ export const seedDatabase = async () => {
 
   // Créer quelques expéditeurs de démonstration
   console.log('📮 Création des expéditeurs de démonstration...');
-  await Sender.insertMany([
+  await Contact.insertMany([
     { name: 'Préfecture de Seine-Maritime', organization: 'Préfecture', email: 'contact@seine-maritime.gouv.fr' },
     { name: 'Conseil Départemental 76', organization: 'Département', email: 'contact@seinemaritime.fr' },
     { name: 'Région Normandie', organization: 'Région', email: 'contact@normandie.fr' },
@@ -190,7 +190,7 @@ if (isCli) {
         await Group.deleteMany({});
         await User.deleteMany({});
         await Service.deleteMany({});
-        await Sender.deleteMany({});
+        await Contact.deleteMany({});
         await Settings.deleteMany({});
       }
 
