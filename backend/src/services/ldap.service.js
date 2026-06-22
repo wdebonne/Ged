@@ -244,6 +244,10 @@ export const fetchRequiredGroupMembers = async () => {
 // Tester la connexion LDAP
 export const testLDAPConnection = async (config) => {
   return new Promise((resolve) => {
+    console.log('[LDAP TEST] URL:', config.url);
+    console.log('[LDAP TEST] Bind DN:', config.bindDN);
+    console.log('[LDAP TEST] Password length:', config.bindPassword ? config.bindPassword.length : 0);
+
     const client = ldap.createClient({
       url: config.url,
       tlsOptions: { rejectUnauthorized: false },
@@ -251,16 +255,20 @@ export const testLDAPConnection = async (config) => {
     });
 
     client.on('error', (err) => {
-      resolve({ success: false, message: err.message });
+      console.error('[LDAP TEST] Client error:', err.message, '| code:', err.code);
+      resolve({ success: false, message: `Erreur connexion: ${err.message}` });
     });
 
     client.on('connect', () => {
+      console.log('[LDAP TEST] TCP/TLS connecté, tentative de bind...');
       client.bind(config.bindDN, config.bindPassword, (err) => {
         if (err) {
+          console.error('[LDAP TEST] Bind échoué:', err.message, '| code:', err.code, '| name:', err.name, '| lde_message:', err.lde_message);
           client.unbind();
-          return resolve({ success: false, message: 'Échec de l\'authentification' });
+          return resolve({ success: false, message: `Échec de l'authentification: ${err.lde_message || err.message}` });
         }
 
+        console.log('[LDAP TEST] Bind réussi !');
         client.unbind();
         resolve({ success: true, message: 'Connexion réussie' });
       });
