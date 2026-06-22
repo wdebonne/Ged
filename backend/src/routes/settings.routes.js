@@ -384,6 +384,7 @@ router.delete('/:key', authenticate, isAdmin, async (req, res) => {
 // POST /api/settings/ldap/test - Tester la connexion LDAP
 router.post('/ldap/test', authenticate, authorize(PERMISSIONS.MANAGE_LDAP), async (req, res) => {
   try {
+    console.log('[LDAP TEST ROUTE] Body reçu:', JSON.stringify({ ...req.body, bindPassword: req.body.bindPassword ? '***' : undefined }));
     const { server, port, useTLS, bindDN, bindPassword } = req.body;
 
     const result = await testLDAPConnection({
