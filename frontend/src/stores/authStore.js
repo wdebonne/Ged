@@ -13,10 +13,10 @@ export const useAuthStore = create(
       error: null,
 
       // Connexion
-      login: async (username, password, authMethod = 'local') => {
+      login: async (username, password) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await api.post('/auth/login', { username, password, authMethod });
+          const response = await api.post('/auth/login', { username, password });
           const { token, refreshToken, user } = response.data.data;
 
           api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
