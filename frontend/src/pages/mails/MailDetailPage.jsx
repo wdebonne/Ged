@@ -633,13 +633,18 @@ export default function MailDetailPage() {
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div className="flex items-center gap-2 text-gray-600">
                   <UserIcon className="w-4 h-4" />
-                  <span>Expéditeur:
-                    <button
-                      onClick={() => setShowContactModal(true)}
-                      className="font-bold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer transition-colors"
-                    >
-                      {mail.sender?.name || mail.senderName}
-                    </button>
+                  <span>Expéditeur:{' '}
+                    {mail.sender && typeof mail.sender === 'object' ? (
+                      <button
+                        type="button"
+                        onClick={() => setShowContactModal(true)}
+                        className="font-bold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer transition-colors"
+                      >
+                        {mail.sender.name}
+                      </button>
+                    ) : (
+                      <strong>{mail.senderName}</strong>
+                    )}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-gray-600">
@@ -1358,7 +1363,7 @@ export default function MailDetailPage() {
       {/* Modal Ajouter une réponse */}
       {/* Modal Fiche Contact Expéditeur */}
       <AnimatePresence>
-        {showContactModal && mail?.sender && (
+        {showContactModal && mail?.sender && typeof mail.sender === 'object' && (
           <div className="fixed inset-0 z-50 overflow-y-auto">
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowContactModal(false)} />
             <div className="flex min-h-full items-center justify-center p-4">

@@ -101,7 +101,7 @@ export default function OutgoingMailDetailPage() {
   const statusInfo = STATUS_LABELS[mail.status] || STATUS_LABELS.draft;
   const priorityInfo = PRIORITY_LABELS[mail.priority] || PRIORITY_LABELS.normal;
 
-  const pdfUrl = `/api/outgoing-mails/${mail._id}/pdf`;
+  const pdfUrl = `/uploads/${mail.filePath}`;
 
   return (
     <div className="space-y-6">

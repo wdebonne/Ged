@@ -230,7 +230,7 @@ router.post('/', authenticate, authorize(PERMISSIONS.CREATE_OUTGOING),
         destination: dest._id,
         destinationName: customDestName || dest.name,
         content,
-        filePath: req.file.path,
+        filePath: `outgoing/${req.file.filename}`,
         fileName: req.file.filename,
         fileSize: req.file.size,
         ocrContent,
@@ -318,10 +318,11 @@ router.put('/:id', authenticate, authorize(PERMISSIONS.EDIT_OUTGOING),
       }
 
       if (req.file) {
-        if (mail.filePath && fs.existsSync(mail.filePath)) {
-          fs.unlinkSync(mail.filePath);
+        const oldFullPath = path.join(uploadPath, mail.filePath);
+        if (mail.filePath && fs.existsSync(oldFullPath)) {
+          fs.unlinkSync(oldFullPath);
         }
-        mail.filePath = req.file.path;
+        mail.filePath = `outgoing/${req.file.filename}`;
         mail.fileName = req.file.filename;
         mail.fileSize = req.file.size;
         try {
@@ -404,12 +405,13 @@ router.post('/:id/archive', authenticate, authorize(PERMISSIONS.ARCHIVE_OUTGOING
     const archiveFileName = `${mail.reference}${ext}`;
     const archiveFilePath = path.join(archiveFullPath, archiveFileName);
 
-    if (mail.filePath && fs.existsSync(mail.filePath)) {
-      fs.copyFileSync(mail.filePath, archiveFilePath);
-      fs.unlinkSync(mail.filePath);
+    const currentFullPath = path.join(uploadPath, mail.filePath);
+    if (mail.filePath && fs.existsSync(currentFullPath)) {
+      fs.copyFileSync(currentFullPath, archiveFilePath);
+      fs.unlinkSync(currentFullPath);
     }
 
-    mail.filePath = archiveFilePath;
+    mail.filePath = path.join(archiveRelPath, archiveFileName);
     mail.fileName = archiveFileName;
     await mail.archive(req.user._id);
 
@@ -438,8 +440,9 @@ router.delete('/:id', authenticate, isAdmin, async (req, res) => {
       return res.status(404).json({ success: false, message: 'Courrier départ non trouvé' });
     }
 
-    if (mail.filePath && fs.existsSync(mail.filePath)) {
-      fs.unlinkSync(mail.filePath);
+    const fullPath = path.join(uploadPath, mail.filePath);
+    if (mail.filePath && fs.existsSync(fullPath)) {
+      fs.unlinkSync(fullPath);
     }
 
     await OutgoingMail.findByIdAndDelete(req.params.id);
@@ -459,13 +462,14 @@ router.get('/:id/pdf', authenticate, async (req, res) => {
       return res.status(404).json({ success: false, message: 'Courrier départ non trouvé' });
     }
 
-    if (!mail.filePath || !fs.existsSync(mail.filePath)) {
+    const fullPath = path.join(uploadPath, mail.filePath);
+    if (!mail.filePath || !fs.existsSync(fullPath)) {
       return res.status(404).json({ success: false, message: 'Fichier non trouvé' });
     }
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `inline; filename="${mail.fileName}"`);
-    fs.createReadStream(mail.filePath).pipe(res);
+    fs.createReadStream(fullPath).pipe(res);
   } catch (error) {
     console.error('Erreur téléchargement PDF:', error);
     res.status(500).json({ success: false, message: 'Erreur serveur' });
