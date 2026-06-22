@@ -381,10 +381,11 @@ export const fetchLDAPGroups = async ({ server, port, useTLS, bindDN, bindPasswo
               info[attr.type] = attr.values[0];
             }
           }
+          const dn = entry.objectName || entry.dn;
           groups.push({
-            dn: entry.objectName || entry.dn,
-            name: info.cn || '',
-            description: info.description || ''
+            dn: typeof dn === 'string' ? dn : String(dn),
+            name: String(info.cn || ''),
+            description: String(info.description || '')
           });
         });
 
