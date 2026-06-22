@@ -39,7 +39,7 @@ export default function LdapGroupMappingsPage() {
     queryKey: ['services'],
     queryFn: async () => {
       const response = await servicesAPI.getAll();
-      return response.data;
+      return response.data.data;
     }
   });
 
@@ -65,7 +65,7 @@ export default function LdapGroupMappingsPage() {
 
   const mappings = data?.data || [];
   const groups = groupsData?.data || [];
-  const services = servicesData?.data || [];
+  const services = servicesData || [];
 
   return (
     <div className="space-y-6">
