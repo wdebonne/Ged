@@ -3732,6 +3732,20 @@ export default function SettingsPage() {
                   </label>
                 </div>
 
+                <div>
+                  <label className="label">Groupe AD requis (DN)</label>
+                  <input
+                    type="text"
+                    value={formData.ldap?.requiredGroupDN || ''}
+                    onChange={(e) => handleChange('ldap', 'requiredGroupDN', e.target.value)}
+                    className="input"
+                    placeholder="Ex: CN=GED,OU=groups,DC=pavilly,DC=int"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Si renseigné, seuls les utilisateurs membres de ce groupe AD pourront se connecter via LDAP. Laissez vide pour autoriser tous les utilisateurs.
+                  </p>
+                </div>
+
                 <div className="border-t border-gray-200 pt-4">
                   <div className="flex items-center justify-between mb-3">
                     <div>

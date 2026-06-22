@@ -62,21 +62,85 @@ router.post('/login', loginLimiter, [
       });
     }
 
-    const { username, password, authMethod = 'local' } = req.body;
+    const { username, password, authMethod } = req.body;
 
     let user = null;
+    let ldapResult = null;
 
-    // Authentification LDAP
-    if (authMethod === 'ldap' && process.env.LDAP_ENABLED === 'true') {
-      const ldapResult = await authenticateLDAP(username, password);
+    // Déterminer la stratégie d'authentification :
+    // - Si authMethod est explicitement fourni, l'utiliser
+    // - Sinon, tenter LDAP d'abord (si activé), puis fallback local
+    const ldapEnabled = process.env.LDAP_ENABLED === 'true';
+    const kerberosEnabled = process.env.KERBEROS_ENABLED === 'true';
+    const explicitMethod = authMethod || null;
 
-      if (!ldapResult.success) {
+    let authenticatedVia = null;
+
+    // === Tentative LDAP ===
+    if (ldapEnabled && (!explicitMethod || explicitMethod === 'ldap')) {
+      ldapResult = await authenticateLDAP(username, password);
+      if (ldapResult.success) {
+        authenticatedVia = 'ldap';
+      } else if (explicitMethod === 'ldap') {
         return res.status(401).json({
           success: false,
           message: ldapResult.message || 'Identifiants incorrects'
         });
       }
+    }
 
+    // === Tentative Kerberos ===
+    if (!authenticatedVia && kerberosEnabled && (!explicitMethod || explicitMethod === 'kerberos')) {
+      const kerberosResult = await authenticateKerberos(username, password);
+      if (kerberosResult.success) {
+        authenticatedVia = 'kerberos';
+      } else if (explicitMethod === 'kerberos') {
+        return res.status(401).json({
+          success: false,
+          message: 'Identifiants incorrects'
+        });
+      }
+    }
+
+    // === Tentative locale ===
+    if (!authenticatedVia && (!explicitMethod || explicitMethod === 'local')) {
+      user = await User.findOne({
+        $or: [
+          { username: username.toLowerCase() },
+          { email: username.toLowerCase() }
+        ]
+      }).populate('group').populate('services');
+
+      if (user && (user.ldapUser || user.kerberosUser)) {
+        // Compte externe : ne pas tenter l'auth locale
+        if (explicitMethod === 'local') {
+          return res.status(401).json({
+            success: false,
+            message: 'Ce compte utilise une authentification externe (LDAP/Kerberos)'
+          });
+        }
+      } else if (user) {
+        const isMatch = await user.comparePassword(password);
+        if (isMatch) {
+          authenticatedVia = 'local';
+        } else if (explicitMethod === 'local') {
+          return res.status(401).json({
+            success: false,
+            message: 'Identifiants incorrects'
+          });
+        }
+      }
+    }
+
+    if (!authenticatedVia) {
+      return res.status(401).json({
+        success: false,
+        message: 'Identifiants incorrects'
+      });
+    }
+
+    // === Post-auth LDAP : création/synchronisation utilisateur ===
+    if (authenticatedVia === 'ldap') {
       user = await User.findOne({
         $or: [
           { username: username.toLowerCase() },
@@ -85,7 +149,6 @@ router.post('/login', loginLimiter, [
       }).populate('group').populate('services');
 
       if (!user) {
-        // Créer l'utilisateur s'il n'existe pas
         const defaultGroup = await Group.findOne({ name: 'Utilisateur' });
         user = new User({
           username: username.toLowerCase(),
@@ -99,7 +162,6 @@ router.post('/login', loginLimiter, [
         await user.save();
         user = await User.findById(user._id).populate('group').populate('services');
       } else {
-        // Synchroniser nom/prénom/email depuis l'annuaire à chaque connexion
         const updates = {};
         if (ldapResult.userInfo.givenName && ldapResult.userInfo.givenName !== user.firstName) {
           updates.firstName = ldapResult.userInfo.givenName;
@@ -121,9 +183,6 @@ router.post('/login', loginLimiter, [
         }
       }
 
-      // Réactiver automatiquement un compte désactivé par la synchronisation périodique du
-      // groupe LDAP requis (LDAP_REQUIRED_GROUP_DN) : l'authentification ci-dessus vient de
-      // confirmer que l'utilisateur en est de nouveau membre.
       if (user.deactivatedByLdapSync) {
         user.isActive = true;
         user.deactivatedByLdapSync = false;
@@ -139,15 +198,11 @@ router.post('/login', loginLimiter, [
             normalizedDN: { $in: memberOfNormalized }
           }).sort({ priority: -1 }).populate('services').populate('supervisorServices');
 
-          // Rôle : la mapping prioritaire qui définit un gedGroup
           const roleMapping = mappings.find((m) => m.gedGroup);
           if (roleMapping && String(user.group?._id || user.group) !== String(roleMapping.gedGroup)) {
             user.group = roleMapping.gedGroup;
           }
 
-          // Services accessibles : synchronisés avec les correspondances actives. Les services
-          // attribués manuellement (jamais accordés via LDAP) restent intacts ; seuls les services
-          // précédemment accordés via LDAP et non reconduits par les correspondances actuelles sont retirés.
           const currentServiceIds = new Set();
           mappings.forEach((m) => m.services.forEach((s) => currentServiceIds.add(String(s._id))));
 
@@ -164,7 +219,6 @@ router.post('/login', loginLimiter, [
           user.services = Array.from(userServiceIds);
           user.ldapManagedServices = Array.from(currentServiceIds);
 
-          // Superviseur : synchronisé avec les correspondances "Devient superviseur de" actives.
           const currentSupervisorServiceIds = new Set();
           mappings.forEach((m) => m.supervisorServices.forEach((s) => currentSupervisorServiceIds.add(String(s._id))));
 
@@ -172,8 +226,6 @@ router.post('/login', loginLimiter, [
           const servicesToUnsupervise = previousSupervisorServiceIds.filter((id) => !currentSupervisorServiceIds.has(id));
 
           if (servicesToUnsupervise.length) {
-            // Ne retire la supervision que si elle est toujours détenue par cet utilisateur
-            // (ne touche pas à une réaffectation manuelle effectuée depuis)
             await Service.updateMany(
               { _id: { $in: servicesToUnsupervise }, supervisor: user._id },
               { supervisor: null }
@@ -196,58 +248,25 @@ router.post('/login', loginLimiter, [
         }
       }
     }
-    // Authentification Kerberos
-    else if (authMethod === 'kerberos' && process.env.KERBEROS_ENABLED === 'true') {
-      const kerberosResult = await authenticateKerberos(username, password);
-      if (kerberosResult.success) {
-        user = await User.findOne({ username: username.toLowerCase() })
-          .populate('group')
-          .populate('services');
-        
-        if (!user) {
-          const defaultGroup = await Group.findOne({ name: 'Utilisateur' });
-          user = new User({
-            username: username.toLowerCase(),
-            email: `${username}@${process.env.KERBEROS_REALM}`,
-            firstName: username,
-            lastName: '',
-            kerberosUser: true,
-            group: defaultGroup._id
-          });
-          await user.save();
-          user = await User.findById(user._id).populate('group').populate('services');
-        }
-      }
-    }
-    // Authentification locale
-    else {
-      user = await User.findOne({
-        $or: [
-          { username: username.toLowerCase() },
-          { email: username.toLowerCase() }
-        ]
-      }).populate('group').populate('services');
+
+    // === Post-auth Kerberos : création utilisateur ===
+    if (authenticatedVia === 'kerberos') {
+      user = await User.findOne({ username: username.toLowerCase() })
+        .populate('group')
+        .populate('services');
 
       if (!user) {
-        return res.status(401).json({
-          success: false,
-          message: 'Identifiants incorrects'
+        const defaultGroup = await Group.findOne({ name: 'Utilisateur' });
+        user = new User({
+          username: username.toLowerCase(),
+          email: `${username}@${process.env.KERBEROS_REALM}`,
+          firstName: username,
+          lastName: '',
+          kerberosUser: true,
+          group: defaultGroup._id
         });
-      }
-
-      if (user.ldapUser || user.kerberosUser) {
-        return res.status(401).json({
-          success: false,
-          message: 'Ce compte utilise une authentification externe (LDAP/Kerberos)'
-        });
-      }
-
-      const isMatch = await user.comparePassword(password);
-      if (!isMatch) {
-        return res.status(401).json({
-          success: false,
-          message: 'Identifiants incorrects'
-        });
+        await user.save();
+        user = await User.findById(user._id).populate('group').populate('services');
       }
     }
 

@@ -1,34 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuthStore } from '../../stores/authStore';
-import { authAPI } from '../../services/api';
 import toast from 'react-hot-toast';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [authMethod, setAuthMethod] = useState('local');
-  const [authConfig, setAuthConfig] = useState({ ldapEnabled: false, kerberosEnabled: false });
   const { login, isLoading, error, clearError } = useAuthStore();
-
-  // Charger la configuration d'authentification au montage
-  useEffect(() => {
-    const loadAuthConfig = async () => {
-      try {
-        const response = await authAPI.getConfig();
-        if (response.data?.success) {
-          setAuthConfig(response.data.data);
-        }
-      } catch (error) {
-        console.error('Erreur lors du chargement de la configuration auth:', error);
-      }
-    };
-    loadAuthConfig();
-  }, []);
-
-  // Vérifier si au moins une méthode alternative est activée
-  const hasAlternativeAuth = authConfig.ldapEnabled || authConfig.kerberosEnabled;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,7 +18,7 @@ export default function LoginPage() {
       return;
     }
 
-    const result = await login(username, password, authMethod);
+    const result = await login(username, password);
     if (result.success) {
       toast.success('Connexion réussie !');
     } else {
@@ -53,49 +32,6 @@ export default function LoginPage() {
       <p className="text-gray-600 mb-6">Accédez à votre espace de gestion de courrier</p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Auth Method Selector - Affiché uniquement si LDAP ou Kerberos est activé */}
-        {hasAlternativeAuth && (
-          <div className="flex gap-2 p-1 bg-gray-100 rounded-lg">
-            <button
-              type="button"
-              onClick={() => setAuthMethod('local')}
-              className={`flex-1 py-2 px-3 text-sm font-medium rounded-md transition-all ${
-                authMethod === 'local'
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Local
-            </button>
-            {authConfig.ldapEnabled && (
-              <button
-                type="button"
-                onClick={() => setAuthMethod('ldap')}
-                className={`flex-1 py-2 px-3 text-sm font-medium rounded-md transition-all ${
-                  authMethod === 'ldap'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                LDAP
-              </button>
-            )}
-            {authConfig.kerberosEnabled && (
-              <button
-                type="button"
-                onClick={() => setAuthMethod('kerberos')}
-                className={`flex-1 py-2 px-3 text-sm font-medium rounded-md transition-all ${
-                  authMethod === 'kerberos'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Kerberos
-              </button>
-            )}
-          </div>
-        )}
-
         <div>
           <label htmlFor="username" className="label">
             Nom d'utilisateur ou email

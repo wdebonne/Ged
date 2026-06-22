@@ -36,8 +36,9 @@ import { startLdapGroupSyncService } from './services/ldapGroupSync.service.js';
 import { initBackupScheduler } from './services/backup.service.js';
 
 // Initialisation de la base
-import { User } from './models/index.js';
+import { User, Settings } from './models/index.js';
 import { seedDatabase } from './scripts/seed.js';
+import { buildLdapUrl } from './utils/ldap.utils.js';
 
 // Configuration
 dotenv.config();
@@ -207,6 +208,26 @@ const startServer = async () => {
     } catch (error) {
       console.error('❌ Erreur lors de l\'initialisation automatique de la base:', error.message);
     }
+  }
+
+  // Charger les settings LDAP de la base vers process.env (priorité sur le .env)
+  const ldapSettings = await Settings.find({ category: 'ldap', key: /^ldap_/ });
+  if (ldapSettings.length > 0) {
+    const ldapMap = {};
+    ldapSettings.forEach(s => { ldapMap[s.key] = s.value; });
+
+    if (ldapMap.ldap_enabled !== undefined) process.env.LDAP_ENABLED = String(ldapMap.ldap_enabled);
+    if (ldapMap.ldap_baseDN) process.env.LDAP_SEARCH_BASE = ldapMap.ldap_baseDN;
+    if (ldapMap.ldap_bindDN) process.env.LDAP_BIND_DN = ldapMap.ldap_bindDN;
+    if (ldapMap.ldap_bindPassword) process.env.LDAP_BIND_PASSWORD = ldapMap.ldap_bindPassword;
+    if (ldapMap.ldap_userFilter) process.env.LDAP_SEARCH_FILTER = ldapMap.ldap_userFilter;
+    if (ldapMap.ldap_requiredGroupDN !== undefined) process.env.LDAP_REQUIRED_GROUP_DN = ldapMap.ldap_requiredGroupDN || '';
+    if (ldapMap.ldap_server) {
+      const useTLS = String(ldapMap.ldap_useTLS) === 'true';
+      const port = ldapMap.ldap_port || (useTLS ? 636 : 389);
+      process.env.LDAP_URL = buildLdapUrl({ server: ldapMap.ldap_server, port, useTLS });
+    }
+    console.log('📂 Settings LDAP chargées depuis la base de données');
   }
 
   app.listen(PORT, () => {

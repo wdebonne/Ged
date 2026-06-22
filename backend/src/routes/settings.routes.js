@@ -311,6 +311,41 @@ router.put('/', authenticate, authorize(PERMISSIONS.EDIT_SETTINGS), async (req, 
       });
     }
 
+    // Synchroniser les settings LDAP vers process.env
+    const ldapEnvMap = {
+      ldap_enabled: 'LDAP_ENABLED',
+      ldap_server: null,
+      ldap_port: null,
+      ldap_useTLS: null,
+      ldap_baseDN: 'LDAP_SEARCH_BASE',
+      ldap_bindDN: 'LDAP_BIND_DN',
+      ldap_bindPassword: 'LDAP_BIND_PASSWORD',
+      ldap_userFilter: 'LDAP_SEARCH_FILTER',
+      ldap_requiredGroupDN: 'LDAP_REQUIRED_GROUP_DN'
+    };
+
+    for (const { key, value } of settings) {
+      if (value === '********') continue;
+      if (ldapEnvMap[key] !== undefined) {
+        if (ldapEnvMap[key]) {
+          process.env[ldapEnvMap[key]] = String(value ?? '');
+        }
+      }
+    }
+
+    // Reconstruire LDAP_URL si server/port/tls ont changé
+    const ldapKeys = settings.map(s => s.key);
+    if (ldapKeys.some(k => ['ldap_server', 'ldap_port', 'ldap_useTLS'].includes(k))) {
+      const serverSetting = await Settings.findOne({ key: 'ldap_server' });
+      const portSetting = await Settings.findOne({ key: 'ldap_port' });
+      const tlsSetting = await Settings.findOne({ key: 'ldap_useTLS' });
+      if (serverSetting?.value) {
+        const useTLS = String(tlsSetting?.value) === 'true';
+        const port = portSetting?.value || (useTLS ? 636 : 389);
+        process.env.LDAP_URL = buildLdapUrl({ server: serverSetting.value, port, useTLS });
+      }
+    }
+
     res.json({
       success: true,
       message: 'Paramètres mis à jour',

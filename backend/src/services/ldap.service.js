@@ -96,10 +96,10 @@ const attemptLDAPAuth = async (config, username, password) => {
           if (userEntry.attributes) {
             for (const attr of userEntry.attributes) {
               if (attr.type === 'memberOf') {
-                // memberOf est multivalué : on garde la liste complète des groupes
-                userInfo.memberOf = attr.values || [];
+                userInfo.memberOf = (attr.values || []).map(v => typeof v === 'string' ? v : String(v));
               } else {
-                userInfo[attr.type] = attr.values[0];
+                const val = attr.values[0];
+                userInfo[attr.type] = typeof val === 'string' ? val : String(val);
               }
             }
           }
