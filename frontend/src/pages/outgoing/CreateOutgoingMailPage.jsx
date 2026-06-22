@@ -32,6 +32,9 @@ export default function CreateOutgoingMailPage() {
   const { user } = useAuthStore();
   const [file, setFile] = useState(null);
   const [errors, setErrors] = useState({});
+  const [subjectSearch, setSubjectSearch] = useState('');
+  const [subjectResults, setSubjectResults] = useState([]);
+  const [showSubjectResults, setShowSubjectResults] = useState(false);
   const [destinationSearch, setDestinationSearch] = useState('');
   const [destinationResults, setDestinationResults] = useState([]);
   const [showDestResults, setShowDestResults] = useState(false);
@@ -55,6 +58,24 @@ export default function CreateOutgoingMailPage() {
       return res.data?.data || [];
     }
   });
+
+  const searchSubjects = useCallback(async (search) => {
+    if (search.length < 1) {
+      setSubjectResults([]);
+      return;
+    }
+    try {
+      const response = await subjectsAPI.autocomplete(search);
+      setSubjectResults(response.data?.data || []);
+    } catch {
+      setSubjectResults([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => searchSubjects(subjectSearch), 300);
+    return () => clearTimeout(timer);
+  }, [subjectSearch, searchSubjects]);
 
   const searchDestinations = useCallback(async (search) => {
     if (search.length < 1) {
@@ -138,16 +159,41 @@ export default function CreateOutgoingMailPage() {
 
       <form onSubmit={(e) => handleSubmit(e, false)} className="card p-6 space-y-6">
         {/* Objet */}
-        <div>
+        <div className="relative">
           <label className="label">Objet *</label>
           <input
             type="text"
-            value={formData.subject}
-            onChange={(e) => setFormData(prev => ({ ...prev, subject: e.target.value }))}
+            value={subjectSearch}
+            onChange={(e) => {
+              setSubjectSearch(e.target.value);
+              setFormData(prev => ({ ...prev, subject: e.target.value }));
+              setShowSubjectResults(true);
+            }}
+            onFocus={() => setShowSubjectResults(true)}
+            onBlur={() => setTimeout(() => setShowSubjectResults(false), 200)}
             className={`input ${errors.subject ? 'border-danger-500' : ''}`}
-            placeholder="Objet du courrier"
+            placeholder="Rechercher ou saisir un objet..."
           />
           {errors.subject && <p className="text-sm text-danger-600 mt-1">{errors.subject}</p>}
+          {showSubjectResults && subjectResults.length > 0 && (
+            <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+              {subjectResults.map((subj) => (
+                <button
+                  key={subj._id}
+                  type="button"
+                  className="w-full text-left px-4 py-2 hover:bg-gray-50"
+                  onClick={() => {
+                    setSubjectSearch(subj.name);
+                    setFormData(prev => ({ ...prev, subject: subj.name }));
+                    setShowSubjectResults(false);
+                  }}
+                >
+                  <p className="font-medium text-gray-900">{subj.name}</p>
+                  {subj.category && <p className="text-sm text-gray-500">{subj.category}</p>}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Destinataire */}
