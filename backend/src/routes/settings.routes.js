@@ -384,13 +384,21 @@ router.delete('/:key', authenticate, isAdmin, async (req, res) => {
 // POST /api/settings/ldap/test - Tester la connexion LDAP
 router.post('/ldap/test', authenticate, authorize(PERMISSIONS.MANAGE_LDAP), async (req, res) => {
   try {
-    console.log('[LDAP TEST ROUTE] Body reçu:', JSON.stringify({ ...req.body, bindPassword: req.body.bindPassword ? '***' : undefined }));
     const { server, port, useTLS, bindDN, bindPassword } = req.body;
+
+    // Si le mot de passe est masqué, récupérer le vrai depuis la base
+    let realPassword = bindPassword;
+    if (bindPassword === '********' || !bindPassword) {
+      const savedPassword = await Settings.findOne({ key: 'ldap_bindPassword' });
+      if (savedPassword) {
+        realPassword = savedPassword.value;
+      }
+    }
 
     const result = await testLDAPConnection({
       url: buildLdapUrl({ server, port, useTLS }),
       bindDN,
-      bindPassword
+      bindPassword: realPassword
     });
 
     res.json(result);
@@ -408,7 +416,16 @@ router.post('/ldap/groups', authenticate, authorize(PERMISSIONS.MANAGE_LDAP), as
   try {
     const { server, port, useTLS, bindDN, bindPassword, baseDN } = req.body;
 
-    const result = await fetchLDAPGroups({ server, port, useTLS, bindDN, bindPassword, baseDN });
+    // Si le mot de passe est masqué, récupérer le vrai depuis la base
+    let realPassword = bindPassword;
+    if (bindPassword === '********' || !bindPassword) {
+      const savedPassword = await Settings.findOne({ key: 'ldap_bindPassword' });
+      if (savedPassword) {
+        realPassword = savedPassword.value;
+      }
+    }
+
+    const result = await fetchLDAPGroups({ server, port, useTLS, bindDN, bindPassword: realPassword, baseDN });
 
     res.json(result);
   } catch (error) {
