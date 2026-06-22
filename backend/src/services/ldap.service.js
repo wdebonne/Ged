@@ -88,7 +88,8 @@ const attemptLDAPAuth = async (config, username, password) => {
             return resolve({ success: false, message: 'Utilisateur non trouvé' });
           }
 
-          const userDN = userEntry.objectName || userEntry.dn;
+          const rawDN = userEntry.objectName || userEntry.dn;
+          const userDN = typeof rawDN === 'string' ? rawDN : String(rawDN);
           const userInfo = {};
 
           // Extraire les attributs
@@ -323,7 +324,8 @@ export const syncLDAPUsers = async () => {
               userInfo[attr.type] = attr.values[0];
             }
           }
-          userInfo.dn = entry.objectName || entry.dn;
+          const rawDn = entry.objectName || entry.dn;
+          userInfo.dn = typeof rawDn === 'string' ? rawDn : String(rawDn);
           users.push(userInfo);
         });
 
