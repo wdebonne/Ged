@@ -123,6 +123,7 @@ Sur chaque page de liste, vous disposez de :
 La page de détail affiche :
 
 - **Informations générales** : Référence, date, expéditeur, objet
+- **Fiche contact expéditeur** : Cliquez sur le nom de l'expéditeur pour ouvrir sa fiche contact (email, téléphone, adresse) avec liens d'action directs
 - **Destinataires** : Principal et en copie
 - **Visualiseur PDF** : Aperçu du document avec zoom et navigation
 - **Historique/Timeline** : Toutes les actions effectuées sur le courrier
@@ -330,14 +331,28 @@ Vous pouvez modifier :
 - **Email**
 - **Mot de passe**
 
-### 9.3 Onglet Délégations
+### 9.3 Onglet Notifications
+
+Personnalisez les notifications email que vous recevez :
+
+1. Accédez à **Mon Profil** > **Notifications**
+2. Par défaut, les paramètres globaux de l'application s'appliquent
+3. Cochez **« Personnaliser mes notifications »** pour les modifier individuellement
+4. Choisissez les notifications à activer/désactiver :
+   - **Nouveau courrier (destinataire principal)** : quand un courrier vous est directement adressé
+   - **Nouveau courrier (en copie)** : quand vous êtes mis en copie
+   - **Nouveau courrier du service** : quand un courrier arrive dans votre service (superviseurs)
+   - **Courrier traité** : quand un de vos courriers est traité
+   - **Courrier archivé** : quand un de vos courriers est archivé
+   - **Rappels d'échéance** : rappels avant la date limite
+   - **Courriers en retard** : alertes pour les échéances dépassées
+5. Cliquez sur **Enregistrer les préférences**
+
+> 💡 **Astuce** : Désactivez « Personnaliser mes notifications » pour revenir aux paramètres par défaut à tout moment.
+
+### 9.4 Onglet Délégations
 
 Gérez vos délégations de courriers (voir section 7).
-
-### 9.4 Préférences
-
-- **Notifications email** : Activer/désactiver les notifications
-- **Langue de l'interface** : Si disponible
 
 ---
 
@@ -400,8 +415,27 @@ Personnalisez les emails automatiques avec :
 - Éditeur HTML intégré
 - Variables dynamiques : `{{userName}}`, `{{mailSubject}}`, `{{appName}}`...
 - Prévisualisation en temps réel
+- **Pièce jointe PDF** : cochez « Joindre le PDF du courrier » pour inclure le document en PJ (disponible pour les templates liés aux courriers)
 
-### 10.7 Paramètres système
+### 10.7 Notifications par défaut
+
+**Chemin : Administration > Paramètres > Notifications**
+
+Définissez les notifications email activées par défaut pour tous les utilisateurs :
+
+| Notification | Par défaut |
+|---|---|
+| Nouveau courrier (destinataire principal) | Activé |
+| Nouveau courrier (en copie) | Activé |
+| Nouveau courrier du service (superviseur) | Désactivé |
+| Courrier traité | Activé |
+| Courrier archivé | Activé |
+| Rappels d'échéance | Activé |
+| Courriers en retard | Activé |
+
+> 💡 Chaque utilisateur peut personnaliser ses propres préférences depuis **Mon Profil > Notifications**.
+
+### 10.8 Paramètres système
 
 **Chemin : Administration > Paramètres**
 

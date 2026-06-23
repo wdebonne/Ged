@@ -467,17 +467,31 @@ router.post('/', authenticate, canImportMails, uploadCourrier.single('document')
       { path: 'importedBy', select: 'firstName lastName' }
     ]);
 
+    // Notifications email
     try {
+      const { sendNewMailNotification, sendServiceMailNotification } = await import('../services/email.service.js');
+
+      // Notifier le destinataire principal
+      if (mail.recipient && mail.recipient.email && mail.recipient._id.toString() !== req.user._id.toString()) {
+        sendNewMailNotification(
+          mail.recipient.email,
+          `${mail.recipient.firstName} ${mail.recipient.lastName}`,
+          mail,
+          { userId: mail.recipient._id, notifType: 'email_newMail_recipient' }
+        ).catch(err => console.error('Erreur notification destinataire:', err.message));
+      }
+
+      // Notifier les superviseurs du service
       const serviceWithSupervisors = await Service.findById(serviceId).populate('supervisors', 'firstName lastName email');
       if (serviceWithSupervisors?.notifySupervisor && serviceWithSupervisors?.supervisors?.length) {
-        const { sendServiceMailNotification } = await import('../services/email.service.js');
         for (const supervisor of serviceWithSupervisors.supervisors) {
           if (supervisor.email) {
             sendServiceMailNotification(
               supervisor.email,
               `${supervisor.firstName} ${supervisor.lastName}`,
               mail,
-              serviceWithSupervisors.name
+              serviceWithSupervisors.name,
+              { userId: supervisor._id }
             ).catch(err =>
               console.error('Erreur notification superviseur:', err.message)
             );
@@ -485,7 +499,7 @@ router.post('/', authenticate, canImportMails, uploadCourrier.single('document')
         }
       }
     } catch (notifError) {
-      console.error('Erreur notification superviseur:', notifError.message);
+      console.error('Erreur notification:', notifError.message);
     }
 
     res.status(201).json({
@@ -784,17 +798,45 @@ router.post('/import', authenticate, canImportMails, [
       .populate('recipient', 'firstName lastName email')
       .populate('recipientsCopy', 'firstName lastName email');
 
+    // Notifications email
     try {
+      const { sendNewMailNotification, sendServiceMailNotification } = await import('../services/email.service.js');
+
+      // Notifier le destinataire principal
+      if (populatedMail.recipient && populatedMail.recipient.email && populatedMail.recipient._id.toString() !== req.user._id.toString()) {
+        sendNewMailNotification(
+          populatedMail.recipient.email,
+          `${populatedMail.recipient.firstName} ${populatedMail.recipient.lastName}`,
+          populatedMail,
+          { userId: populatedMail.recipient._id, notifType: 'email_newMail_recipient' }
+        ).catch(err => console.error('Erreur notification destinataire:', err.message));
+      }
+
+      // Notifier les destinataires en copie
+      if (populatedMail.recipientsCopy?.length > 0) {
+        for (const cc of populatedMail.recipientsCopy) {
+          if (cc.email && cc._id.toString() !== req.user._id.toString()) {
+            sendNewMailNotification(
+              cc.email,
+              `${cc.firstName} ${cc.lastName}`,
+              populatedMail,
+              { userId: cc._id, notifType: 'email_newMail_copy' }
+            ).catch(err => console.error('Erreur notification CC:', err.message));
+          }
+        }
+      }
+
+      // Notifier les superviseurs du service
       const serviceWithSupervisors = await Service.findById(serviceId).populate('supervisors', 'firstName lastName email');
       if (serviceWithSupervisors?.notifySupervisor && serviceWithSupervisors?.supervisors?.length) {
-        const { sendServiceMailNotification } = await import('../services/email.service.js');
         for (const supervisor of serviceWithSupervisors.supervisors) {
           if (supervisor.email) {
             sendServiceMailNotification(
               supervisor.email,
               `${supervisor.firstName} ${supervisor.lastName}`,
               populatedMail,
-              serviceWithSupervisors.name
+              serviceWithSupervisors.name,
+              { userId: supervisor._id }
             ).catch(err =>
               console.error('Erreur notification superviseur:', err.message)
             );
@@ -802,7 +844,7 @@ router.post('/import', authenticate, canImportMails, [
         }
       }
     } catch (notifError) {
-      console.error('Erreur notification superviseur:', notifError.message);
+      console.error('Erreur notification:', notifError.message);
     }
 
     res.status(201).json({
@@ -1126,19 +1168,22 @@ router.post('/:id/process', authenticate, async (req, res) => {
       _id: mail._id,
       reference: mail.reference,
       subject: mail.subject,
-      senderName: mail.senderName
+      senderName: mail.senderName,
+      filePath: mail.filePath,
+      fileName: mail.fileName
     };
 
     // Import dynamique pour éviter les dépendances circulaires
     const { sendMailProcessedNotification } = await import('../services/email.service.js');
-    
+
     // Notifier le destinataire principal s'il existe et n'est pas celui qui a traité
     if (mail.recipient && mail.recipient._id.toString() !== req.user._id.toString() && mail.recipient.email) {
       sendMailProcessedNotification(
         mail.recipient.email,
         `${mail.recipient.firstName} ${mail.recipient.lastName}`,
         mailInfo,
-        processedByName
+        processedByName,
+        { userId: mail.recipient._id }
       ).catch(err => console.error('Erreur notification recipient:', err));
     }
 
@@ -1150,7 +1195,8 @@ router.post('/:id/process', authenticate, async (req, res) => {
             cc.email,
             `${cc.firstName} ${cc.lastName}`,
             mailInfo,
-            processedByName
+            processedByName,
+            { userId: cc._id }
           ).catch(err => console.error('Erreur notification CC:', err));
         }
       }
@@ -1375,19 +1421,22 @@ router.post('/:id/archive', authenticate, async (req, res) => {
       _id: mail._id,
       reference: archiveFileName,
       subject: mail.subject,
-      senderName: mail.senderName
+      senderName: mail.senderName,
+      filePath: mail.filePath,
+      fileName: mail.fileName
     };
 
     // Import dynamique pour éviter les dépendances circulaires
     const { sendMailArchivedNotification } = await import('../services/email.service.js');
-    
+
     // Notifier le destinataire principal s'il existe et n'est pas celui qui a archivé
     if (mail.recipient && mail.recipient._id.toString() !== req.user._id.toString() && mail.recipient.email) {
       sendMailArchivedNotification(
         mail.recipient.email,
         `${mail.recipient.firstName} ${mail.recipient.lastName}`,
         mailInfo,
-        archivedByName
+        archivedByName,
+        { userId: mail.recipient._id }
       ).catch(err => console.error('Erreur notification recipient:', err));
     }
 
@@ -1399,7 +1448,8 @@ router.post('/:id/archive', authenticate, async (req, res) => {
             cc.email,
             `${cc.firstName} ${cc.lastName}`,
             mailInfo,
-            archivedByName
+            archivedByName,
+            { userId: cc._id }
           ).catch(err => console.error('Erreur notification CC:', err));
         }
       }

@@ -643,6 +643,67 @@ router.put('/profile', authenticate, uploadAvatar.single('avatar'), async (req, 
   }
 });
 
+// GET /api/auth/notification-preferences - Récupérer les préférences de notification
+router.get('/notification-preferences', authenticate, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select('notificationPreferences');
+
+    // Charger les defaults globaux
+    const defaultsSetting = await Settings.findOne({ key: 'notification_defaults' });
+    const defaults = defaultsSetting?.value || {
+      email_newMail_recipient: true,
+      email_newMail_copy: true,
+      email_newMail_service: false,
+      email_processed: true,
+      email_archived: true,
+      email_reminder: true,
+      email_overdue: true
+    };
+
+    res.json({
+      success: true,
+      data: {
+        defaults,
+        preferences: user.notificationPreferences || { useCustom: false }
+      }
+    });
+  } catch (error) {
+    console.error('Erreur récupération préférences notifications:', error);
+    res.status(500).json({ success: false, message: 'Erreur serveur' });
+  }
+});
+
+// PUT /api/auth/notification-preferences - Mettre à jour les préférences de notification
+router.put('/notification-preferences', authenticate, async (req, res) => {
+  try {
+    const { useCustom, ...prefs } = req.body;
+
+    const allowedKeys = [
+      'email_newMail_recipient', 'email_newMail_copy', 'email_newMail_service',
+      'email_processed', 'email_archived', 'email_reminder', 'email_overdue'
+    ];
+
+    const update = { 'notificationPreferences.useCustom': useCustom === true };
+    for (const key of allowedKeys) {
+      if (prefs[key] !== undefined) {
+        update[`notificationPreferences.${key}`] = prefs[key];
+      }
+    }
+
+    const user = await User.findByIdAndUpdate(req.user._id, { $set: update }, { new: true })
+      .select('notificationPreferences');
+
+    res.json({
+      success: true,
+      message: 'Préférences de notification mises à jour',
+      data: user.notificationPreferences
+    });
+  } catch (error) {
+    console.error('Erreur mise à jour préférences notifications:', error);
+    res.status(500).json({ success: false, message: 'Erreur serveur' });
+  }
+});
+
 // POST /api/auth/logout - Déconnexion (côté client principalement)
 router.post('/logout', authenticate, (req, res) => {
   res.json({

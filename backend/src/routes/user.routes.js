@@ -265,7 +265,7 @@ router.put('/:id', authenticate, async (req, res) => {
     }
 
     // Champs que l'utilisateur peut modifier lui-même
-    const selfEditableFields = ['firstName', 'lastName', 'email', 'avatar'];
+    const selfEditableFields = ['firstName', 'lastName', 'email', 'avatar', 'notificationPreferences'];
     
     // Champs que seuls les admins peuvent modifier
     const adminFields = ['username', 'group', 'services', 'isActive', 'password'];

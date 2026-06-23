@@ -7,9 +7,84 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ---
 
-## [3.11.0] - 2026-06-22
+## [3.13.0] - 2026-06-23
 
 ### Ajouté
+
+- **Pièce jointe PDF dans les notifications email** :
+  - Option « Joindre le PDF du courrier » dans les modèles de mail (pour les actions liées aux courriers)
+  - Badge « PDF joint » visible dans la liste des templates quand l'option est activée
+  - Le PDF du courrier est automatiquement attaché à l'email si le template le demande
+  - Supporté sur toutes les notifications : nouveau courrier, superviseur, traitement, archivage
+
+- **Notification email au destinataire lors de l'import** :
+  - Le destinataire principal reçoit désormais un email lors de la création ou de l'import d'un courrier
+  - Les destinataires en copie sont également notifiés lors de l'import
+  - Auparavant, seuls les superviseurs de service étaient notifiés
+
+- **Préférences de notification personnalisables par utilisateur** :
+  - Nouvel onglet « Notifications » dans Mon Profil
+  - Chaque utilisateur peut personnaliser les notifications qu'il souhaite recevoir :
+    - Nouveau courrier (destinataire principal)
+    - Nouveau courrier (en copie)
+    - Nouveau courrier du service (superviseur)
+    - Courrier traité
+    - Courrier archivé
+    - Rappels d'échéance
+    - Courriers en retard
+  - Toggle « Personnaliser mes notifications » : désactivé = paramètres globaux, activé = préférences individuelles
+  - Indicateurs visuels clairs (badges « Activé/Désactivé par défaut » quand en mode global)
+
+- **Paramètres de notification globaux (Administration)** :
+  - Nouvel onglet « Notifications » dans Paramètres d'administration
+  - L'administrateur définit les notifications activées par défaut pour tous les utilisateurs
+  - Les préférences individuelles des utilisateurs priment sur les paramètres globaux
+  - Stocké en base de données (clé `notification_defaults`)
+
+---
+
+## [3.12.0] - 2026-06-23
+
+### Ajouté
+
+- **Fiche contact expéditeur (modal)** :
+  - Le nom de l'expéditeur est désormais cliquable sur la page de détails du courrier
+  - Ouvre une modal "Fiche contact" affichant les informations du contact :
+    - **Email** : lien `mailto:` cliquable pour envoyer un email directement
+    - **Téléphone** : lien `tel:` cliquable pour lancer un appel
+    - **Adresse** : affichée pour faciliter l'envoi d'un courrier de réponse
+  - Affiche le nom et l'organisation du contact en en-tête
+  - Les champs non renseignés sont indiqués en grisé ("Non renseigné")
+  - Design cohérent avec les autres modales de l'application (Framer Motion, backdrop blur)
+
+---
+
+## [3.11.0] - 2026-06-23
+
+### Ajouté
+
+- **Tableau de bord statistiques personnalisé pour les superviseurs** :
+  - Les superviseurs voient désormais les filtres Service et Utilisateur (auparavant réservés aux administrateurs)
+  - Le filtre Service n'affiche que les services auxquels le superviseur est rattaché
+  - Le filtre Utilisateur n'affiche que les utilisateurs des services du superviseur
+  - Sélectionner un service filtre dynamiquement la liste des utilisateurs associés
+  - Les statistiques par service s'affichent pour les superviseurs ayant plusieurs services
+  - Validation backend : un superviseur ne peut interroger que ses propres services
+
+- **Filtres autocomplete Service et Utilisateur** :
+  - Remplacement des listes déroulantes classiques par des champs de recherche autocomplete (react-select)
+  - Recherche instantanée par saisie de texte pour filtrer services et utilisateurs
+  - Adapté aux grandes structures (100+ utilisateurs, 30+ services)
+  - Option de vidage rapide (bouton ×) pour réinitialiser un filtre
+  - Style cohérent avec le design existant du tableau de bord
+
+- **Multi-superviseurs par service** :
+  - Un service peut désormais avoir plusieurs superviseurs (tableau `supervisors` au lieu de `supervisor` unique)
+  - Mise à jour de la détection superviseur côté frontend et backend
+
+- **Statistiques courrier départ** :
+  - Compteurs brouillons/envoyés/archivés dans les statistiques générales
+  - Prise en compte des permissions courrier sortant (view_all_outgoing, view_service_outgoing)
 
 - **Courrier Départ (Gestion du courrier sortant)** :
   - Nouveau module complet pour gérer le courrier sortant indépendamment du courrier entrant
@@ -40,6 +115,20 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
   - Migration automatique des permissions `view_senders` -> `view_contacts`, etc.
   - Routes API `/api/contacts` (avec alias `/api/senders` pour compatibilité)
   - Interface renommée : page "Contacts" au lieu de "Expéditeurs"
+
+- **Correspondances LDAP (attribution automatique rôle/services par groupe AD)** :
+  - Nouvelle page d'administration pour définir des correspondances entre groupes AD/LDAP et la configuration GED
+  - Attribution automatique d'un rôle GED (Administrateur, Archiviste, Superviseur, Utilisateur) en fonction du groupe AD
+  - Attribution automatique des services accessibles par correspondance
+  - Attribution automatique du statut superviseur de services par correspondance
+  - Système de priorité pour résoudre les conflits entre plusieurs correspondances
+  - Activation/désactivation individuelle de chaque correspondance
+  - Nom optionnel et description pour identifier facilement chaque règle
+  - Interface CRUD complète avec table récapitulative et modal de création/édition
+
+### Corrigé
+
+- **Correspondances LDAP — services et rôles non affichés** : le formulaire de création/édition affichait "Aucun service disponible" et le sélecteur de rôle restait vide tant que la page n'était pas rafraîchie manuellement — la page n'attendait pas la fin du chargement des services et des groupes avant de s'afficher (ajout de `isLoadingGroups` et `isLoadingServices` dans la condition de chargement)
 
 ---
 

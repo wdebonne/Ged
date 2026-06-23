@@ -94,6 +94,16 @@ const userSchema = new mongoose.Schema({
   lastLogin: {
     type: Date,
     default: null
+  },
+  notificationPreferences: {
+    useCustom: { type: Boolean, default: false },
+    email_newMail_recipient: { type: Boolean, default: null },
+    email_newMail_copy: { type: Boolean, default: null },
+    email_newMail_service: { type: Boolean, default: null },
+    email_processed: { type: Boolean, default: null },
+    email_archived: { type: Boolean, default: null },
+    email_reminder: { type: Boolean, default: null },
+    email_overdue: { type: Boolean, default: null }
   }
 }, {
   timestamps: true

@@ -42,6 +42,10 @@ const emailTemplateSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  attachPdf: {
+    type: Boolean,
+    default: false
+  },
   variables: [{
     type: String
   }],

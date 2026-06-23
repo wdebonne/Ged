@@ -1,6 +1,9 @@
 import nodemailer from 'nodemailer';
+import fs from 'fs';
+import path from 'path';
 import EmailTemplate, { EMAIL_ACTIONS } from '../models/EmailTemplate.model.js';
 import Settings from '../models/Settings.model.js';
+import User from '../models/User.model.js';
 
 // Créer le transporteur email
 const createTransporter = async () => {
@@ -87,6 +90,37 @@ const replaceVariables = (text, variables) => {
   return result;
 };
 
+// Vérifier si un utilisateur doit recevoir une notification
+// prefKey : la clé de préférence (ex: 'email_newMail_recipient')
+// userId : l'ID de l'utilisateur à notifier (optionnel, si null on vérifie que le default global)
+const shouldNotifyUser = async (userId, prefKey) => {
+  // Charger les defaults globaux
+  const defaultsSetting = await Settings.findOne({ key: 'notification_defaults' });
+  const defaults = defaultsSetting?.value || {
+    email_newMail_recipient: true,
+    email_newMail_copy: true,
+    email_newMail_service: false,
+    email_processed: true,
+    email_archived: true,
+    email_reminder: true,
+    email_overdue: true
+  };
+
+  const globalDefault = defaults[prefKey] !== undefined ? defaults[prefKey] : true;
+
+  if (!userId) return globalDefault;
+
+  try {
+    const user = await User.findById(userId).select('notificationPreferences').lean();
+    if (!user?.notificationPreferences?.useCustom) return globalDefault;
+
+    const userPref = user.notificationPreferences[prefKey];
+    return userPref !== null && userPref !== undefined ? userPref : globalDefault;
+  } catch {
+    return globalDefault;
+  }
+};
+
 // Template HTML par défaut (fallback)
 const getDefaultTemplate = (headerColor, headerIcon, headerTitle, content) => `
 <!DOCTYPE html>
@@ -121,13 +155,13 @@ const getDefaultTemplate = (headerColor, headerIcon, headerTitle, content) => `
 `;
 
 // Fonction générique pour envoyer un email avec template
-export const sendTemplatedEmail = async (action, recipientEmail, variables) => {
+export const sendTemplatedEmail = async (action, recipientEmail, variables, options = {}) => {
   try {
     const transporter = await createTransporter();
     const fromAddress = await getFromAddress();
     const appUrl = await getAppUrl();
     const appName = await getAppName();
-    
+
     // Enrichir les variables avec les infos communes
     const enrichedVars = {
       ...variables,
@@ -136,18 +170,18 @@ export const sendTemplatedEmail = async (action, recipientEmail, variables) => {
       currentDate: new Date().toLocaleDateString('fr-FR'),
       currentYear: new Date().getFullYear().toString()
     };
-    
+
     // Chercher le template actif pour cette action
     const template = await EmailTemplate.getActiveByAction(action);
-    
+
     let subject, htmlContent;
-    
+    let shouldAttachPdf = false;
+
     if (template) {
-      // Utiliser le template personnalisé
       subject = replaceVariables(template.subject, enrichedVars);
       htmlContent = replaceVariables(template.htmlContent, enrichedVars);
+      shouldAttachPdf = template.attachPdf === true;
     } else {
-      // Fallback sur les templates par défaut
       const defaults = getDefaultTemplates(enrichedVars);
       if (defaults[action]) {
         subject = defaults[action].subject;
@@ -157,16 +191,29 @@ export const sendTemplatedEmail = async (action, recipientEmail, variables) => {
         return { success: false, error: 'Template non trouvé' };
       }
     }
-    
+
     const mailOptions = {
       from: fromAddress,
       to: recipientEmail,
       subject,
       html: htmlContent
     };
-    
+
+    // Joindre le PDF si le template le demande et qu'un fichier est fourni
+    if (shouldAttachPdf && options.pdfFilePath) {
+      const uploadPath = process.env.UPLOAD_PATH || './uploads';
+      const fullPath = path.resolve(uploadPath, options.pdfFilePath);
+      if (fs.existsSync(fullPath)) {
+        mailOptions.attachments = [{
+          filename: options.pdfFileName || path.basename(fullPath),
+          path: fullPath,
+          contentType: 'application/pdf'
+        }];
+      }
+    }
+
     await transporter.sendMail(mailOptions);
-    console.log(`Email [${action}] envoyé à ${recipientEmail}`);
+    console.log(`Email [${action}] envoyé à ${recipientEmail}${mailOptions.attachments ? ' (avec PJ)' : ''}`);
     return { success: true };
   } catch (error) {
     console.error(`Erreur envoi email [${action}]:`, error);
@@ -328,8 +375,12 @@ export const sendPasswordResetEmail = async (email, firstName, resetUrl) => {
   });
 };
 
-// Envoyer une notification de nouveau courrier
-export const sendNewMailNotification = async (recipientEmail, recipientName, mailInfo) => {
+// Envoyer une notification de nouveau courrier (destinataire principal)
+export const sendNewMailNotification = async (recipientEmail, recipientName, mailInfo, { userId, notifType = 'email_newMail_recipient' } = {}) => {
+  if (userId) {
+    const allowed = await shouldNotifyUser(userId, notifType);
+    if (!allowed) return { success: true, skipped: true };
+  }
   const appUrl = await getAppUrl();
   return sendTemplatedEmail(EMAIL_ACTIONS.MAIL_TO_PROCESS, recipientEmail, {
     userName: recipientName,
@@ -340,11 +391,18 @@ export const sendNewMailNotification = async (recipientEmail, recipientName, mai
     mailDate: new Date(mailInfo.receivedDate).toLocaleDateString('fr-FR'),
     mailPriority: mailInfo.priority,
     mailUrl: `${appUrl}/courriers/${mailInfo._id}`
+  }, {
+    pdfFilePath: mailInfo.filePath,
+    pdfFileName: mailInfo.fileName
   });
 };
 
 // Notifier le superviseur qu'un nouveau courrier est arrivé pour son service
-export const sendServiceMailNotification = async (supervisorEmail, supervisorName, mailInfo, serviceName) => {
+export const sendServiceMailNotification = async (supervisorEmail, supervisorName, mailInfo, serviceName, { userId } = {}) => {
+  if (userId) {
+    const allowed = await shouldNotifyUser(userId, 'email_newMail_service');
+    if (!allowed) return { success: true, skipped: true };
+  }
   const appUrl = await getAppUrl();
   return sendTemplatedEmail(EMAIL_ACTIONS.SUPERVISOR_NEW_MAIL, supervisorEmail, {
     userName: supervisorName,
@@ -356,11 +414,18 @@ export const sendServiceMailNotification = async (supervisorEmail, supervisorNam
     mailDate: new Date(mailInfo.receivedDate).toLocaleDateString('fr-FR'),
     mailPriority: mailInfo.priority,
     mailUrl: `${appUrl}/courriers/${mailInfo._id}`
+  }, {
+    pdfFilePath: mailInfo.filePath,
+    pdfFileName: mailInfo.fileName
   });
 };
 
 // Notifier les co-destinataires qu'un courrier a été traité
-export const sendMailProcessedNotification = async (recipientEmail, recipientName, mailInfo, processedByName) => {
+export const sendMailProcessedNotification = async (recipientEmail, recipientName, mailInfo, processedByName, { userId } = {}) => {
+  if (userId) {
+    const allowed = await shouldNotifyUser(userId, 'email_processed');
+    if (!allowed) return { success: true, skipped: true };
+  }
   const appUrl = await getAppUrl();
   return sendTemplatedEmail(EMAIL_ACTIONS.CORECIPIENT_PROCESSED, recipientEmail, {
     userName: recipientName,
@@ -371,11 +436,18 @@ export const sendMailProcessedNotification = async (recipientEmail, recipientNam
     processedBy: processedByName,
     processedDate: new Date().toLocaleDateString('fr-FR'),
     mailUrl: `${appUrl}/courriers/${mailInfo._id}`
+  }, {
+    pdfFilePath: mailInfo.filePath,
+    pdfFileName: mailInfo.fileName
   });
 };
 
 // Notifier les co-destinataires qu'un courrier a été archivé
-export const sendMailArchivedNotification = async (recipientEmail, recipientName, mailInfo, archivedByName) => {
+export const sendMailArchivedNotification = async (recipientEmail, recipientName, mailInfo, archivedByName, { userId } = {}) => {
+  if (userId) {
+    const allowed = await shouldNotifyUser(userId, 'email_archived');
+    if (!allowed) return { success: true, skipped: true };
+  }
   const appUrl = await getAppUrl();
   return sendTemplatedEmail(EMAIL_ACTIONS.CORECIPIENT_ARCHIVED, recipientEmail, {
     userName: recipientName,
@@ -386,6 +458,9 @@ export const sendMailArchivedNotification = async (recipientEmail, recipientName
     archivedBy: archivedByName,
     archivedDate: new Date().toLocaleDateString('fr-FR'),
     mailUrl: `${appUrl}/courriers/${mailInfo._id}`
+  }, {
+    pdfFilePath: mailInfo.filePath,
+    pdfFileName: mailInfo.fileName
   });
 };
 
@@ -400,6 +475,8 @@ export const testSmtpConnection = async () => {
   }
 };
 
+export { shouldNotifyUser };
+
 export default {
   sendTemplatedEmail,
   sendPasswordResetEmail,
@@ -407,5 +484,6 @@ export default {
   sendMailProcessedNotification,
   sendMailArchivedNotification,
   sendServiceMailNotification,
+  shouldNotifyUser,
   testSmtpConnection
 };

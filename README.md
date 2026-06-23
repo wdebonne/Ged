@@ -42,7 +42,7 @@ Application web complète de gestion de courrier avec authentification LDAP/Kerb
 - ✅ Récupération de mot de passe par email
 - ✅ Support LDAP optionnel
 - ✅ Support Kerberos optionnel
-- ✅ Gestion du profil utilisateur
+- ✅ Gestion du profil utilisateur (informations, mot de passe, notifications, délégations)
 
 ### Gestion des courriers
 - ✅ **Séparation Mes Courriers / Courriers Délégués / Courriers Service(s)**
@@ -68,9 +68,17 @@ Application web complète de gestion de courrier avec authentification LDAP/Kerb
 - ✅ Recherche et filtres avancés
 - ✅ Assignation aux utilisateurs/services
 - ✅ **Notifications email automatiques** :
+  - Notification au destinataire principal lors de l'import/création d'un courrier
+  - Notification aux destinataires en copie lors de l'import
   - Notification aux co-destinataires lors du traitement
   - Notification aux co-destinataires lors de l'archivage
   - Notification au superviseur du service lors de l'arrivée d'un nouveau courrier
+  - **Pièce jointe PDF optionnelle** : le PDF du courrier peut être joint aux emails (configurable par template)
+- ✅ **Préférences de notification personnalisables** :
+  - Chaque utilisateur peut personnaliser ses notifications depuis son profil (onglet « Notifications »)
+  - Toggle global/personnalisé : par défaut les paramètres globaux s'appliquent
+  - 7 types de notifications configurables individuellement
+  - Paramètres par défaut définis par l'administrateur (Paramètres > Notifications)
 - ✅ **Délégation de courriers** :
   - Transfert temporaire de ses courriers à un collègue
   - Gestion des dates de début/fin de délégation
@@ -82,6 +90,19 @@ Application web complète de gestion de courrier avec authentification LDAP/Kerb
 - ✅ **Accès superviseur** :
   - Le responsable d'un service voit automatiquement les courriers du service
   - Menu "Courriers Service(s)" visible pour les superviseurs
+
+### Courrier Départ (sortant)
+- ✅ **Module indépendant** : gestion du courrier sortant sans lien obligatoire avec un courrier entrant
+- ✅ Cycle de vie : Brouillon → Envoyé → Archivé
+- ✅ Référence auto-générée au format `CRD-YYYYMMDD-RANDOM`
+- ✅ Méthodes d'envoi : courrier postal, email, fax, remise en main propre, autre
+- ✅ Lien optionnel vers un courrier entrant existant
+- ✅ Numéro de suivi postal optionnel
+- ✅ OCR automatique du PDF joint pour recherche plein texte
+- ✅ Archivage avec arborescence `archives-depart/[Service]/[Année]/[Mois]/`
+- ✅ 9 permissions dédiées (view_own_outgoing, create_outgoing, send_outgoing, etc.)
+- ✅ Section sidebar dédiée avec badges de comptage (brouillons, envoyés)
+- ✅ Autocomplete des objets et destinataires (contacts partagés avec le courrier entrant)
 
 ### Historique des courriers
 - ✅ Timeline visuelle avec icônes par type d'événement
@@ -118,7 +139,7 @@ Application web complète de gestion de courrier avec authentification LDAP/Kerb
 #### Groupes et Permissions
 - ✅ Gestion des groupes avec permissions granulaires
 - ✅ Interface visuelle de sélection des permissions
-- ✅ 27 permissions disponibles réparties en catégories
+- ✅ 36 permissions disponibles réparties en catégories
 - ✅ Permission `view_service_mails` pour voir les courriers du service
 - ✅ Les superviseurs de service ont accès automatique sans cette permission
 
@@ -129,9 +150,12 @@ Application web complète de gestion de courrier avec authentification LDAP/Kerb
 - ✅ **Accès automatique superviseur** : le responsable voit les courriers du service sans permission explicite
 - ✅ **Notifications superviseur** : alertes email automatiques lors de l'arrivée de nouveaux courriers
 
-#### Expéditeurs
-- ✅ Gestion des expéditeurs fréquents
+#### Contacts (ex-Expéditeurs)
+- ✅ Modèle unifié Contact pour expéditeurs (courrier entrant) et destinataires (courrier départ)
+- ✅ Gestion des contacts fréquents (nom, organisation, email, téléphone, adresse)
 - ✅ Auto-complétion lors de la saisie
+- ✅ **Fiche contact** : clic sur le nom du contact dans les détails du courrier pour afficher sa fiche (email, téléphone, adresse) avec liens d'action directs (`mailto:`, `tel:`)
+- ✅ Migration automatique de la collection `senders` → `contacts` au démarrage
 
 #### Objets prédéfinis
 - ✅ Gestion des objets de courrier prédéfinis
@@ -154,6 +178,7 @@ Application web complète de gestion de courrier avec authentification LDAP/Kerb
 #### Modèles d'emails
 - ✅ Éditeur HTML intégré avec prévisualisation
 - ✅ Variables dynamiques ({{userName}}, {{appName}}, etc.)
+- ✅ **Pièce jointe PDF** : option pour joindre automatiquement le PDF du courrier aux emails (par template)
 - ✅ Templates par type d'action :
   - Bienvenue (nouveau compte)
   - Réinitialisation de mot de passe
@@ -163,9 +188,17 @@ Application web complète de gestion de courrier avec authentification LDAP/Kerb
   - Courrier en retard
   - Templates personnalisés
 - ✅ **Notifications automatiques intégrées** :
+  - **Notification destinataire** : email au destinataire principal lors de l'import/création d'un courrier
+  - **Notification copie** : email aux destinataires en copie lors de l'import
   - **Notification superviseur** : email au superviseur du service lors de l'arrivée d'un nouveau courrier
   - **Notification co-destinataires (traitement)** : email aux destinataires en copie lorsqu'un courrier est traité
   - **Notification co-destinataires (archivage)** : email aux destinataires en copie lorsqu'un courrier est archivé
+
+#### Notifications
+- ✅ **Paramètres globaux** : l'administrateur définit les notifications activées par défaut
+- ✅ **Préférences par utilisateur** : chaque utilisateur personnalise depuis son profil
+- ✅ 7 types de notifications : nouveau courrier (destinataire/copie/service), traité, archivé, rappel, en retard
+- ✅ Système de priorité : préférences utilisateur > paramètres globaux
 
 #### Webhooks
 - ✅ CRUD complet des webhooks
@@ -369,6 +402,16 @@ Sans effet si `LDAP_REQUIRED_GROUP_DN` n'est pas défini (aucune restriction de 
 - ✅ Déplacement automatique vers le dossier traité
 - ✅ Bouton "Vérifier Courrier" sur la page des courriers entrants (affiche le statut OCR en temps réel et rafraîchit la liste automatiquement)
 
+#### IMAP Email-to-PDF (second service IMAP)
+- ✅ Service IMAP indépendant avec sa propre configuration (serveur, port, credentials)
+- ✅ Conversion automatique du corps des emails sans PJ PDF en document PDF
+- ✅ Import des pièces jointes PDF existantes
+- ✅ Toggle configurable : générer le PDF du corps systématiquement ou seulement sans PJ
+- ✅ Les PDF générés incluent les métadonnées (De, À, Cc, Objet, Date) et le corps du mail
+- ✅ Filtres configurables : domaines, emails, mots-clés sujet/corps
+- ✅ Post-traitement : marquer comme lu, déplacer vers un dossier, ou supprimer
+- ✅ Onglet dédié "IMAP Email-PDF" dans les paramètres d'administration
+
 #### Stockage externe (OneDrive)
 - ✅ Intégration Microsoft OneDrive via Azure AD
 - ✅ Configuration OAuth 2.0 (Client ID, Tenant ID, Client Secret)
@@ -504,6 +547,7 @@ Sans effet si `LDAP_REQUIRED_GROUP_DN` n'est pas défini (aucune restriction de 
 ### Interface utilisateur
 - ✅ **Sidebar avec sections distinctes** :
   - Import (pour utilisateurs autorisés)
+  - Courrier Départ (nouveau, brouillons, envoyés, archivés)
   - Mes courriers (avec badges bleus)
   - Courriers Délégués (avec badges violets) - visible uniquement si délégations actives
   - Courriers Service(s) (avec badges orange)
@@ -782,11 +826,12 @@ GED/
 │   ├── src/
 │   │   ├── middleware/     # Auth, upload middleware
 │   │   ├── models/         # Schémas Mongoose
+│   │   │   ├── Contact.model.js
 │   │   │   ├── EmailTemplate.model.js
 │   │   │   ├── Group.model.js
 │   │   │   ├── Mail.model.js
+│   │   │   ├── OutgoingMail.model.js
 │   │   │   ├── PendingMail.model.js
-│   │   │   ├── Sender.model.js
 │   │   │   ├── Service.model.js
 │   │   │   ├── Settings.model.js
 │   │   │   ├── Subject.model.js
@@ -806,7 +851,8 @@ GED/
 │   │   │   ├── admin/      # Pages administration
 │   │   │   ├── auth/       # Login, Reset password
 │   │   │   ├── dashboard/  # Tableau de bord
-│   │   │   ├── mails/      # Gestion courriers
+│   │   │   ├── mails/      # Gestion courriers entrants
+│   │   │   ├── outgoing/   # Gestion courriers départ
 │   │   │   ├── profile/    # Profil utilisateur
 │   │   │   └── stats/      # Statistiques avancées
 │   │   ├── services/       # API service
@@ -867,13 +913,26 @@ Les permissions sont gérées au niveau des groupes et organisées par catégori
 | `edit_services` | Modifier des services |
 | `delete_services` | Supprimer des services |
 
-### Expéditeurs
+### Contacts
 | Permission | Description |
 |------------|-------------|
-| `view_senders` | Voir les expéditeurs |
-| `create_senders` | Créer des expéditeurs |
-| `edit_senders` | Modifier des expéditeurs |
-| `delete_senders` | Supprimer des expéditeurs |
+| `view_contacts` | Voir les contacts |
+| `create_contacts` | Créer des contacts |
+| `edit_contacts` | Modifier des contacts |
+| `delete_contacts` | Supprimer des contacts |
+
+### Courrier Départ
+| Permission | Description |
+|------------|-------------|
+| `view_own_outgoing` | Voir ses courriers départ |
+| `view_service_outgoing` | Voir les courriers départ du service |
+| `view_all_outgoing` | Voir tous les courriers départ |
+| `create_outgoing` | Créer un courrier départ |
+| `edit_outgoing` | Modifier un courrier départ |
+| `send_outgoing` | Envoyer un courrier départ |
+| `archive_outgoing` | Archiver un courrier départ |
+| `delete_outgoing` | Supprimer un courrier départ |
+| `export_outgoing` | Exporter les courriers départ |
 
 ### Paramètres
 | Permission | Description |
@@ -1055,12 +1114,27 @@ Personnalisez les emails envoyés par l'application :
 
 ### Notifications automatiques
 
-Le système utilise les templates ci-dessus pour envoyer automatiquement les notifications suivantes :
+Le système utilise les templates ci-dessus pour envoyer automatiquement les notifications suivantes. Chaque notification respecte les **préférences de l'utilisateur** (personnalisables dans Mon Profil > Notifications) et les **paramètres globaux** définis par l'administrateur (Paramètres > Notifications).
+
+#### Notification nouveau courrier (destinataire principal)
+Envoyée au destinataire principal lorsqu'un courrier est importé ou créé.
+- **Template** : `mail_to_process` (personnalisable)
+- **Déclencheur** : Import/création d'un courrier
+- **Préférence** : `email_newMail_recipient` (activée par défaut)
+- **Destinataire** : Destinataire principal du courrier
+
+#### Notification nouveau courrier (en copie)
+Envoyée aux destinataires en copie lorsqu'un courrier est importé.
+- **Template** : `mail_to_process` (personnalisable)
+- **Déclencheur** : Import d'un courrier
+- **Préférence** : `email_newMail_copy` (activée par défaut)
+- **Destinataires** : Destinataires en copie
 
 #### Notification superviseur de service
 Envoyée au superviseur d'un service lorsqu'un nouveau courrier arrive pour ce service.
 - **Template** : `supervisor_new_mail` (personnalisable)
 - **Déclencheur** : Import/création d'un courrier
+- **Préférence** : `email_newMail_service` (désactivée par défaut)
 - **Condition** : Le service a un superviseur configuré avec notifications activées
 - **Destinataire** : Superviseur du service
 
@@ -1068,15 +1142,18 @@ Envoyée au superviseur d'un service lorsqu'un nouveau courrier arrive pour ce s
 Envoyée aux destinataires en copie lorsqu'un courrier est marqué comme traité.
 - **Template** : `corecipient_processed` (personnalisable)
 - **Déclencheur** : Marquage d'un courrier comme "Traité"
-- **Condition** : Le courrier a des destinataires en copie avec email
-- **Destinataires** : Tous les co-destinataires
+- **Préférence** : `email_processed` (activée par défaut)
+- **Destinataires** : Destinataire principal et co-destinataires
 
 #### Notification d'archivage (co-destinataires)
 Envoyée aux destinataires en copie lorsqu'un courrier est archivé.
 - **Template** : `corecipient_archived` (personnalisable)
 - **Déclencheur** : Archivage d'un courrier
-- **Condition** : Le courrier a des destinataires en copie avec email
-- **Destinataires** : Tous les co-destinataires
+- **Préférence** : `email_archived` (activée par défaut)
+- **Destinataires** : Destinataire principal et co-destinataires
+
+#### Pièce jointe PDF
+Chaque template de notification peut être configuré pour **joindre automatiquement le PDF du courrier** en pièce jointe de l'email. Activez l'option « Joindre le PDF du courrier » lors de la création/modification du template.
 
 > **💡 Astuce** : Tous les templates disposent de versions par défaut intégrées. Créez vos propres templates pour personnaliser l'apparence et le contenu des emails selon vos besoins.
 
@@ -1117,6 +1194,8 @@ L'API REST est accessible sur `http://localhost:5000/api`. Toutes les routes pro
 | POST | `/api/auth/reset-password` | Réinitialisation du mot de passe |
 | PUT | `/api/auth/profile` | Mise à jour du profil |
 | GET | `/api/auth/me` | Obtenir l'utilisateur courant |
+| GET | `/api/auth/notification-preferences` | Préférences de notification |
+| PUT | `/api/auth/notification-preferences` | Modifier ses préférences de notification |
 
 #### Connexion
 ```bash
@@ -1497,24 +1576,27 @@ curl -X DELETE http://localhost:5000/api/services/60f7b3b3b3b3b3b3b3b3b3b3 \
 
 ---
 
-### Expéditeurs
+### Contacts (ex-Expéditeurs)
 
 | Méthode | Endpoint | Description |
 |---------|----------|-------------|
-| GET | `/api/senders` | Liste des expéditeurs |
-| POST | `/api/senders` | Créer un expéditeur |
-| PUT | `/api/senders/:id` | Modifier un expéditeur |
-| DELETE | `/api/senders/:id` | Supprimer un expéditeur |
+| GET | `/api/contacts` | Liste des contacts |
+| GET | `/api/contacts/autocomplete?q=` | Autocomplétion |
+| POST | `/api/contacts` | Créer un contact |
+| PUT | `/api/contacts/:id` | Modifier un contact |
+| DELETE | `/api/contacts/:id` | Supprimer un contact |
 
-#### Liste des expéditeurs
+> L'alias `/api/senders` reste fonctionnel pour la rétrocompatibilité.
+
+#### Liste des contacts
 ```bash
-curl -X GET http://localhost:5000/api/senders \
+curl -X GET http://localhost:5000/api/contacts \
   -H "Authorization: Bearer <token>"
 ```
 
-#### Créer un expéditeur
+#### Créer un contact
 ```bash
-curl -X POST http://localhost:5000/api/senders \
+curl -X POST http://localhost:5000/api/contacts \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -1524,9 +1606,9 @@ curl -X POST http://localhost:5000/api/senders \
   }'
 ```
 
-#### Modifier un expéditeur
+#### Modifier un contact
 ```bash
-curl -X PUT http://localhost:5000/api/senders/60f7b3b3b3b3b3b3b3b3b3b3 \
+curl -X PUT http://localhost:5000/api/contacts/60f7b3b3b3b3b3b3b3b3b3b3 \
   -H "Authorization: Bearer <token>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -1534,9 +1616,49 @@ curl -X PUT http://localhost:5000/api/senders/60f7b3b3b3b3b3b3b3b3b3b3 \
   }'
 ```
 
-#### Supprimer un expéditeur
+#### Supprimer un contact
 ```bash
-curl -X DELETE http://localhost:5000/api/senders/60f7b3b3b3b3b3b3b3b3b3b3 \
+curl -X DELETE http://localhost:5000/api/contacts/60f7b3b3b3b3b3b3b3b3b3b3 \
+  -H "Authorization: Bearer <token>"
+```
+
+---
+
+### Courrier Départ
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| GET | `/api/outgoing-mails` | Liste des courriers départ |
+| GET | `/api/outgoing-mails/:id` | Détail d'un courrier départ |
+| POST | `/api/outgoing-mails` | Créer un courrier départ (multipart/form-data) |
+| PUT | `/api/outgoing-mails/:id` | Modifier (brouillon uniquement) |
+| POST | `/api/outgoing-mails/:id/send` | Marquer comme envoyé |
+| POST | `/api/outgoing-mails/:id/archive` | Archiver |
+| DELETE | `/api/outgoing-mails/:id` | Supprimer (admin) |
+| GET | `/api/outgoing-mails/:id/pdf` | Télécharger le PDF |
+
+#### Créer un courrier départ
+```bash
+curl -X POST http://localhost:5000/api/outgoing-mails \
+  -H "Authorization: Bearer <token>" \
+  -H "Content-Type: multipart/form-data" \
+  -F "subject=Réponse à votre demande" \
+  -F "destinationName=Préfecture de Seine-Maritime" \
+  -F "service=60f7b3b3b3b3b3b3b3b3b3b3" \
+  -F "sendingMethod=courrier" \
+  -F "priority=normal" \
+  -F "document=@/path/to/document.pdf"
+```
+
+#### Marquer comme envoyé
+```bash
+curl -X POST http://localhost:5000/api/outgoing-mails/60f7b3b3b3b3b3b3b3b3b3b3/send \
+  -H "Authorization: Bearer <token>"
+```
+
+#### Archiver
+```bash
+curl -X POST http://localhost:5000/api/outgoing-mails/60f7b3b3b3b3b3b3b3b3b3b3/archive \
   -H "Authorization: Bearer <token>"
 ```
 

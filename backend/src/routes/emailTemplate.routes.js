@@ -92,15 +92,15 @@ router.get('/:id', authenticate, authorize(PERMISSIONS.MANAGE_SETTINGS), async (
 // POST - Créer un nouveau template
 router.post('/', authenticate, authorize(PERMISSIONS.MANAGE_SETTINGS), async (req, res) => {
   try {
-    const { name, action, subject, htmlContent, description, isActive } = req.body;
-    
+    const { name, action, subject, htmlContent, description, isActive, attachPdf } = req.body;
+
     if (!name || !action || !subject || !htmlContent) {
       return res.status(400).json({
         success: false,
         message: 'Nom, action, sujet et contenu HTML sont requis'
       });
     }
-    
+
     // Si ce template est actif, désactiver les autres du même type
     if (isActive !== false) {
       await EmailTemplate.updateMany(
@@ -108,13 +108,14 @@ router.post('/', authenticate, authorize(PERMISSIONS.MANAGE_SETTINGS), async (re
         { isActive: false }
       );
     }
-    
+
     const template = new EmailTemplate({
       name,
       action,
       subject,
       htmlContent,
       description,
+      attachPdf: attachPdf || false,
       isActive: isActive !== false,
       variables: EmailTemplate.getAvailableVariables(action),
       createdBy: req.user.id,
@@ -140,17 +141,17 @@ router.post('/', authenticate, authorize(PERMISSIONS.MANAGE_SETTINGS), async (re
 // PUT - Mettre à jour un template
 router.put('/:id', authenticate, authorize(PERMISSIONS.MANAGE_SETTINGS), async (req, res) => {
   try {
-    const { name, action, subject, htmlContent, description, isActive } = req.body;
-    
+    const { name, action, subject, htmlContent, description, isActive, attachPdf } = req.body;
+
     const template = await EmailTemplate.findById(req.params.id);
-    
+
     if (!template) {
       return res.status(404).json({
         success: false,
         message: 'Template non trouvé'
       });
     }
-    
+
     // Si on active ce template, désactiver les autres du même type
     if (isActive && !template.isActive) {
       const actionToUse = action || template.action;
@@ -159,13 +160,14 @@ router.put('/:id', authenticate, authorize(PERMISSIONS.MANAGE_SETTINGS), async (
         { isActive: false }
       );
     }
-    
+
     template.name = name || template.name;
     template.action = action || template.action;
     template.subject = subject || template.subject;
     template.htmlContent = htmlContent || template.htmlContent;
     template.description = description !== undefined ? description : template.description;
     template.isActive = isActive !== undefined ? isActive : template.isActive;
+    template.attachPdf = attachPdf !== undefined ? attachPdf : template.attachPdf;
     template.variables = EmailTemplate.getAvailableVariables(template.action);
     template.updatedBy = req.user.id;
     

@@ -166,7 +166,9 @@ export const authAPI = {
   resetPassword: (token, password) => api.post(`/auth/reset-password/${token}`, { password }),
   changePassword: (data) => api.post('/auth/change-password', data),
   getConfig: () => api.get('/auth/config'),
-  updateProfile: (formData) => api.put('/auth/profile', formData)
+  updateProfile: (formData) => api.put('/auth/profile', formData),
+  getNotificationPreferences: () => api.get('/auth/notification-preferences'),
+  updateNotificationPreferences: (data) => api.put('/auth/notification-preferences', data)
 };
 
 // Users

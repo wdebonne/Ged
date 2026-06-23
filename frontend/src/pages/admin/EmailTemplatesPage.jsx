@@ -14,7 +14,8 @@ import {
   CodeBracketIcon,
   DocumentTextIcon,
   ClipboardDocumentIcon,
-  ExclamationTriangleIcon
+  ExclamationTriangleIcon,
+  PaperClipIcon
 } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 
@@ -163,9 +164,17 @@ export default function EmailTemplatesPage() {
                       <div>
                         <h3 className="font-medium text-gray-900">{template.name}</h3>
                         <p className="text-sm text-gray-500">{template.subject}</p>
-                        {template.description && (
-                          <p className="text-xs text-gray-400 mt-1">{template.description}</p>
-                        )}
+                        <div className="flex items-center gap-2 mt-1">
+                          {template.description && (
+                            <p className="text-xs text-gray-400">{template.description}</p>
+                          )}
+                          {template.attachPdf && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-blue-50 text-blue-700">
+                              <PaperClipIcon className="w-3 h-3" />
+                              PDF joint
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -243,8 +252,15 @@ function TemplateModal({ template, actions, onClose }) {
     subject: template?.subject || '',
     htmlContent: template?.htmlContent || getDefaultTemplate(),
     description: template?.description || '',
-    isActive: template?.isActive ?? true
+    isActive: template?.isActive ?? true,
+    attachPdf: template?.attachPdf ?? false
   });
+
+  const MAIL_ACTIONS = [
+    'mail_to_process', 'mail_assigned', 'mail_reminder', 'mail_overdue',
+    'supervisor_new_mail', 'corecipient_processed', 'corecipient_archived'
+  ];
+  const showAttachPdf = MAIL_ACTIONS.includes(formData.action);
 
   // Récupérer les variables disponibles pour l'action sélectionnée
   const selectedAction = actions?.find(a => a.id === formData.action);
@@ -373,15 +389,29 @@ function TemplateModal({ template, actions, onClose }) {
                     placeholder="Description du modèle"
                   />
                 </div>
-                <div className="flex items-center gap-2 pt-6">
-                  <input
-                    type="checkbox"
-                    id="isActive"
-                    checked={formData.isActive}
-                    onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                    className="w-4 h-4 rounded border-gray-300 text-primary-600"
-                  />
-                  <label htmlFor="isActive" className="text-sm text-gray-700">Activer ce modèle</label>
+                <div className="flex items-center gap-4 pt-6">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="isActive"
+                      checked={formData.isActive}
+                      onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                      className="w-4 h-4 rounded border-gray-300 text-primary-600"
+                    />
+                    <label htmlFor="isActive" className="text-sm text-gray-700">Activer ce modèle</label>
+                  </div>
+                  {showAttachPdf && (
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="attachPdf"
+                        checked={formData.attachPdf}
+                        onChange={(e) => setFormData({ ...formData, attachPdf: e.target.checked })}
+                        className="w-4 h-4 rounded border-gray-300 text-primary-600"
+                      />
+                      <label htmlFor="attachPdf" className="text-sm text-gray-700">Joindre le PDF du courrier</label>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

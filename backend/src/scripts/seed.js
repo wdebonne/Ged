@@ -147,7 +147,7 @@ export const seedDatabase = async () => {
   console.log('⚙️ Création des paramètres...');
   await Settings.insertMany([
     { key: 'app_name', value: 'GED Courrier', category: 'appearance', description: 'Nom de l\'application' },
-    { key: 'app_version', value: 'v1.0.0', category: 'appearance', description: 'Version de l\'application' },
+    { key: 'app_version', value: 'v3.12.0', category: 'appearance', description: 'Version de l\'application' },
     { key: 'app_logo', value: '', category: 'appearance', description: 'Logo de l\'application' },
     { key: 'footer_text', value: 'Fait avec ❤️ par le Service Informatique de Pavilly', category: 'appearance', description: 'Texte du pied de page' },
     { key: 'footer_visible', value: 'true', category: 'appearance', description: 'Afficher le pied de page' },

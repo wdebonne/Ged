@@ -11,9 +11,11 @@ import {
   ExclamationTriangleIcon,
   EyeIcon,
   EyeSlashIcon,
-  UserGroupIcon
+  UserGroupIcon,
+  BellIcon
 } from '@heroicons/react/24/outline';
 import DelegationsTab from './DelegationsTab';
+import NotificationsTab from './NotificationsTab';
 
 export default function ProfilePage() {
   const queryClient = useQueryClient();
@@ -197,6 +199,17 @@ export default function ProfilePage() {
             }`}
           >
             Mot de passe
+          </button>
+          <button
+            onClick={() => setActiveTab('notifications')}
+            className={`pb-4 px-1 border-b-2 font-medium transition-colors flex items-center gap-2 ${
+              activeTab === 'notifications'
+                ? 'border-primary-600 text-primary-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <BellIcon className="w-5 h-5" />
+            Notifications
           </button>
           <button
             onClick={() => setActiveTab('delegations')}
@@ -459,6 +472,17 @@ export default function ProfilePage() {
               </button>
             </div>
           </form>
+        </motion.div>
+      )}
+
+      {/* Notifications Tab */}
+      {activeTab === 'notifications' && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="card p-6"
+        >
+          <NotificationsTab />
         </motion.div>
       )}
 

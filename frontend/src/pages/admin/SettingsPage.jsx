@@ -34,7 +34,8 @@ import {
   LinkIcon,
   DocumentMagnifyingGlassIcon,
   ChatBubbleLeftRightIcon,
-  SwatchIcon
+  SwatchIcon,
+  BellIcon
 } from '@heroicons/react/24/outline';
 
 const TABS = [
@@ -42,6 +43,7 @@ const TABS = [
   { id: 'appearance', name: 'Apparence', icon: PaintBrushIcon },
   { id: 'chatbot', name: 'ChatBot', icon: ChatBubbleLeftRightIcon },
   { id: 'ocr', name: 'OCR', icon: DocumentMagnifyingGlassIcon },
+  { id: 'notifications', name: 'Notifications', icon: BellIcon },
   { id: 'email-templates', name: 'Modèles de mail', icon: EnvelopeIcon },
   { id: 'webhooks', name: 'Webhooks', icon: BoltIcon },
   { id: 'storage', name: 'Stockage externe', icon: CloudIcon },
@@ -52,6 +54,112 @@ const TABS = [
   { id: 'smtp', name: 'SMTP', icon: EnvelopeIcon },
   { id: 'database', name: 'Base de données', icon: ServerIcon }
 ];
+
+// Composant Notifications par défaut
+function NotificationDefaultsSettings() {
+  const queryClient = useQueryClient();
+  const NOTIFICATION_OPTIONS = [
+    { key: 'email_newMail_recipient', label: 'Nouveau courrier (destinataire principal)', description: 'Le destinataire principal reçoit un email' },
+    { key: 'email_newMail_copy', label: 'Nouveau courrier (en copie)', description: 'Les destinataires en copie reçoivent un email' },
+    { key: 'email_newMail_service', label: 'Nouveau courrier du service (superviseur)', description: 'Les superviseurs du service sont notifiés' },
+    { key: 'email_processed', label: 'Courrier traité', description: 'Notification quand un courrier est marqué comme traité' },
+    { key: 'email_archived', label: 'Courrier archivé', description: 'Notification quand un courrier est archivé' },
+    { key: 'email_reminder', label: 'Rappels d\'échéance', description: 'Rappels avant la date d\'échéance' },
+    { key: 'email_overdue', label: 'Courriers en retard', description: 'Alertes pour les courriers dont l\'échéance est dépassée' }
+  ];
+
+  const [defaults, setDefaults] = useState({
+    email_newMail_recipient: true,
+    email_newMail_copy: true,
+    email_newMail_service: false,
+    email_processed: true,
+    email_archived: true,
+    email_reminder: true,
+    email_overdue: true
+  });
+
+  const { data: settingsData } = useQuery({
+    queryKey: ['settings', 'notification_defaults'],
+    queryFn: async () => {
+      const res = await settingsAPI.getOne('notification_defaults');
+      return res.data?.data?.value;
+    },
+    retry: false
+  });
+
+  useEffect(() => {
+    if (settingsData) {
+      setDefaults(prev => ({ ...prev, ...settingsData }));
+    }
+  }, [settingsData]);
+
+  const saveMutation = useMutation({
+    mutationFn: () => settingsAPI.update('notification_defaults', {
+      value: defaults,
+      category: 'general',
+      description: 'Préférences de notification par défaut pour tous les utilisateurs'
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['settings', 'notification_defaults']);
+      toast.success('Paramètres de notification par défaut enregistrés');
+    },
+    onError: () => {
+      toast.error('Erreur lors de l\'enregistrement');
+    }
+  });
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <BellIcon className="w-5 h-5" />
+          Notifications par défaut
+        </h2>
+        <p className="text-sm text-gray-500 mt-1">
+          Définissez les notifications email activées par défaut pour tous les utilisateurs.
+          Chaque utilisateur peut ensuite personnaliser ses propres préférences depuis son profil.
+        </p>
+      </div>
+
+      <div className="divide-y rounded-lg border overflow-hidden">
+        {NOTIFICATION_OPTIONS.map((opt) => (
+          <label key={opt.key} className="flex items-center gap-4 p-4 hover:bg-gray-50 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={defaults[opt.key] ?? true}
+              onChange={(e) => setDefaults({ ...defaults, [opt.key]: e.target.checked })}
+              className="w-4 h-4 rounded border-gray-300 text-primary-600"
+            />
+            <div className="flex-1 min-w-0">
+              <span className="text-sm font-medium text-gray-900">{opt.label}</span>
+              <p className="text-xs text-gray-500">{opt.description}</p>
+            </div>
+          </label>
+        ))}
+      </div>
+
+      <div className="flex justify-end">
+        <button
+          onClick={() => saveMutation.mutate()}
+          disabled={saveMutation.isLoading}
+          className="btn-primary flex items-center gap-2"
+        >
+          {saveMutation.isLoading ? (
+            <>
+              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Enregistrement...
+            </>
+          ) : (
+            <>
+              <CheckCircleIcon className="w-5 h-5" />
+              Enregistrer les paramètres par défaut
+            </>
+          )}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 // Composant IMAP Email-PDF (second IMAP pour conversion email -> PDF)
 function ImapMailSettings() {
@@ -3336,6 +3444,11 @@ export default function SettingsPage() {
             {/* ChatBot Settings */}
             {activeTab === 'chatbot' && (
               <ChatBotSettings />
+            )}
+
+            {/* Notifications defaults */}
+            {activeTab === 'notifications' && (
+              <NotificationDefaultsSettings />
             )}
 
             {/* Email Templates */}
