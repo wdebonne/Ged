@@ -7,6 +7,29 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ---
 
+## [3.13.2] - 2026-06-23
+
+### Corrigé
+
+- **Compteur de contacts à 0 sur la page Gestion des contacts** :
+  - La route backend `GET /api/contacts` ne renvoyait pas d'objet `pagination` dans la réponse, le frontend affichait donc « 0 contact(s) au total » même avec des contacts existants
+  - Ajout de la pagination côté backend (`countDocuments`, `skip`, `limit`) avec renvoi de `pagination: { total, page, pages }`
+  - Correction des `invalidateQueries(['senders'])` → `invalidateQueries(['contacts'])` dans le frontend (la queryKey utilisée est `'contacts'`, pas `'senders'`) — la liste ne se rafraîchissait pas après création/suppression d'un contact
+
+---
+
+## [3.13.1] - 2026-06-23
+
+### Amélioré
+
+- **Aperçu PDF adaptatif dans les courriers entrants** :
+  - L'aperçu PDF s'adapte automatiquement à la hauteur disponible du conteneur
+  - Plus besoin de scroller pour voir l'intégralité d'une page
+  - Utilisation d'un `ResizeObserver` pour recalculer dynamiquement la hauteur en cas de redimensionnement de la fenêtre
+  - Le zoom (+/−) fonctionne comme multiplicateur par-dessus la taille adaptée
+
+---
+
 ## [3.13.0] - 2026-06-23
 
 ### Ajouté

@@ -54,6 +54,7 @@ Application web complète de gestion de courrier avec authentification LDAP/Kerb
 - ✅ Courriers traités
 - ✅ Courriers archivés
 - ✅ Visualisation PDF intégrée avec zoom, navigation, **rotation** et **recadrage**
+  - **Ajustement automatique à la hauteur** : l'aperçu s'adapte à la zone disponible pour afficher la page entière sans scroll
   - Rotation gauche/droite (−90°/+90°) appliquée définitivement au fichier PDF à l'import
   - Recadrage manuel par sélection rectangle sur l'aperçu, appliqué définitivement à l'import
   - Recadrage automatique par détection des bords du contenu (analyse pixels canvas)

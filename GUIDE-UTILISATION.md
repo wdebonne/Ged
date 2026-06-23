@@ -180,9 +180,9 @@ Si configuré par l'administrateur :
 ### 5.1 Consulter un courrier
 
 1. Cliquez sur un courrier dans la liste
-2. Le PDF s'affiche dans le visualiseur intégré
+2. Le PDF s'affiche dans le visualiseur intégré, **adapté automatiquement à la hauteur** de la zone d'aperçu
 3. Utilisez les contrôles :
-   - **+/-** : Zoom avant/arrière
+   - **+/-** : Zoom avant/arrière (par rapport à la taille adaptée)
    - **◀ ▶** : Navigation entre les pages
    - **⤢** : Plein écran
 
@@ -394,11 +394,11 @@ Les permissions sont organisées en catégories :
 
 > 💡 Le superviseur d'un service voit automatiquement tous les courriers du service.
 
-### 10.4 Expéditeurs prédéfinis
+### 10.4 Contacts
 
-**Chemin : Administration > Expéditeurs**
+**Chemin : Administration > Contacts**
 
-Créez une liste d'expéditeurs fréquents pour l'auto-complétion.
+Créez et gérez une liste de contacts (expéditeurs pour le courrier entrant, destinataires pour le courrier départ) avec auto-complétion. Chaque contact peut avoir un nom, une organisation, un email, un téléphone et une adresse.
 
 ### 10.5 Objets prédéfinis
 
@@ -542,5 +542,5 @@ En cas de problème ou question :
 
 ---
 
-*Guide d'utilisation GED Courrier - Version 3.9.16*
-*Dernière mise à jour : Mai 2026*
+*Guide d'utilisation GED Courrier - Version 3.13.2*
+*Dernière mise à jour : Juin 2026*

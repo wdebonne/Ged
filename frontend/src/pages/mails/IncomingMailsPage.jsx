@@ -49,6 +49,8 @@ export default function IncomingMailsPage() {
   const [cropRect, setCropRect] = useState(null);
   const [cropDrag, setCropDrag] = useState(null);
   const pdfContainerRef = useRef(null);
+  const pdfViewerRef = useRef(null);
+  const [containerHeight, setContainerHeight] = useState(null);
   const [formData, setFormData] = useState({
     senderName: '',
     subject: '',
@@ -243,6 +245,17 @@ export default function IncomingMailsPage() {
     const service = services?.find(s => s._id === serviceId);
     return service ? service.name : '';
   };
+
+  // Mesurer la hauteur du conteneur PDF pour adapter le zoom
+  useEffect(() => {
+    const el = pdfViewerRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(([entry]) => {
+      setContainerHeight(entry.contentRect.height);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   // Cleanup des timeouts OCR au démontage
   useEffect(() => {
@@ -630,7 +643,7 @@ export default function IncomingMailsPage() {
               </div>
             )}
           </div>
-          <div className="flex-1 overflow-auto bg-gray-100 flex items-center justify-center p-4">
+          <div ref={pdfViewerRef} className="flex-1 overflow-auto bg-gray-100 flex items-center justify-center p-4">
             {!selectedFile ? (
               <div className="text-center text-gray-500">
                 <DocumentTextIcon className="w-16 h-16 mx-auto mb-3 opacity-30" />
@@ -698,6 +711,7 @@ export default function IncomingMailsPage() {
                 >
                   <Page
                     pageNumber={pageNumber}
+                    height={containerHeight ? containerHeight - 32 : undefined}
                     scale={scale}
                     rotate={rotation}
                     renderTextLayer={true}
