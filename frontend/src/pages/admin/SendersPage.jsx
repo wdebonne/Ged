@@ -37,7 +37,7 @@ export default function ContactsPage() {
   const deleteMutation = useMutation({
     mutationFn: (id) => contactsAPI.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries(['senders']);
+      queryClient.invalidateQueries(['contacts']);
       setDeleteConfirm(null);
     }
   });
@@ -272,7 +272,7 @@ function ContactModal({ sender, onClose }) {
       return contactsAPI.create(data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries(['senders']);
+      queryClient.invalidateQueries(['contacts']);
       onClose();
     },
     onError: (error) => {

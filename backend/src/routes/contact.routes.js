@@ -9,7 +9,7 @@ const router = express.Router();
 // GET /api/contacts - Liste des contacts
 router.get('/', authenticate, async (req, res) => {
   try {
-    const { search = '', isActive = '', limit = '' } = req.query;
+    const { search = '', isActive = '', page = 1, limit = 20 } = req.query;
 
     const query = {};
 
@@ -26,17 +26,22 @@ router.get('/', authenticate, async (req, res) => {
       query.isActive = isActive === 'true';
     }
 
-    let contactsQuery = Contact.find(query).sort({ name: 1 });
-
-    if (limit) {
-      contactsQuery = contactsQuery.limit(parseInt(limit));
-    }
-
-    const contacts = await contactsQuery;
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const total = await Contact.countDocuments(query);
+    const contacts = await Contact.find(query)
+      .sort({ name: 1 })
+      .skip((pageNum - 1) * limitNum)
+      .limit(limitNum);
 
     res.json({
       success: true,
-      data: contacts
+      data: contacts,
+      pagination: {
+        total,
+        page: pageNum,
+        pages: Math.ceil(total / limitNum)
+      }
     });
   } catch (error) {
     console.error('Erreur liste contacts:', error);
