@@ -84,7 +84,7 @@ export const saveNextCloudSettings = async (config) => {
 /**
  * Créer un client WebDAV NextCloud
  */
-const createNextCloudClient = async () => {
+export const createNextCloudClient = async () => {
   const enabledSetting = await Settings.findOne({ key: CONFIG_KEYS.enabled });
   if (!enabledSetting?.value) {
     return null;

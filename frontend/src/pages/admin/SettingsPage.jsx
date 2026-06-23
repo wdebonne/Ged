@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { settingsAPI, emailTemplatesAPI, webhooksAPI, onedriveAPI, s3API, nextcloudAPI, imapMailAPI } from '../../services/api';
 import useBrandingStore from '../../stores/brandingStore';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import ExcelRegisterSettings from '../../components/ExcelRegisterSettings';
 import toast from 'react-hot-toast';
 import {
   Cog6ToothIcon,
@@ -35,7 +36,8 @@ import {
   DocumentMagnifyingGlassIcon,
   ChatBubbleLeftRightIcon,
   SwatchIcon,
-  BellIcon
+  BellIcon,
+  TableCellsIcon
 } from '@heroicons/react/24/outline';
 
 const TABS = [
@@ -52,7 +54,8 @@ const TABS = [
   { id: 'imap', name: 'IMAP', icon: EnvelopeIcon },
   { id: 'imap-mail', name: 'IMAP Email-PDF', icon: EnvelopeIcon },
   { id: 'smtp', name: 'SMTP', icon: EnvelopeIcon },
-  { id: 'database', name: 'Base de données', icon: ServerIcon }
+  { id: 'database', name: 'Base de données', icon: ServerIcon },
+  { id: 'excel', name: 'Registre Excel', icon: TableCellsIcon }
 ];
 
 // Composant Notifications par défaut
@@ -4930,6 +4933,11 @@ export default function SettingsPage() {
                   </p>
                 </div>
               </div>
+            )}
+
+            {/* Excel Register Settings */}
+            {activeTab === 'excel' && (
+              <ExcelRegisterSettings />
             )}
 
             {/* Database Settings */}

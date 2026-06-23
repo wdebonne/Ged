@@ -8,6 +8,7 @@ import { authenticate, authorize, isAdmin } from '../middleware/auth.middleware.
 import { uploadOutgoing, handleUploadError, validateMagicBytes } from '../middleware/upload.middleware.js';
 import { extractTextFromPDF } from '../services/ocr.service.js';
 import { escapeRegex } from '../utils/regex.js';
+import { queueRegisterUpdate } from '../services/excel.service.js';
 
 const router = express.Router();
 
@@ -251,6 +252,8 @@ router.post('/', authenticate, authorize(PERMISSIONS.CREATE_OUTGOING),
         .populate('destination', 'name organization email')
         .populate('service', 'name code color')
         .populate('sender', 'firstName lastName email');
+
+      queueRegisterUpdate('outgoing', outgoingMail._id);
 
       res.status(201).json({
         success: true,

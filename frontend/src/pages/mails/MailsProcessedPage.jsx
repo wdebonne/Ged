@@ -12,10 +12,15 @@ import EmptyState from '../../components/EmptyState';
 import {
   CheckCircleIcon,
   EyeIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  TableCellsIcon
 } from '@heroicons/react/24/outline';
+import { useAuthStore } from '../../stores/authStore';
+import ExcelExportModal from '../../components/modals/ExcelExportModal';
 
 export default function MailsProcessedPage() {
+  const [showExcelExport, setShowExcelExport] = useState(false);
+  const { hasPermission } = useAuthStore();
   const [searchParams] = useSearchParams();
   const scope = searchParams.get('scope') || 'mine';
   
@@ -75,8 +80,19 @@ export default function MailsProcessedPage() {
 
   return (
     <div className="space-y-6">
-      {/* Titre */}
-      <h1 className="text-2xl font-bold text-gray-900">{pageTitle}</h1>
+      {/* Titre + Actions */}
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900">{pageTitle}</h1>
+        {hasPermission('export_mails') && (
+          <button
+            onClick={() => setShowExcelExport(true)}
+            className="btn-secondary flex items-center gap-2 text-sm"
+          >
+            <TableCellsIcon className="w-5 h-5" />
+            Registre Excel
+          </button>
+        )}
+      </div>
       
       {/* Filtres */}
       <MailFilters filters={filters} onChange={handleFilterChange} />
@@ -168,6 +184,7 @@ export default function MailsProcessedPage() {
           )}
         </>
       )}
+      <ExcelExportModal isOpen={showExcelExport} onClose={() => setShowExcelExport(false)} />
     </div>
   );
 }

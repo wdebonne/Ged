@@ -28,6 +28,7 @@ import nextcloudRoutes from './routes/nextcloud.routes.js';
 import delegationRoutes from './routes/delegation.routes.js';
 import ldapGroupMappingRoutes from './routes/ldapGroupMapping.routes.js';
 import backupRoutes from './routes/backup.routes.js';
+import excelRoutes from './routes/excel.routes.js';
 
 // Middleware
 import { serveMailFiles } from './middleware/serveMailFiles.middleware.js';
@@ -111,6 +112,12 @@ if (!fs.existsSync(path.join(uploadPath, 'pending'))) {
 if (!fs.existsSync(path.join(uploadPath, 'outgoing'))) {
   fs.mkdirSync(path.join(uploadPath, 'outgoing'), { recursive: true });
 }
+if (!fs.existsSync(path.join(uploadPath, 'templates'))) {
+  fs.mkdirSync(path.join(uploadPath, 'templates'), { recursive: true });
+}
+if (!fs.existsSync(path.join(uploadPath, 'registers'))) {
+  fs.mkdirSync(path.join(uploadPath, 'registers'), { recursive: true });
+}
 
 // Servir les fichiers statiques
 // D'abord vérifier si le fichier doit être récupéré depuis le stockage externe
@@ -140,6 +147,7 @@ app.use('/api/storage/nextcloud', nextcloudRoutes);
 app.use('/api/delegations', delegationRoutes);
 app.use('/api/ldap/group-mappings', ldapGroupMappingRoutes);
 app.use('/api/backup', backupRoutes);
+app.use('/api/excel', excelRoutes);
 
 // Route de santé
 app.get('/api/health', (req, res) => {

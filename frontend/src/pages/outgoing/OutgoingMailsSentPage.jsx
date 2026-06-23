@@ -7,10 +7,15 @@ import Pagination from '../../components/Pagination';
 import {
   MagnifyingGlassIcon,
   EyeIcon,
-  PaperAirplaneIcon
+  PaperAirplaneIcon,
+  TableCellsIcon
 } from '@heroicons/react/24/outline';
+import { useAuthStore } from '../../stores/authStore';
+import ExcelExportModal from '../../components/modals/ExcelExportModal';
 
 export default function OutgoingMailsSentPage() {
+  const [showExcelExport, setShowExcelExport] = useState(false);
+  const { hasPermission } = useAuthStore();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
 
@@ -38,6 +43,15 @@ export default function OutgoingMailsSentPage() {
             {pagination?.total || 0} courrier(s) envoyé(s)
           </p>
         </div>
+        {hasPermission('export_mails') && (
+          <button
+            onClick={() => setShowExcelExport(true)}
+            className="btn-secondary flex items-center gap-2 text-sm"
+          >
+            <TableCellsIcon className="w-5 h-5" />
+            Registre Excel
+          </button>
+        )}
       </div>
 
       <div className="card p-4">
@@ -115,6 +129,8 @@ export default function OutgoingMailsSentPage() {
       {pagination && pagination.pages > 1 && (
         <Pagination currentPage={pagination.page} totalPages={pagination.pages} onPageChange={setPage} />
       )}
+
+      <ExcelExportModal isOpen={showExcelExport} onClose={() => setShowExcelExport(false)} />
     </div>
   );
 }

@@ -13,7 +13,7 @@ const settingsSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    enum: ['general', 'ldap', 'kerberos', 'imap', 'imap_mail', 'smtp', 'security', 'appearance', 'ocr', 'chatbot'],
+    enum: ['general', 'ldap', 'kerberos', 'imap', 'imap_mail', 'smtp', 'security', 'appearance', 'ocr', 'chatbot', 'excel'],
     default: 'general'
   },
   description: {

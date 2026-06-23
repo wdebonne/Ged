@@ -420,6 +420,19 @@ export const backupAPI = {
   saveConfig: (data) => api.put('/backup/config', data),
 };
 
+// Excel Register
+export const excelAPI = {
+  getConfig: () => api.get('/excel/config'),
+  updateConfig: (data) => api.put('/excel/config', data),
+  uploadTemplate: (formData) => api.post('/excel/template/upload', formData),
+  deleteTemplate: () => api.delete('/excel/template'),
+  getTemplatePreview: () => api.get('/excel/template/preview'),
+  getFields: (type) => api.get(`/excel/fields/${type}`),
+  generate: (data) => api.post('/excel/generate', data, { responseType: 'blob' }),
+  download: () => api.get('/excel/download', { responseType: 'blob' }),
+  getStatus: () => api.get('/excel/status')
+};
+
 // Correspondances groupes LDAP/AD -> rôle/services GED
 export const ldapMappingsAPI = {
   getAll: () => api.get('/ldap/group-mappings'),

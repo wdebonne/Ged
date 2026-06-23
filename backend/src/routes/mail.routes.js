@@ -12,6 +12,7 @@ import { generateMailHistoryPDF } from '../services/pdf.service.js';
 import archiver from 'archiver';
 import { syncArchivedMail as syncToOneDrive } from '../services/onedrive.service.js';
 import { escapeRegex } from '../utils/regex.js';
+import { queueRegisterUpdate } from '../services/excel.service.js';
 
 const router = express.Router();
 
@@ -502,6 +503,8 @@ router.post('/', authenticate, canImportMails, uploadCourrier.single('document')
       console.error('Erreur notification:', notifError.message);
     }
 
+    queueRegisterUpdate('incoming', mail._id);
+
     res.status(201).json({
       success: true,
       message: 'Courrier créé avec succès',
@@ -846,6 +849,8 @@ router.post('/import', authenticate, canImportMails, [
     } catch (notifError) {
       console.error('Erreur notification:', notifError.message);
     }
+
+    queueRegisterUpdate('incoming', populatedMail._id);
 
     res.status(201).json({
       success: true,

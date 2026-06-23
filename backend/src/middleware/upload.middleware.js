@@ -10,6 +10,7 @@ const MAGIC_BYTES = {
   png:  { bytes: [0x89, 0x50, 0x4E, 0x47], offset: 0 },
   gif:  { bytes: [0x47, 0x49, 0x46, 0x38], offset: 0 },        // GIF8
   webp: { bytes: [0x57, 0x45, 0x42, 0x50], offset: 8 },        // WEBP at offset 8
+  xlsx: { bytes: [0x50, 0x4B, 0x03, 0x04], offset: 0 },        // PK (ZIP/XLSX)
 };
 
 const readMagicBytes = (filePath, length = 12) => new Promise((resolve, reject) => {
@@ -137,6 +138,21 @@ const outgoingStorage = multer.diskStorage({
   }
 });
 
+// Configuration du stockage pour les templates Excel
+const templatesStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const destPath = path.join(uploadPath, 'templates');
+    if (!fs.existsSync(destPath)) {
+      fs.mkdirSync(destPath, { recursive: true });
+    }
+    cb(null, destPath);
+  },
+  filename: (req, file, cb) => {
+    const uniqueName = `template-${uuidv4().slice(0, 8)}${path.extname(file.originalname)}`;
+    cb(null, uniqueName);
+  }
+});
+
 // Filtre pour les fichiers PDF
 const pdfFilter = (req, file, cb) => {
   if (file.mimetype === 'application/pdf') {
@@ -163,6 +179,16 @@ const pdfAndImageFilter = (req, file, cb) => {
     cb(null, true);
   } else {
     cb(new Error('Seuls les fichiers PDF et images sont autorisés.'), false);
+  }
+};
+
+// Filtre pour les fichiers Excel
+const xlsxFilter = (req, file, cb) => {
+  const allowedTypes = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+  if (allowedTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Seuls les fichiers Excel (.xlsx) sont autorisés.'), false);
   }
 };
 
@@ -198,6 +224,12 @@ export const uploadPending = multer({
   storage: pendingStorage,
   fileFilter: pdfFilter,
   limits: { fileSize: maxFileSize }
+});
+
+export const uploadTemplate = multer({
+  storage: templatesStorage,
+  fileFilter: xlsxFilter,
+  limits: { fileSize: 10 * 1024 * 1024 } // 10MB pour les templates
 });
 
 // Middleware de gestion des erreurs d'upload
