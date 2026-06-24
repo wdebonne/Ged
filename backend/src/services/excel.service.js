@@ -1,4 +1,4 @@
-import ExcelJS from 'exceljs';
+import XlsxPopulate from 'xlsx-populate';
 import fs from 'fs';
 import path from 'path';
 import { Settings, Mail, OutgoingMail } from '../models/index.js';
@@ -109,6 +109,32 @@ const SENDING_METHOD_LABELS = {
   fax: 'Fax',
   main_propre: 'Main propre',
   autre: 'Autre'
+};
+
+// --- Helpers ---
+
+const columnLetterToNumber = (letter) => {
+  let num = 0;
+  for (let i = 0; i < letter.length; i++) {
+    num = num * 26 + (letter.charCodeAt(i) - 64);
+  }
+  return num;
+};
+
+const columnNumberToLetter = (num) => {
+  let letter = '';
+  while (num > 0) {
+    const mod = (num - 1) % 26;
+    letter = String.fromCharCode(65 + mod) + letter;
+    num = Math.floor((num - 1) / 26);
+  }
+  return letter;
+};
+
+const findLastUsedRow = (sheet, startRow) => {
+  const range = sheet.usedRange();
+  if (!range) return startRow - 1;
+  return range.endCell().rowNumber();
 };
 
 // --- Settings CRUD ---
@@ -242,59 +268,48 @@ export const resolveFieldValue = (mail, fieldKey, type, settings) => {
 // --- Template loading ---
 
 export const loadTemplate = async (settings) => {
-  const workbook = new ExcelJS.Workbook();
-
   if (settings.templateSource === 'nextcloud' && settings.nextcloudTemplatePath) {
     const client = await createNextCloudClient();
     if (!client) throw new Error('NextCloud non configuré');
     const buffer = await client.getFileContents(settings.nextcloudTemplatePath);
-    await workbook.xlsx.load(buffer);
-  } else if (settings.templatePath) {
-    const fullPath = path.join(uploadPath, settings.templatePath);
-    if (!fs.existsSync(fullPath)) throw new Error('Fichier template introuvable');
-    await workbook.xlsx.readFile(fullPath);
-  } else {
-    return null;
+    return XlsxPopulate.fromDataAsync(buffer);
   }
 
-  return workbook;
+  if (settings.templatePath) {
+    const fullPath = path.join(uploadPath, settings.templatePath);
+    if (!fs.existsSync(fullPath)) throw new Error('Fichier template introuvable');
+    return XlsxPopulate.fromFileAsync(fullPath);
+  }
+
+  return null;
 };
 
 // --- Template preview ---
-
-const columnNumberToLetter = (num) => {
-  let letter = '';
-  while (num > 0) {
-    const mod = (num - 1) % 26;
-    letter = String.fromCharCode(65 + mod) + letter;
-    num = Math.floor((num - 1) / 26);
-  }
-  return letter;
-};
 
 export const getTemplatePreview = async () => {
   const settings = await getExcelSettings();
   const workbook = await loadTemplate(settings);
   if (!workbook) return [];
 
-  const sheets = [];
-  workbook.eachSheet((worksheet) => {
+  return workbook.sheets().map(sheet => {
     const columns = [];
-    const headerRow = worksheet.getRow(1);
-    headerRow.eachCell({ includeEmpty: true }, (cell, colNumber) => {
-      columns.push({
-        column: columnNumberToLetter(colNumber),
-        header: cell.value != null ? String(cell.value) : '',
-        colNumber
-      });
-    });
-    sheets.push({ name: worksheet.name, columns });
+    const range = sheet.usedRange();
+    if (range) {
+      const lastCol = range.endCell().columnNumber();
+      for (let col = 1; col <= lastCol; col++) {
+        const cellValue = sheet.cell(1, col).value();
+        columns.push({
+          column: columnNumberToLetter(col),
+          header: cellValue != null ? String(cellValue) : '',
+          colNumber: col
+        });
+      }
+    }
+    return { name: sheet.name(), columns };
   });
-
-  return sheets;
 };
 
-// --- Register generation (on-demand) ---
+// --- Register generation ---
 
 const populateIncomingQuery = () => ({
   populate: [
@@ -314,24 +329,25 @@ const populateOutgoingQuery = () => ({
   ]
 });
 
-const fillSheet = (worksheet, mails, mapping, startRow, type, settings) => {
+const fillSheet = (sheet, mails, mapping, startRow, type, settings) => {
   if (!mapping || Object.keys(mapping).length === 0) return;
 
+  const fields = type === 'outgoing' ? OUTGOING_FIELDS : INCOMING_FIELDS;
+
   mails.forEach((mail, index) => {
-    const row = worksheet.getRow(startRow + index);
-    for (const [column, fieldKey] of Object.entries(mapping)) {
-      const cell = row.getCell(column);
+    const row = startRow + index;
+    for (const [columnLetter, fieldKey] of Object.entries(mapping)) {
+      const colNum = columnLetterToNumber(columnLetter.toUpperCase());
       const value = resolveFieldValue(mail, fieldKey, type, settings);
-      const fieldDef = (type === 'outgoing' ? OUTGOING_FIELDS : INCOMING_FIELDS)
-        .find(f => f.key === fieldKey);
+      const fieldDef = fields.find(f => f.key === fieldKey);
+      const cell = sheet.cell(row, colNum);
 
       if (fieldDef?.type === 'link' && value) {
-        cell.value = { text: value, hyperlink: value };
+        cell.value(value).hyperlink(value);
       } else {
-        cell.value = value;
+        cell.value(value);
       }
     }
-    row.commit();
   });
 };
 
@@ -350,13 +366,13 @@ export const generateRegister = async (options = {}) => {
     workbook = null;
   }
   if (!workbook) {
-    workbook = new ExcelJS.Workbook();
+    workbook = await XlsxPopulate.fromBlankAsync();
   }
 
   if (includeIncoming) {
     const sheetName = settings.incomingSheetName || DEFAULTS.incomingSheetName;
-    let sheet = workbook.getWorksheet(sheetName);
-    if (!sheet) sheet = workbook.addWorksheet(sheetName);
+    let sheet = workbook.sheets().find(s => s.name() === sheetName);
+    if (!sheet) sheet = workbook.addSheet(sheetName);
 
     const query = {};
     if (status) query.status = status;
@@ -379,8 +395,8 @@ export const generateRegister = async (options = {}) => {
 
   if (includeOutgoing) {
     const sheetName = settings.outgoingSheetName || DEFAULTS.outgoingSheetName;
-    let sheet = workbook.getWorksheet(sheetName);
-    if (!sheet) sheet = workbook.addWorksheet(sheetName);
+    let sheet = workbook.sheets().find(s => s.name() === sheetName);
+    if (!sheet) sheet = workbook.addSheet(sheetName);
 
     const query = {};
     if (status) query.status = status;
@@ -401,17 +417,17 @@ export const generateRegister = async (options = {}) => {
     fillSheet(sheet, mails, settings.outgoingMapping || {}, startRow, 'outgoing', settings);
   }
 
-  const buffer = await workbook.xlsx.writeBuffer();
+  const buffer = await workbook.outputAsync('nodebuffer');
 
   if (settings.autoSaveToNextCloud && settings.nextcloudOutputPath) {
     try {
-      await saveToNextCloud(Buffer.from(buffer), settings);
+      await saveToNextCloud(buffer, settings);
     } catch (err) {
       console.error('Erreur sauvegarde registre NextCloud:', err.message);
     }
   }
 
-  return Buffer.from(buffer);
+  return buffer;
 };
 
 // --- NextCloud output ---
@@ -482,8 +498,7 @@ const processRegisterQueue = async () => {
 
     let workbook;
     if (fs.existsSync(registerPath)) {
-      workbook = new ExcelJS.Workbook();
-      await workbook.xlsx.readFile(registerPath);
+      workbook = await XlsxPopulate.fromFileAsync(registerPath);
     } else {
       try {
         workbook = await loadTemplate(settings);
@@ -491,7 +506,7 @@ const processRegisterQueue = async () => {
         workbook = null;
       }
       if (!workbook) {
-        workbook = new ExcelJS.Workbook();
+        workbook = await XlsxPopulate.fromBlankAsync();
       }
     }
 
@@ -500,35 +515,37 @@ const processRegisterQueue = async () => {
 
     if (incomingIds.length > 0) {
       const sheetName = settings.incomingSheetName || DEFAULTS.incomingSheetName;
-      let sheet = workbook.getWorksheet(sheetName);
-      if (!sheet) sheet = workbook.addWorksheet(sheetName);
+      let sheet = workbook.sheets().find(s => s.name() === sheetName);
+      if (!sheet) sheet = workbook.addSheet(sheetName);
 
       const { populate } = populateIncomingQuery();
       const mails = await Mail.find({ _id: { $in: incomingIds } })
         .populate(populate)
         .sort({ receivedDate: 1 });
 
-      const lastRow = sheet.lastRow ? sheet.lastRow.number : (parseInt(settings.incomingStartRow) || DEFAULTS.incomingStartRow) - 1;
-      const startRow = Math.max(lastRow + 1, parseInt(settings.incomingStartRow) || DEFAULTS.incomingStartRow);
+      const configStartRow = parseInt(settings.incomingStartRow) || DEFAULTS.incomingStartRow;
+      const lastRow = findLastUsedRow(sheet, configStartRow);
+      const startRow = Math.max(lastRow + 1, configStartRow);
       fillSheet(sheet, mails, settings.incomingMapping || {}, startRow, 'incoming', settings);
     }
 
     if (outgoingIds.length > 0) {
       const sheetName = settings.outgoingSheetName || DEFAULTS.outgoingSheetName;
-      let sheet = workbook.getWorksheet(sheetName);
-      if (!sheet) sheet = workbook.addWorksheet(sheetName);
+      let sheet = workbook.sheets().find(s => s.name() === sheetName);
+      if (!sheet) sheet = workbook.addSheet(sheetName);
 
       const { populate } = populateOutgoingQuery();
       const mails = await OutgoingMail.find({ _id: { $in: outgoingIds } })
         .populate(populate)
         .sort({ createdAt: 1 });
 
-      const lastRow = sheet.lastRow ? sheet.lastRow.number : (parseInt(settings.outgoingStartRow) || DEFAULTS.outgoingStartRow) - 1;
-      const startRow = Math.max(lastRow + 1, parseInt(settings.outgoingStartRow) || DEFAULTS.outgoingStartRow);
+      const configStartRow = parseInt(settings.outgoingStartRow) || DEFAULTS.outgoingStartRow;
+      const lastRow = findLastUsedRow(sheet, configStartRow);
+      const startRow = Math.max(lastRow + 1, configStartRow);
       fillSheet(sheet, mails, settings.outgoingMapping || {}, startRow, 'outgoing', settings);
     }
 
-    await workbook.xlsx.writeFile(registerPath);
+    await workbook.toFileAsync(registerPath);
 
     await Settings.findOneAndUpdate(
       { key: CONFIG_KEYS.lastUpdateDate },
