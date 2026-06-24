@@ -20,6 +20,7 @@ Application web complète de gestion de courrier avec authentification LDAP/Kerb
 - **@aws-sdk/client-s3** pour le stockage Amazon S3 et compatibles
 - **webdav** pour l'intégration NextCloud/ownCloud
 - **@microsoft/microsoft-graph-client** pour OneDrive
+- **xlsx-populate** pour la génération de fichiers Excel (.xlsx) sans altérer les tableaux dynamiques
 - **n8n** intégration pour ChatBot IA (webhook)
 
 ### Frontend
@@ -66,6 +67,17 @@ Application web complète de gestion de courrier avec authentification LDAP/Kerb
   - Export complet (ZIP avec tous les fichiers)
   - **Options d'export PDF personnalisables** (admin) : choisissez les éléments à inclure dans l'historique (création, service, destinataire, lectures, traitement, réponses, archivage)
   - Les options s'appliquent à tous les utilisateurs lors de l'export
+- ✅ **Registre Excel automatique (.xlsx)** :
+  - Mise à jour automatique d'un fichier Excel à chaque courrier créé/importé (entrant et sortant)
+  - Système de buffer/debounce avec mutex anti-concurrence
+  - Template personnalisable : uploadez votre modèle .xlsx ou récupérez-le depuis NextCloud
+  - Mapping flexible des colonnes via l'interface d'administration
+  - Feuilles séparées pour courrier arrivé et courrier départ
+  - 23 champs mappables (entrant) / 19 champs (sortant) avec liens hypertexte
+  - Export à la demande avec filtres (dates, statut, service)
+  - Téléchargement du registre courant auto-généré
+  - Sauvegarde automatique sur NextCloud (optionnel)
+  - Préservation des tableaux dynamiques et formules du template grâce à `xlsx-populate`
 - ✅ Recherche et filtres avancés
 - ✅ Assignation aux utilisateurs/services
 - ✅ **Notifications email automatiques** :

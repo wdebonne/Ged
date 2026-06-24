@@ -7,6 +7,40 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ---
 
+## [3.14.0] - 2026-06-24
+
+### Ajouté
+
+- **Registre Excel automatique (.xlsx)** :
+  - Génération automatique d'un fichier Excel mis à jour à chaque création/import de courrier (entrant ou sortant)
+  - Système de **buffer/debounce** avec délai configurable : les mises à jour sont accumulées et traitées en lot pour éviter les accès concurrents
+  - **Mutex** intégré pour empêcher les écritures simultanées sur le fichier
+  - Support des **templates Excel personnalisés** : uploadez votre propre modèle .xlsx — les tableaux dynamiques, formules et mises en forme sont préservés grâce à `xlsx-populate`
+  - Récupération du template depuis **NextCloud** (si configuré) ou par upload local
+  - **Mapping flexible des colonnes** : choisissez quelle donnée va dans quelle colonne de votre template via l'interface d'administration
+  - **Feuilles séparées** pour courrier arrivé et courrier départ, chacune avec son propre mapping
+  - **23 champs mappables** pour le courrier entrant et **19 pour le sortant**, dont :
+    - Lien hypertexte vers la page détail du courrier dans l'application
+    - Chemin du fichier (local ou stockage externe)
+  - **Export à la demande** avec filtres (dates, statut, service) en plus de la mise à jour automatique
+  - **Téléchargement du registre courant** (fichier auto-généré dans `uploads/registers/`)
+  - Sauvegarde automatique sur NextCloud après chaque mise à jour (optionnel)
+  - Nouvel onglet **« Registre Excel »** dans les paramètres d'administration
+  - Bouton **« Registre Excel »** sur les pages de liste des courriers (traités, archivés, envoyés, archivés départ) — visible avec la permission `export_mails`
+  - 9 endpoints API dédiés (`/api/excel/*`) pour la configuration, l'upload de template, l'aperçu, la génération et le téléchargement
+
+### Technique
+
+- Nouvelle dépendance : `xlsx-populate` pour la manipulation de fichiers Excel sans altérer les structures internes (tableaux dynamiques, formules, styles)
+- Nouveau service : `backend/src/services/excel.service.js` avec file d'attente en mémoire et debounce configurable
+- Nouvelles routes : `backend/src/routes/excel.routes.js`
+- Extension du middleware d'upload pour les fichiers .xlsx (magic bytes ZIP/XLSX, filtre MIME, stockage `uploads/templates/`)
+- Catégorie `'excel'` ajoutée au modèle Settings
+- Export de `createNextCloudClient` dans `nextcloud.service.js` pour permettre la récupération de templates distants
+- Hooks `queueRegisterUpdate()` branchés sur les routes de création/import de courrier entrant et création de courrier sortant
+
+---
+
 ## [3.13.2] - 2026-06-23
 
 ### Corrigé

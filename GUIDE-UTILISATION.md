@@ -14,11 +14,12 @@ Ce guide vous accompagne dans l'utilisation quotidienne de l'application GED Cou
 4. [Import de courriers](#4-import-de-courriers)
 5. [Traitement des courriers](#5-traitement-des-courriers)
 6. [Archivage](#6-archivage)
-7. [Délégations](#7-délégations)
-8. [Statistiques](#8-statistiques)
-9. [Mon Profil](#9-mon-profil)
-10. [Administration](#10-administration)
-11. [FAQ & Astuces](#11-faq--astuces)
+7. [Registre Excel](#7-registre-excel)
+8. [Délégations](#8-délégations)
+9. [Statistiques](#9-statistiques)
+10. [Mon Profil](#10-mon-profil)
+11. [Administration](#11-administration)
+12. [FAQ & Astuces](#12-faq--astuces)
 
 ---
 
@@ -249,11 +250,68 @@ L'archivage automatique :
 
 ---
 
-## 7. Délégations
+## 7. Registre Excel
+
+L'application peut générer automatiquement un fichier Excel (.xlsx) qui enregistre chaque courrier entrant et sortant, constituant un registre de correspondance.
+
+### 7.1 Fonctionnement automatique
+
+Lorsque le registre Excel est activé par l'administrateur :
+
+1. **Chaque courrier créé ou importé** (entrant et sortant) déclenche une mise à jour du fichier Excel
+2. Un **système de buffer** accumule les courriers pendant un délai configurable (ex: 30 secondes) puis les écrit tous en lot
+3. Le fichier est sauvegardé dans `uploads/registers/registre-courrier-{ANNÉE}.xlsx`
+4. Optionnellement, le fichier est synchronisé automatiquement sur **NextCloud**
+
+### 7.2 Télécharger le registre
+
+Un bouton **« Registre Excel »** est disponible sur les pages de liste des courriers (traités, archivés, envoyés, archivés départ) :
+
+1. Cliquez sur le bouton **Registre Excel**
+2. Choisissez le mode :
+   - **Registre courant** : télécharge le fichier auto-généré tel quel
+   - **Export personnalisé** : génère un fichier filtré par dates, statut, service, type de courrier
+3. Le fichier .xlsx est téléchargé sur votre ordinateur
+
+> 💡 Ce bouton n'est visible que si vous avez la permission **Export des courriers**.
+
+### 7.3 Configuration (Administration)
+
+**Chemin : Administration > Paramètres > Registre Excel**
+
+| Paramètre | Description |
+|-----------|-------------|
+| **Activation** | Activer/désactiver le registre automatique |
+| **URL de l'application** | URL de base pour les liens dans le registre (ex: `https://ged.exemple.fr`) |
+| **Modèle Excel** | Uploadez votre propre template .xlsx ou récupérez-le depuis NextCloud |
+| **Feuilles** | Assignez une feuille pour le courrier arrivé et une pour le courrier départ |
+| **Ligne de départ** | Première ligne de données (après les en-têtes) |
+| **Mapping des colonnes** | Associez chaque colonne de votre template à un champ de données |
+| **Format de date** | DD/MM/YYYY, YYYY-MM-DD, etc. |
+| **Délai du buffer** | Temps d'attente avant mise à jour (en secondes) |
+| **Sauvegarde NextCloud** | Sauvegarde automatique du registre sur NextCloud |
+
+### 7.4 Mapping des colonnes
+
+Le mapping permet de choisir précisément quelle donnée va dans quelle colonne :
+
+1. Uploadez votre template Excel
+2. L'aperçu montre les feuilles et les en-têtes de colonnes (ligne 1)
+3. Pour chaque colonne, sélectionnez le champ correspondant dans le dropdown
+
+**Champs disponibles (courrier entrant)** : Référence, Objet, Nom/Organisation/Email/Téléphone expéditeur, Destinataire, Service, Dates (réception, import, traitement, archivage), Statut, Priorité, Réponses, Notes, Tags, Lien application, Chemin fichier...
+
+**Champs disponibles (courrier départ)** : Référence, Objet, Destinataire, Expéditeur (agent), Service, Dates, Mode d'envoi, N° de suivi, Réf. courrier entrant lié, Lien application, Chemin fichier...
+
+> 💡 **Astuce** : Le champ « Lien vers l'application » génère un hyperlien cliquable dans Excel qui ouvre directement la page de détail du courrier.
+
+---
+
+## 8. Délégations
 
 La délégation permet de transférer temporairement ses courriers à un collègue (absence, congés...).
 
-### 7.1 Créer une délégation
+### 8.1 Créer une délégation
 
 1. Accédez à **Mon Profil** > **Délégations**
 2. Cliquez sur **+ Nouvelle délégation**
@@ -263,13 +321,13 @@ La délégation permet de transférer temporairement ses courriers à un collèg
    - **Date de fin** : Quand la délégation se termine
 4. Cliquez sur **Créer**
 
-### 7.2 Gérer ses délégations
+### 8.2 Gérer ses délégations
 
 - **Consulter** : Voir toutes vos délégations actives et passées
 - **Révoquer** : Annuler une délégation avant la date de fin
 - **Prolonger** : Modifier la date de fin
 
-### 7.3 Recevoir des délégations
+### 8.3 Recevoir des délégations
 
 Si un collègue vous délègue ses courriers :
 
@@ -282,14 +340,14 @@ Si un collègue vous délègue ses courriers :
 
 ---
 
-## 8. Statistiques
+## 9. Statistiques
 
-### 8.1 Accès aux statistiques
+### 9.1 Accès aux statistiques
 
 1. Cliquez sur **Statistiques** dans le menu principal
 2. La page affiche des graphiques et indicateurs
 
-### 8.2 Filtres disponibles
+### 9.2 Filtres disponibles
 
 | Filtre | Options |
 |--------|---------|
@@ -298,7 +356,7 @@ Si un collègue vous délègue ses courriers :
 | **Service** | Filtrer par service (admin) |
 | **Utilisateur** | Filtrer par utilisateur (admin) |
 
-### 8.3 Indicateurs affichés
+### 9.3 Indicateurs affichés
 
 - **Total des courriers** : Nombre global
 - **Répartition par statut** : À traiter, traités, archivés
@@ -307,7 +365,7 @@ Si un collègue vous délègue ses courriers :
 - **Performance par utilisateur** : Classement
 - **Top 10 expéditeurs** : Expéditeurs les plus fréquents
 
-### 8.4 Export des statistiques
+### 9.4 Export des statistiques
 
 1. Cliquez sur l'icône **⚙️** à côté du bouton d'export
 2. Sélectionnez les sections à inclure
@@ -316,13 +374,13 @@ Si un collègue vous délègue ses courriers :
 
 ---
 
-## 9. Mon Profil
+## 10. Mon Profil
 
-### 9.1 Accès au profil
+### 10.1 Accès au profil
 
 Cliquez sur votre avatar en haut à droite > **Mon Profil**
 
-### 9.2 Informations personnelles
+### 10.2 Informations personnelles
 
 Vous pouvez modifier :
 
@@ -331,7 +389,7 @@ Vous pouvez modifier :
 - **Email**
 - **Mot de passe**
 
-### 9.3 Onglet Notifications
+### 10.3 Onglet Notifications
 
 Personnalisez les notifications email que vous recevez :
 
@@ -350,17 +408,17 @@ Personnalisez les notifications email que vous recevez :
 
 > 💡 **Astuce** : Désactivez « Personnaliser mes notifications » pour revenir aux paramètres par défaut à tout moment.
 
-### 9.4 Onglet Délégations
+### 10.4 Onglet Délégations
 
-Gérez vos délégations de courriers (voir section 7).
+Gérez vos délégations de courriers (voir section 8).
 
 ---
 
-## 10. Administration
+## 11. Administration
 
 *(Section visible uniquement pour les administrateurs)*
 
-### 10.1 Utilisateurs
+### 11.1 Utilisateurs
 
 **Chemin : Administration > Utilisateurs**
 
@@ -371,7 +429,7 @@ Gérez vos délégations de courriers (voir section 7).
 | **Activer/Désactiver** | Bloquer ou réactiver un compte |
 | **Réinitialiser MDP** | Envoyer un lien de réinitialisation |
 
-### 10.2 Groupes et Permissions
+### 11.2 Groupes et Permissions
 
 **Chemin : Administration > Groupes**
 
@@ -384,7 +442,7 @@ Les permissions sont organisées en catégories :
 | **Archive** | Archiver, désarchiver |
 | **Administration** | Gérer utilisateurs, paramètres |
 
-### 10.3 Services
+### 11.3 Services
 
 **Chemin : Administration > Services**
 
@@ -394,19 +452,19 @@ Les permissions sont organisées en catégories :
 
 > 💡 Le superviseur d'un service voit automatiquement tous les courriers du service.
 
-### 10.4 Contacts
+### 11.4 Contacts
 
 **Chemin : Administration > Contacts**
 
 Créez et gérez une liste de contacts (expéditeurs pour le courrier entrant, destinataires pour le courrier départ) avec auto-complétion. Chaque contact peut avoir un nom, une organisation, un email, un téléphone et une adresse.
 
-### 10.5 Objets prédéfinis
+### 11.5 Objets prédéfinis
 
 **Chemin : Administration > Objets**
 
 Créez des objets de courrier prédéfinis.
 
-### 10.6 Modèles d'emails
+### 11.6 Modèles d'emails
 
 **Chemin : Administration > Modèles d'emails**
 
@@ -417,7 +475,7 @@ Personnalisez les emails automatiques avec :
 - Prévisualisation en temps réel
 - **Pièce jointe PDF** : cochez « Joindre le PDF du courrier » pour inclure le document en PJ (disponible pour les templates liés aux courriers)
 
-### 10.7 Notifications par défaut
+### 11.7 Notifications par défaut
 
 **Chemin : Administration > Paramètres > Notifications**
 
@@ -435,7 +493,7 @@ Définissez les notifications email activées par défaut pour tous les utilisat
 
 > 💡 Chaque utilisateur peut personnaliser ses propres préférences depuis **Mon Profil > Notifications**.
 
-### 10.8 Paramètres système
+### 11.8 Paramètres système
 
 **Chemin : Administration > Paramètres**
 
@@ -461,13 +519,18 @@ Définissez les notifications email activées par défaut pour tous les utilisat
 #### SMTP / LDAP / IMAP
 - Configuration des services externes
 
+#### Registre Excel
+- Activation et configuration du registre automatique
+- Upload de template, mapping des colonnes
+- Voir la [section 7](#7-registre-excel) pour le détail complet
+
 #### Stockage externe
 - OneDrive, S3, NextCloud
 - Synchronisation automatique
 
 ---
 
-## 11. FAQ & Astuces
+## 12. FAQ & Astuces
 
 ### Questions fréquentes
 
@@ -542,5 +605,5 @@ En cas de problème ou question :
 
 ---
 
-*Guide d'utilisation GED Courrier - Version 3.13.2*
+*Guide d'utilisation GED Courrier - Version 3.14.0*
 *Dernière mise à jour : Juin 2026*
