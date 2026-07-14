@@ -286,6 +286,7 @@ Lancez la mise à jour :
 | `APP_NAME` | Nom affiché de l'application | `GED Courrier` |
 | `MAX_FILE_SIZE` | Taille max des fichiers (octets) | `50000000` |
 | `REMINDER_CRON` | Horaire (cron, Europe/Paris) du job quotidien de rappels d'échéance et alertes de retard | `0 8 * * *` |
+| `TRASH_PURGE_CRON` | Horaire (cron, Europe/Paris) du job quotidien de purge automatique de la corbeille | `0 3 * * *` |
 
 ### Variables SMTP (envoi d'emails)
 

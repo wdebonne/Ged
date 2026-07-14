@@ -296,8 +296,8 @@ export default function OutgoingMailDetailPage() {
               <div className="w-12 h-12 rounded-full bg-danger-100 mx-auto mb-4 flex items-center justify-center">
                 <ExclamationTriangleIcon className="w-6 h-6 text-danger-600" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Supprimer ce courrier ?</h3>
-              <p className="text-gray-600 mb-6">Cette action est irréversible.</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Déplacer ce courrier vers la corbeille ?</h3>
+              <p className="text-gray-600 mb-6">Il pourra être restauré depuis Administration &gt; Corbeille.</p>
               <div className="flex items-center justify-center gap-3">
                 <button onClick={() => setShowDeleteConfirm(false)} className="btn-secondary">Annuler</button>
                 <button

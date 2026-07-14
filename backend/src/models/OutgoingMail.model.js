@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import Counter, { formatChronoNumber } from './Counter.model.js';
+import softDeletePlugin from './plugins/softDelete.plugin.js';
 
 export const OUTGOING_MAIL_STATUS = {
   DRAFT: 'draft',
@@ -145,6 +146,22 @@ const outgoingMailSchema = new mongoose.Schema({
       default: false
     },
     syncedAt: Date
+  },
+
+  // Corbeille (soft delete)
+  deletedAt: {
+    type: Date,
+    default: null
+  },
+  deletedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
+  },
+  deleteReason: {
+    type: String,
+    trim: true,
+    default: ''
   }
 }, {
   timestamps: true
@@ -155,6 +172,7 @@ outgoingMailSchema.index({ status: 1, sender: 1 });
 outgoingMailSchema.index({ status: 1, service: 1 });
 outgoingMailSchema.index({ sentDate: -1 });
 outgoingMailSchema.index({ destination: 1 });
+outgoingMailSchema.index({ deletedAt: 1 });
 
 outgoingMailSchema.pre('save', async function(next) {
   if (!this.reference) {
@@ -197,6 +215,24 @@ outgoingMailSchema.methods.markAsRead = function(userId) {
   }
   return this.save();
 };
+
+// Méthode pour mettre à la corbeille (soft delete)
+outgoingMailSchema.methods.softDelete = function(userId, reason = '') {
+  this.deletedAt = new Date();
+  this.deletedBy = userId;
+  this.deleteReason = reason;
+  return this.save();
+};
+
+// Méthode pour restaurer depuis la corbeille
+outgoingMailSchema.methods.restore = function() {
+  this.deletedAt = null;
+  this.deletedBy = null;
+  this.deleteReason = '';
+  return this.save();
+};
+
+outgoingMailSchema.plugin(softDeletePlugin);
 
 const OutgoingMail = mongoose.model('OutgoingMail', outgoingMailSchema);
 

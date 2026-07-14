@@ -31,7 +31,9 @@ import {
   CircleStackIcon,
   PaperAirplaneIcon,
   PlusIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  TrashIcon,
+  ClipboardDocumentListIcon
 } from '@heroicons/react/24/outline';
 
 export default function MainLayout() {
@@ -147,6 +149,8 @@ export default function MainLayout() {
     { name: 'Paramètres', href: '/admin/parametres', icon: Cog6ToothIcon, permission: 'view_settings' },
     { name: 'Sauvegardes', href: '/admin/sauvegardes', icon: CircleStackIcon, permission: 'manage_settings' },
     { name: 'Correspondances LDAP', href: '/admin/correspondances-ldap', icon: LinkIcon, permission: 'manage_ldap' },
+    { name: 'Corbeille', href: '/admin/corbeille', icon: TrashIcon, permission: 'manage_trash' },
+    { name: "Journal d'audit", href: '/admin/journal-audit', icon: ClipboardDocumentListIcon, permission: 'view_audit_log' },
   ];
 
   const filteredAdminNav = useMemo(
@@ -649,6 +653,8 @@ function getPageTitle(pathname) {
     '/courriers/depart/envoyes': 'Courriers envoyés',
     '/courriers/depart/archives': 'Courriers départ archivés',
     '/admin/parametres': 'Paramètres',
+    '/admin/corbeille': 'Corbeille',
+    '/admin/journal-audit': "Journal d'audit",
   };
 
   // Gérer les routes dynamiques

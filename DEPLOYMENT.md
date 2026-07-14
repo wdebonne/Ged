@@ -101,6 +101,13 @@ MAX_FILE_SIZE=50000000  # 50MB en octets
 REMINDER_CRON=0 8 * * *
 
 # ═══════════════════════════════════════════════════════════════
+# CORBEILLE (optionnel)
+# ═══════════════════════════════════════════════════════════════
+# Horaire du job quotidien de purge automatique de la corbeille (cron, timezone Europe/Paris)
+# La durée de rétention (30 jours par défaut) se configure dans l'interface : Administration > Corbeille.
+TRASH_PURGE_CRON=0 3 * * *
+
+# ═══════════════════════════════════════════════════════════════
 # SMTP - Envoi d'emails (optionnel mais recommandé)
 # ═══════════════════════════════════════════════════════════════
 SMTP_HOST=smtp.example.com

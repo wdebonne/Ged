@@ -3,12 +3,13 @@ import { body, validationResult } from 'express-validator';
 import mongoose from 'mongoose';
 import fs from 'fs';
 import path from 'path';
-import { OutgoingMail, Contact, Subject, User, Service, OUTGOING_MAIL_STATUS, PERMISSIONS } from '../models/index.js';
+import { OutgoingMail, Contact, Subject, User, Service, OUTGOING_MAIL_STATUS, PERMISSIONS, AUDIT_CATEGORIES } from '../models/index.js';
 import { authenticate, authorize, isAdmin } from '../middleware/auth.middleware.js';
 import { uploadOutgoing, handleUploadError, validateMagicBytes } from '../middleware/upload.middleware.js';
 import { extractTextFromPDF } from '../services/ocr.service.js';
 import { escapeRegex } from '../utils/regex.js';
 import { queueRegisterUpdate } from '../services/excel.service.js';
+import { logAudit } from '../services/audit.service.js';
 
 const router = express.Router();
 
@@ -436,7 +437,7 @@ router.post('/:id/archive', authenticate, authorize(PERMISSIONS.ARCHIVE_OUTGOING
   }
 });
 
-// DELETE /api/outgoing-mails/:id - Supprimer
+// DELETE /api/outgoing-mails/:id - Mettre à la corbeille
 router.delete('/:id', authenticate, isAdmin, async (req, res) => {
   try {
     const mail = await OutgoingMail.findById(req.params.id);
@@ -444,14 +445,19 @@ router.delete('/:id', authenticate, isAdmin, async (req, res) => {
       return res.status(404).json({ success: false, message: 'Courrier départ non trouvé' });
     }
 
-    const fullPath = path.join(uploadPath, mail.filePath);
-    if (mail.filePath && fs.existsSync(fullPath)) {
-      fs.unlinkSync(fullPath);
-    }
+    await mail.softDelete(req.user._id, req.body?.reason || '');
 
-    await OutgoingMail.findByIdAndDelete(req.params.id);
+    logAudit({
+      req,
+      action: 'outgoing.trashed',
+      category: AUDIT_CATEGORIES.DELETION,
+      entityType: 'OutgoingMail',
+      entityId: mail._id,
+      entityLabel: `${mail.reference} - ${mail.subject}`,
+      metadata: { reason: req.body?.reason || '' }
+    });
 
-    res.json({ success: true, message: 'Courrier départ supprimé avec succès' });
+    res.json({ success: true, message: 'Courrier départ déplacé vers la corbeille' });
   } catch (error) {
     console.error('Erreur suppression courrier départ:', error);
     res.status(500).json({ success: false, message: 'Erreur serveur' });
@@ -470,6 +476,15 @@ router.get('/:id/pdf', authenticate, async (req, res) => {
     if (!mail.filePath || !fs.existsSync(fullPath)) {
       return res.status(404).json({ success: false, message: 'Fichier non trouvé' });
     }
+
+    logAudit({
+      req,
+      action: 'export.outgoing_pdf',
+      category: AUDIT_CATEGORIES.EXPORT,
+      entityType: 'OutgoingMail',
+      entityId: mail._id,
+      entityLabel: `${mail.reference} - ${mail.subject}`
+    });
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `inline; filename="${mail.fileName}"`);

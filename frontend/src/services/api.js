@@ -440,3 +440,20 @@ export const ldapMappingsAPI = {
   update: (id, data) => api.put(`/ldap/group-mappings/${id}`, data),
   delete: (id) => api.delete(`/ldap/group-mappings/${id}`)
 };
+
+// Corbeille (courriers entrants/sortants)
+export const trashAPI = {
+  getAll: (params) => api.get('/trash', { params }),
+  getCounts: () => api.get('/trash/counts'),
+  restoreMail: (id) => api.post(`/trash/mails/${id}/restore`),
+  restoreOutgoing: (id) => api.post(`/trash/outgoing-mails/${id}/restore`),
+  purgeMail: (id) => api.delete(`/trash/mails/${id}`),
+  purgeOutgoing: (id) => api.delete(`/trash/outgoing-mails/${id}`),
+  emptyTrash: (type) => api.post('/trash/empty', { type }),
+};
+
+// Journal d'audit
+export const auditAPI = {
+  getAll: (params) => api.get('/audit-logs', { params }),
+  getEntityTypes: () => api.get('/audit-logs/entity-types'),
+};

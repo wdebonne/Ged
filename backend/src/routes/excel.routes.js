@@ -2,7 +2,7 @@ import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import { authenticate, authorize } from '../middleware/auth.middleware.js';
-import { PERMISSIONS } from '../models/index.js';
+import { PERMISSIONS, AUDIT_CATEGORIES } from '../models/index.js';
 import { uploadTemplate, handleUploadError, validateMagicBytes } from '../middleware/upload.middleware.js';
 import {
   getExcelSettings,
@@ -12,6 +12,7 @@ import {
   generateRegister,
   getRegisterStatus
 } from '../services/excel.service.js';
+import { logAudit } from '../services/audit.service.js';
 
 const router = express.Router();
 const uploadPath = process.env.UPLOAD_PATH || './uploads';
@@ -116,6 +117,15 @@ router.post('/generate', authenticate, authorize(PERMISSIONS.EXPORT_MAILS), asyn
     const { dateFrom, dateTo, status, service, includeIncoming, includeOutgoing } = req.body;
     const buffer = await generateRegister({ dateFrom, dateTo, status, service, includeIncoming, includeOutgoing });
 
+    logAudit({
+      req,
+      action: 'export.excel_register',
+      category: AUDIT_CATEGORIES.EXPORT,
+      entityType: 'Excel',
+      entityLabel: 'Registre Excel (génération à la demande)',
+      metadata: { dateFrom, dateTo, status, service }
+    });
+
     const fileName = `registre-courrier-${new Date().toISOString().slice(0, 10)}.xlsx`;
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
@@ -135,6 +145,14 @@ router.get('/download', authenticate, authorize(PERMISSIONS.EXPORT_MAILS), async
     if (!fs.existsSync(filePath)) {
       return res.status(404).json({ success: false, message: 'Aucun registre disponible. Créez ou importez des courriers pour générer le registre.' });
     }
+
+    logAudit({
+      req,
+      action: 'export.excel_register',
+      category: AUDIT_CATEGORIES.EXPORT,
+      entityType: 'Excel',
+      entityLabel: fileName
+    });
 
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);

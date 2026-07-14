@@ -1,7 +1,8 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
-import { Delegation, User, Mail, DELEGATION_STATUS } from '../models/index.js';
+import { Delegation, User, Mail, DELEGATION_STATUS, AUDIT_CATEGORIES } from '../models/index.js';
 import { authenticate } from '../middleware/auth.middleware.js';
+import { logAudit } from '../services/audit.service.js';
 
 const router = express.Router();
 
@@ -311,7 +312,16 @@ router.delete('/:id', authenticate, async (req, res) => {
     }
     
     await delegation.deleteOne();
-    
+
+    logAudit({
+      req,
+      action: 'delegation.deleted',
+      category: AUDIT_CATEGORIES.DELETION,
+      entityType: 'Delegation',
+      entityId: delegation._id,
+      entityLabel: `${delegation.delegator} -> ${delegation.delegate}`
+    });
+
     res.json({
       success: true,
       message: 'Délégation supprimée'

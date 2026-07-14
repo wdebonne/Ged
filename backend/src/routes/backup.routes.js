@@ -3,7 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import multer from 'multer';
 import { authenticate, authorize } from '../middleware/auth.middleware.js';
-import { PERMISSIONS } from '../models/index.js';
+import { PERMISSIONS, AUDIT_CATEGORIES } from '../models/index.js';
 import {
   createBackup,
   listBackups,
@@ -15,6 +15,7 @@ import {
   saveBackupConfig,
   ensureBackupDirPublic,
 } from '../services/backup.service.js';
+import { logAudit } from '../services/audit.service.js';
 
 const router = express.Router();
 
@@ -107,6 +108,14 @@ router.get('/download/:filename', async (req, res) => {
     if (!fs.existsSync(filePath)) {
       return res.status(404).json({ success: false, message: 'Fichier introuvable' });
     }
+
+    logAudit({
+      req,
+      action: 'export.backup',
+      category: AUDIT_CATEGORIES.EXPORT,
+      entityType: 'Backup',
+      entityLabel: safe
+    });
 
     res.download(filePath, safe);
   } catch (err) {

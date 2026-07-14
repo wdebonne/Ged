@@ -29,6 +29,8 @@ import delegationRoutes from './routes/delegation.routes.js';
 import ldapGroupMappingRoutes from './routes/ldapGroupMapping.routes.js';
 import backupRoutes from './routes/backup.routes.js';
 import excelRoutes from './routes/excel.routes.js';
+import trashRoutes from './routes/trash.routes.js';
+import auditRoutes from './routes/audit.routes.js';
 
 // Middleware
 import { serveMailFiles } from './middleware/serveMailFiles.middleware.js';
@@ -39,6 +41,7 @@ import { startImapMailService } from './services/imapMail.service.js';
 import { startLdapGroupSyncService } from './services/ldapGroupSync.service.js';
 import { initBackupScheduler } from './services/backup.service.js';
 import { initReminderScheduler } from './services/reminder.service.js';
+import { initTrashPurgeScheduler } from './services/trash.service.js';
 
 // Initialisation de la base
 import { User, Settings, Group, DEFAULT_PERMISSIONS } from './models/index.js';
@@ -149,6 +152,8 @@ app.use('/api/delegations', delegationRoutes);
 app.use('/api/ldap/group-mappings', ldapGroupMappingRoutes);
 app.use('/api/backup', backupRoutes);
 app.use('/api/excel', excelRoutes);
+app.use('/api/trash', trashRoutes);
+app.use('/api/audit-logs', auditRoutes);
 
 // Route de santé
 app.get('/api/health', (req, res) => {
@@ -340,6 +345,9 @@ const startServer = async () => {
 
   // Initialiser le job quotidien de rappels d'échéance (J-N + retards)
   initReminderScheduler();
+
+  // Initialiser la purge automatique de la corbeille (rétention configurable, défaut 30 jours)
+  initTrashPurgeScheduler();
 };
 
 startServer();

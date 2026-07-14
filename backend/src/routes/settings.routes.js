@@ -4,12 +4,13 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import nodemailer from 'nodemailer';
-import { Settings, PERMISSIONS } from '../models/index.js';
+import { Settings, PERMISSIONS, AUDIT_CATEGORIES } from '../models/index.js';
 import EmailTemplate from '../models/EmailTemplate.model.js';
 import { authenticate, authorize, isAdmin } from '../middleware/auth.middleware.js';
 import { extractTextFromPDF, extractTextFromImage, getOCRLanguages, isOCRAvailable } from '../services/ocr.service.js';
 import { testLDAPConnection, fetchLDAPGroups, buildLdapUrl } from '../services/ldap.service.js';
 import { isLdapForceDisabled } from '../utils/ldap.utils.js';
+import { logAudit } from '../services/audit.service.js';
 
 const router = express.Router();
 
@@ -281,6 +282,7 @@ router.put('/', authenticate, authorize(PERMISSIONS.EDIT_SETTINGS), async (req, 
     }
 
     const results = [];
+    const auditChanges = [];
 
     for (const { key, value, category, description, isSecret } of settings) {
       if (!key) continue;
@@ -291,12 +293,14 @@ router.put('/', authenticate, authorize(PERMISSIONS.EDIT_SETTINGS), async (req, 
         continue;
       }
 
-      const updateData = { 
-        category, 
-        description, 
-        isSecret 
+      const previous = await Settings.findOne({ key });
+
+      const updateData = {
+        category,
+        description,
+        isSecret
       };
-      
+
       // Toujours mettre à jour la valeur
       updateData.value = value;
 
@@ -306,9 +310,28 @@ router.put('/', authenticate, authorize(PERMISSIONS.EDIT_SETTINGS), async (req, 
         { upsert: true, new: true }
       );
 
+      if (!previous || previous.value !== updated.value) {
+        auditChanges.push({
+          key,
+          before: previous?.isSecret ? '********' : (previous?.value ?? null),
+          after: isSecret ? '********' : value
+        });
+      }
+
       results.push({
         key: updated.key,
         success: true
+      });
+    }
+
+    if (auditChanges.length > 0) {
+      logAudit({
+        req,
+        action: 'settings.updated',
+        category: AUDIT_CATEGORIES.SETTINGS,
+        entityType: 'Settings',
+        entityLabel: `${auditChanges.length} paramètre(s)`,
+        changes: auditChanges
       });
     }
 
@@ -370,11 +393,27 @@ router.put('/:key', authenticate, authorize(PERMISSIONS.EDIT_SETTINGS), async (r
     const { key } = req.params;
     const { value, category, description, isSecret } = req.body;
 
+    const previous = await Settings.findOne({ key });
+
     const setting = await Settings.findOneAndUpdate(
       { key },
       { value, category, description, isSecret },
       { upsert: true, new: true }
     );
+
+    if (!previous || previous.value !== setting.value) {
+      logAudit({
+        req,
+        action: 'settings.updated',
+        category: AUDIT_CATEGORIES.SETTINGS,
+        entityType: 'Settings',
+        entityLabel: key,
+        changes: {
+          before: previous?.isSecret ? '********' : (previous?.value ?? null),
+          after: isSecret ? '********' : value
+        }
+      });
+    }
 
     res.json({
       success: true,
@@ -406,6 +445,14 @@ router.delete('/:key', authenticate, isAdmin, async (req, res) => {
     }
 
     await Settings.findOneAndDelete({ key: req.params.key });
+
+    logAudit({
+      req,
+      action: 'settings.key_deleted',
+      category: AUDIT_CATEGORIES.DELETION,
+      entityType: 'Settings',
+      entityLabel: req.params.key
+    });
 
     res.json({
       success: true,

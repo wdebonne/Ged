@@ -4,9 +4,11 @@ import { User, Group, Service } from '../models/index.js';
 import { authenticate, authorize, isAdmin } from '../middleware/auth.middleware.js';
 import { uploadAvatar, handleUploadError } from '../middleware/upload.middleware.js';
 import { PERMISSIONS } from '../models/Group.model.js';
+import { AUDIT_CATEGORIES } from '../models/index.js';
 import fs from 'fs';
 import path from 'path';
 import { escapeRegex } from '../utils/regex.js';
+import { logAudit } from '../services/audit.service.js';
 
 const router = express.Router();
 
@@ -393,6 +395,15 @@ router.delete('/:id', authenticate, authorize(PERMISSIONS.DELETE_USERS), async (
     }
 
     await User.findByIdAndDelete(id);
+
+    logAudit({
+      req,
+      action: 'user.deleted',
+      category: AUDIT_CATEGORIES.DELETION,
+      entityType: 'User',
+      entityId: user._id,
+      entityLabel: `${user.firstName} ${user.lastName} (${user.email})`
+    });
 
     res.json({
       success: true,

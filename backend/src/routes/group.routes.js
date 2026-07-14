@@ -1,7 +1,8 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
-import { Group, User, PERMISSIONS, DEFAULT_PERMISSIONS } from '../models/index.js';
+import { Group, User, PERMISSIONS, DEFAULT_PERMISSIONS, AUDIT_CATEGORIES } from '../models/index.js';
 import { authenticate, authorize, isAdmin } from '../middleware/auth.middleware.js';
+import { logAudit } from '../services/audit.service.js';
 
 const router = express.Router();
 
@@ -59,7 +60,8 @@ router.get('/permissions', authenticate, authorize(PERMISSIONS.VIEW_GROUPS), asy
       services: permissionsList.filter(p => p.value.includes('service')),
       contacts: permissionsList.filter(p => p.value.includes('contact')),
       parametres: permissionsList.filter(p => p.value.includes('setting') || p.value.includes('ldap') || p.value.includes('kerberos') || p.value.includes('imap')),
-      statistiques: permissionsList.filter(p => p.value.includes('stat'))
+      statistiques: permissionsList.filter(p => p.value.includes('stat')),
+      administration: permissionsList.filter(p => p.value === 'manage_trash' || p.value === 'view_audit_log')
     };
 
     res.json({
@@ -159,12 +161,32 @@ router.put('/:id', authenticate, authorize(PERMISSIONS.EDIT_GROUPS), [
       });
     }
 
+    const previousPermissions = [...group.permissions];
+
     if (name) group.name = name;
     group.permissions = permissions;
     if (description !== undefined) group.description = description;
     if (color) group.color = color;
-    
+
     await group.save();
+
+    const beforeSet = new Set(previousPermissions);
+    const afterSet = new Set(permissions);
+    const permissionsChanged = previousPermissions.length !== permissions.length
+      || previousPermissions.some(p => !afterSet.has(p))
+      || permissions.some(p => !beforeSet.has(p));
+
+    if (permissionsChanged) {
+      logAudit({
+        req,
+        action: 'group.permissions_updated',
+        category: AUDIT_CATEGORIES.PERMISSION,
+        entityType: 'Group',
+        entityId: group._id,
+        entityLabel: group.name,
+        changes: { before: previousPermissions, after: permissions }
+      });
+    }
 
     res.json({
       success: true,
@@ -249,7 +271,9 @@ function formatPermissionLabel(key) {
     MANAGE_KERBEROS: 'Gérer Kerberos',
     MANAGE_IMAP: 'Gérer IMAP',
     VIEW_STATS: 'Voir les statistiques',
-    VIEW_ALL_STATS: 'Voir toutes les statistiques'
+    VIEW_ALL_STATS: 'Voir toutes les statistiques',
+    MANAGE_TRASH: 'Gérer la corbeille',
+    VIEW_AUDIT_LOG: 'Voir le journal d\'audit'
   };
   return labels[key] || key;
 }

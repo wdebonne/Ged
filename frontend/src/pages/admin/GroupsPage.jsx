@@ -72,7 +72,11 @@ const PERMISSIONS = {
   
   // Statistiques
   view_stats: 'Voir les statistiques',
-  view_all_stats: 'Voir toutes les statistiques'
+  view_all_stats: 'Voir toutes les statistiques',
+
+  // Corbeille et journal d'audit
+  manage_trash: 'Gérer la corbeille',
+  view_audit_log: "Voir le journal d'audit"
 };
 
 export default function GroupsPage() {

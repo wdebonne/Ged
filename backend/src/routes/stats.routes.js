@@ -382,6 +382,7 @@ router.get('/dashboard', authenticate, async (req, res) => {
 router.get('/by-service', authenticate, authorize(PERMISSIONS.VIEW_ALL_STATS), async (req, res) => {
   try {
     const stats = await Mail.aggregate([
+      { $match: { deletedAt: null } },
       {
         $group: {
           _id: '$service',
@@ -448,7 +449,8 @@ router.get('/by-month', authenticate, authorize(PERMISSIONS.VIEW_STATS), async (
     const stats = await Mail.aggregate([
       {
         $match: {
-          receivedDate: { $gte: startDate, $lte: endDate }
+          receivedDate: { $gte: startDate, $lte: endDate },
+          deletedAt: null
         }
       },
       {
@@ -599,7 +601,7 @@ router.get('/detailed', authenticate, async (req, res) => {
 
     // Statistiques par utilisateur (qui a traité quoi)
     const userStats = await Mail.aggregate([
-      { $match: { ...baseQuery, processedBy: { $exists: true } } },
+      { $match: { ...baseQuery, processedBy: { $exists: true }, deletedAt: null } },
       {
         $group: {
           _id: '$processedBy',
@@ -649,7 +651,7 @@ router.get('/detailed', authenticate, async (req, res) => {
       }
 
       serviceStats = await Mail.aggregate([
-        { $match: matchQuery },
+        { $match: { ...matchQuery, deletedAt: null } },
         {
           $group: {
             _id: '$service',
@@ -693,7 +695,7 @@ router.get('/detailed', authenticate, async (req, res) => {
     }
     
     const monthlyStats = await Mail.aggregate([
-      { $match: monthlyQuery },
+      { $match: { ...monthlyQuery, deletedAt: null } },
       {
         $group: {
           _id: {
@@ -711,7 +713,7 @@ router.get('/detailed', authenticate, async (req, res) => {
 
     // Statistiques par priorité
     const priorityStats = await Mail.aggregate([
-      { $match: baseQuery },
+      { $match: { ...baseQuery, deletedAt: null } },
       {
         $group: {
           _id: '$priority',
@@ -722,7 +724,7 @@ router.get('/detailed', authenticate, async (req, res) => {
 
     // Statistiques par expéditeur (top 10)
     const senderStats = await Mail.aggregate([
-      { $match: baseQuery },
+      { $match: { ...baseQuery, deletedAt: null } },
       {
         $group: {
           _id: '$sender',
@@ -756,7 +758,7 @@ router.get('/detailed', authenticate, async (req, res) => {
     }
     
     const importStats = await Mail.aggregate([
-      { $match: importStatsQuery },
+      { $match: { ...importStatsQuery, deletedAt: null } },
       {
         $group: {
           _id: {
@@ -786,7 +788,7 @@ router.get('/detailed', authenticate, async (req, res) => {
 
     // Totaux d'import
     const importTotals = await Mail.aggregate([
-      { $match: baseQuery },
+      { $match: { ...baseQuery, deletedAt: null } },
       {
         $group: {
           _id: { $ifNull: ['$source', 'manual'] },
@@ -889,7 +891,7 @@ router.get('/my-performance', authenticate, async (req, res) => {
 
     // Évolution de mes traitements par mois
     const myMonthlyProcessed = await Mail.aggregate([
-      { $match: { processedBy: req.user._id, ...processedByMeQuery } },
+      { $match: { processedBy: req.user._id, ...processedByMeQuery, deletedAt: null } },
       {
         $group: {
           _id: {

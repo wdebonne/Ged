@@ -156,7 +156,7 @@ Application web complète de gestion de courrier avec authentification LDAP/Kerb
 - ✅ Activation/Désactivation des comptes
 
 #### Gestion des courriers (Admin)
-- ✅ **Suppression de courriers** : possibilité de supprimer définitivement un courrier (à traiter, traité ou archivé)
+- ✅ **Suppression de courriers (corbeille)** : la suppression d'un courrier (entrant ou sortant) le déplace vers la **Corbeille** au lieu de l'effacer immédiatement — voir [section dédiée](#corbeille) ci-dessous
 - ✅ **Réouverture de courriers** : remettre un courrier traité ou archivé en statut "à traiter"
 - ✅ **Suppression de réponses** : supprimer des réponses individuelles
 - ✅ **Consultation silencieuse** : permission pour consulter sans marquer comme lu (`silent_view`)
@@ -185,6 +185,22 @@ Application web complète de gestion de courrier avec authentification LDAP/Kerb
 #### Objets prédéfinis
 - ✅ Gestion des objets de courrier prédéfinis
 - ✅ Auto-complétion lors de la saisie
+
+#### Corbeille
+- ✅ **Suppression réversible** : la suppression d'un courrier (entrant ou sortant) le déplace vers la corbeille au lieu de l'effacer immédiatement — le fichier PDF reste sur disque
+- ✅ **Restauration** en un clic, à tout moment avant la purge définitive
+- ✅ **Suppression définitive manuelle** (avec confirmation) ou **« Vider la corbeille »** en masse
+- ✅ **Purge automatique planifiée** : les éléments dépassant la durée de rétention configurable (30 jours par défaut, 0 = purge désactivée) sont supprimés chaque nuit — fichier PDF et document effacés définitivement
+- ✅ **Ne touche pas le stockage externe** : si le courrier a déjà été synchronisé sur S3/OneDrive/NextCloud, seule la copie locale et l'enregistrement sont supprimés
+- ✅ Onglets séparés courriers entrants / sortants, avec compte à rebours ("Xj restants") par élément
+- ✅ Permission dédiée `manage_trash`
+
+#### Journal d'audit
+- ✅ **Traçabilité des actions sensibles** : suppressions (courriers, utilisateurs, contacts, services, etc.), changements de permissions de groupe, modifications de paramètres, exports (PDF, Excel, sauvegardes)
+- ✅ Chaque entrée conserve la date, l'utilisateur (ou « Système » pour la purge automatique), l'action, l'entité concernée, le détail (avant/après pour les permissions et paramètres) et l'adresse IP
+- ✅ **Filtres** par catégorie (Suppression / Permission / Paramètre / Export), type d'entité, utilisateur, période
+- ✅ Conservé indéfiniment (pas de purge automatique, contrairement à la corbeille)
+- ✅ Permission dédiée `view_audit_log`
 
 ### Paramètres système
 
@@ -689,6 +705,14 @@ MAX_FILE_SIZE=50000000  # 50MB en octets
 REMINDER_CRON=0 8 * * *
 
 # ═══════════════════════════════════════════════════════════════
+# CORBEILLE (optionnel)
+# ═══════════════════════════════════════════════════════════════
+# Horaire du job quotidien de purge automatique de la corbeille (expression cron, timezone Europe/Paris)
+# Défaut si absent : tous les jours à 3h00. La durée de rétention (30 jours par défaut,
+# 0 = purge désactivée) se configure dans l'interface : Administration > Corbeille.
+TRASH_PURGE_CRON=0 3 * * *
+
+# ═══════════════════════════════════════════════════════════════
 # SMTP - Envoi d'emails (optionnel mais recommandé)
 # ═══════════════════════════════════════════════════════════════
 SMTP_HOST=smtp.example.com
@@ -814,6 +838,7 @@ GED/
 │   ├── src/
 │   │   ├── middleware/     # Auth, upload middleware
 │   │   ├── models/         # Schémas Mongoose
+│   │   │   ├── AuditLog.model.js
 │   │   │   ├── Contact.model.js
 │   │   │   ├── EmailTemplate.model.js
 │   │   │   ├── Group.model.js
@@ -937,6 +962,12 @@ Les permissions sont gérées au niveau des groupes et organisées par catégori
 |------------|-------------|
 | `view_stats` | Voir ses statistiques |
 | `view_all_stats` | Voir toutes les statistiques |
+
+### Corbeille et audit
+| Permission | Description |
+|------------|-------------|
+| `manage_trash` | Voir, restaurer et purger la corbeille |
+| `view_audit_log` | Voir le journal d'audit |
 
 ## 📧 Configuration Email
 
@@ -1167,6 +1198,8 @@ Personnalisez l'apparence de l'application :
 - Upload sécurisé avec vérification MIME
 - Permissions granulaires par groupe
 - Masquage des mots de passe dans l'interface
+- **Corbeille** pour les courriers : suppression réversible avec rétention configurable avant purge définitive
+- **Journal d'audit** : traçabilité des suppressions, changements de permissions, modifications de paramètres et exports
 
 ## 📝 API
 
@@ -2437,6 +2470,99 @@ curl -X GET "http://localhost:5000/api/stats/my-performance?startDate=2025-01-01
   }
 }
 ```
+
+---
+
+### Corbeille
+
+Toutes les routes nécessitent la permission `manage_trash`.
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| GET | `/api/trash` | Liste paginée de la corbeille (`type=mail\|outgoing`, `page`, `limit`, `search`, `service`, `dateFrom`, `dateTo`) |
+| GET | `/api/trash/counts` | Nombre d'éléments en corbeille par type (`{ mails, outgoing }`) |
+| POST | `/api/trash/mails/:id/restore` | Restaurer un courrier entrant |
+| POST | `/api/trash/outgoing-mails/:id/restore` | Restaurer un courrier sortant |
+| DELETE | `/api/trash/mails/:id` | Purger définitivement un courrier entrant |
+| DELETE | `/api/trash/outgoing-mails/:id` | Purger définitivement un courrier sortant |
+| POST | `/api/trash/empty` | Vider la corbeille (`{ type: 'mail'\|'outgoing' }`, omis = les deux) |
+
+```bash
+curl -X GET "http://localhost:5000/api/trash?type=mail&page=1&limit=20" \
+  -H "Authorization: Bearer <token>"
+```
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "data": {
+    "items": [
+      {
+        "_id": "...",
+        "reference": "CRR-20260714-7KDDBJ",
+        "chronoNumber": "2026-0001",
+        "subject": "...",
+        "senderName": "...",
+        "deletedAt": "2026-07-14T18:15:06.000Z",
+        "deletedBy": { "_id": "...", "firstName": "...", "lastName": "..." },
+        "deleteReason": "",
+        "daysRemaining": 30
+      }
+    ],
+    "retentionDays": 30,
+    "pagination": { "page": 1, "limit": 20, "total": 1, "pages": 1 }
+  }
+}
+```
+
+> La durée de rétention (`retentionDays`) se lit/modifie comme n'importe quel paramètre via `GET/PUT /api/settings/trash_retention_days` (clé `trash_retention_days`, défaut `30`, `0` = purge automatique désactivée).
+
+### Journal d'audit
+
+Nécessite la permission `view_audit_log`.
+
+| Méthode | Endpoint | Description |
+|---------|----------|-------------|
+| GET | `/api/audit-logs` | Liste paginée (`page`, `limit`, `category`, `entityType`, `performedBy`, `dateFrom`, `dateTo`) |
+| GET | `/api/audit-logs/entity-types` | Types d'entités présents dans le journal (pour peupler un filtre) |
+
+```bash
+curl -X GET "http://localhost:5000/api/audit-logs?category=deletion&page=1" \
+  -H "Authorization: Bearer <token>"
+```
+
+**Réponse :**
+```json
+{
+  "success": true,
+  "data": {
+    "logs": [
+      {
+        "_id": "...",
+        "action": "mail.trashed",
+        "category": "deletion",
+        "entityType": "Mail",
+        "entityId": "...",
+        "entityLabel": "CRR-20260714-7KDDBJ - Objet du courrier",
+        "performedBy": { "_id": "...", "firstName": "...", "lastName": "..." },
+        "performedByLabel": "Administrateur Système",
+        "isSystemAction": false,
+        "ip": "::1",
+        "changes": null,
+        "createdAt": "2026-07-14T18:15:06.000Z"
+      }
+    ],
+    "pagination": { "page": 1, "limit": 25, "total": 1, "pages": 1 }
+  }
+}
+```
+
+**Catégories (`category`)** : `deletion`, `permission`, `settings`, `export`.
+
+**Exemples d'`action`** : `mail.trashed`, `mail.restored`, `mail.purged`, `outgoing.trashed`, `outgoing.restored`, `outgoing.purged`, `pending_mail.deleted`, `mail.response_deleted`, `user.deleted`, `contact.deleted`, `service.deleted`, `subject.deleted`, `delegation.deleted`, `webhook.deleted`, `email_template.deleted`, `ldap_mapping.deleted`, `settings.key_deleted`, `group.permissions_updated`, `settings.updated`, `export.mail_pdf`, `export.mail_pdf_history`, `export.mail_zip`, `export.mail_report`, `export.outgoing_pdf`, `export.excel_register`, `export.backup`.
+
+> Les actions de purge automatique (job planifié) ont `isSystemAction: true` et `performedBy: null` (`performedByLabel: "Système"`).
 
 ---
 

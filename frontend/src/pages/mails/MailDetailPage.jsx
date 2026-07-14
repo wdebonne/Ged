@@ -149,7 +149,7 @@ export default function MailDetailPage() {
       // Supprimer la query du cache pour éviter le refetch
       queryClient.removeQueries(['mail', id]);
       queryClient.invalidateQueries(['mails']);
-      toast.success('Courrier supprimé');
+      toast.success('Courrier déplacé vers la corbeille');
       // Récupérer le scope depuis l'URL actuelle pour rediriger vers la bonne section
       const urlParams = new URLSearchParams(window.location.search);
       const scope = urlParams.get('scope') || 'mine';
@@ -473,7 +473,7 @@ export default function MailDetailPage() {
           {isAdmin && (
             <button
               onClick={() => {
-                if (window.confirm('Voulez-vous vraiment supprimer définitivement ce courrier ? Cette action est irréversible.')) {
+                if (window.confirm('Voulez-vous déplacer ce courrier vers la corbeille ? Il pourra être restauré depuis Administration > Corbeille.')) {
                   deleteMutation.mutate();
                 }
               }}

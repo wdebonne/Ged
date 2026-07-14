@@ -3,7 +3,9 @@ import { body, validationResult } from 'express-validator';
 import crypto from 'crypto';
 import Webhook, { WEBHOOK_EVENTS } from '../models/Webhook.model.js';
 import { PERMISSIONS } from '../models/Group.model.js';
+import { AUDIT_CATEGORIES } from '../models/index.js';
 import { authenticate, authorize } from '../middleware/auth.middleware.js';
+import { logAudit } from '../services/audit.service.js';
 
 const router = express.Router();
 
@@ -263,6 +265,15 @@ router.delete('/:id', authenticate, authorize(PERMISSIONS.EDIT_SETTINGS), async 
         message: 'Webhook non trouvé'
       });
     }
+
+    logAudit({
+      req,
+      action: 'webhook.deleted',
+      category: AUDIT_CATEGORIES.DELETION,
+      entityType: 'Webhook',
+      entityId: webhook._id,
+      entityLabel: webhook.name
+    });
 
     res.json({
       success: true,

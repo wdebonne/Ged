@@ -62,7 +62,11 @@ export const PERMISSIONS = {
 
   // Statistiques
   VIEW_STATS: 'view_stats',
-  VIEW_ALL_STATS: 'view_all_stats'
+  VIEW_ALL_STATS: 'view_all_stats',
+
+  // Corbeille et journal d'audit
+  MANAGE_TRASH: 'manage_trash',
+  VIEW_AUDIT_LOG: 'view_audit_log'
 };
 
 // Permissions par défaut pour chaque rôle

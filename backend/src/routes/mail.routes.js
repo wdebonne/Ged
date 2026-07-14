@@ -3,7 +3,7 @@ import { body, validationResult, query } from 'express-validator';
 import mongoose from 'mongoose';
 import fs from 'fs';
 import path from 'path';
-import { Mail, PendingMail, Contact, Subject, User, Settings, Service, MAIL_STATUS, RESPONSE_TYPE, PERMISSIONS, Delegation } from '../models/index.js';
+import { Mail, PendingMail, Contact, Subject, User, Settings, Service, MAIL_STATUS, RESPONSE_TYPE, PERMISSIONS, Delegation, AUDIT_CATEGORIES } from '../models/index.js';
 import { authenticate, authorize, canImportMails, isAdmin } from '../middleware/auth.middleware.js';
 import { uploadCourrier, uploadResponse, uploadPending, handleUploadError } from '../middleware/upload.middleware.js';
 import { extractTextFromPDF } from '../services/ocr.service.js';
@@ -13,6 +13,7 @@ import archiver from 'archiver';
 import { syncArchivedMail as syncToOneDrive } from '../services/onedrive.service.js';
 import { escapeRegex } from '../utils/regex.js';
 import { queueRegisterUpdate } from '../services/excel.service.js';
+import { logAudit } from '../services/audit.service.js';
 
 const router = express.Router();
 
@@ -680,6 +681,15 @@ router.delete('/pending/:id', authenticate, canImportMails, async (req, res) => 
 
     await PendingMail.findByIdAndDelete(req.params.id);
 
+    logAudit({
+      req,
+      action: 'pending_mail.deleted',
+      category: AUDIT_CATEGORIES.DELETION,
+      entityType: 'PendingMail',
+      entityId: pendingMail._id,
+      entityLabel: pendingMail.fileName
+    });
+
     res.json({
       success: true,
       message: 'Courrier supprimé'
@@ -942,6 +952,15 @@ router.get('/:id/pdf', authenticate, async (req, res) => {
       });
     }
 
+    logAudit({
+      req,
+      action: 'export.mail_pdf',
+      category: AUDIT_CATEGORIES.EXPORT,
+      entityType: 'Mail',
+      entityId: mail._id,
+      entityLabel: `${mail.reference} - ${mail.subject}`
+    });
+
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${mail.reference || mail.fileName}"`);
     res.sendFile(filePath);
@@ -988,6 +1007,15 @@ router.get('/:id/pdf/history', authenticate, async (req, res) => {
     };
 
     const pdfBuffer = await generateMailHistoryPDF(mail, exportOptions);
+
+    logAudit({
+      req,
+      action: 'export.mail_pdf_history',
+      category: AUDIT_CATEGORIES.EXPORT,
+      entityType: 'Mail',
+      entityId: mail._id,
+      entityLabel: `${mail.reference} - ${mail.subject}`
+    });
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="historique-${mail.reference || mail._id}.pdf"`);
@@ -1047,6 +1075,15 @@ router.get('/:id/pdf/all', authenticate, async (req, res) => {
 
     // Générer le PDF d'historique avec les options
     const historyPdfBuffer = await generateMailHistoryPDF(mail, exportOptions);
+
+    logAudit({
+      req,
+      action: 'export.mail_zip',
+      category: AUDIT_CATEGORIES.EXPORT,
+      entityType: 'Mail',
+      entityId: mail._id,
+      entityLabel: `${mail.reference} - ${mail.subject}`
+    });
 
     // Créer le ZIP
     const archive = archiver('zip', { zlib: { level: 9 } });
@@ -1529,7 +1566,7 @@ router.post('/:id/archive', authenticate, async (req, res) => {
   }
 });
 
-// DELETE /api/mails/:id - Supprimer un courrier (Admin uniquement)
+// DELETE /api/mails/:id - Mettre un courrier à la corbeille (Admin uniquement)
 router.delete('/:id', authenticate, isAdmin, async (req, res) => {
   try {
     const mail = await Mail.findById(req.params.id);
@@ -1540,29 +1577,21 @@ router.delete('/:id', authenticate, isAdmin, async (req, res) => {
       });
     }
 
-    const uploadPath = process.env.UPLOAD_PATH || './uploads';
+    await mail.softDelete(req.user._id, req.body?.reason || '');
 
-    // Supprimer le fichier principal
-    const mainFilePath = path.join(uploadPath, mail.filePath);
-    if (fs.existsSync(mainFilePath)) {
-      fs.unlinkSync(mainFilePath);
-    }
-
-    // Supprimer les fichiers de réponse
-    for (const response of mail.responses) {
-      if (response.filePath) {
-        const responsePath = path.join(uploadPath, response.filePath);
-        if (fs.existsSync(responsePath)) {
-          fs.unlinkSync(responsePath);
-        }
-      }
-    }
-
-    await Mail.findByIdAndDelete(req.params.id);
+    logAudit({
+      req,
+      action: 'mail.trashed',
+      category: AUDIT_CATEGORIES.DELETION,
+      entityType: 'Mail',
+      entityId: mail._id,
+      entityLabel: `${mail.reference} - ${mail.subject}`,
+      metadata: { reason: req.body?.reason || '' }
+    });
 
     res.json({
       success: true,
-      message: 'Courrier supprimé'
+      message: 'Courrier déplacé vers la corbeille'
     });
   } catch (error) {
     console.error('Erreur suppression courrier:', error);
@@ -1636,6 +1665,15 @@ router.post('/export', authenticate, authorize(PERMISSIONS.EXPORT_MAILS), async 
       generatedBy: req.user.fullName
     });
 
+    logAudit({
+      req,
+      action: 'export.mail_report',
+      category: AUDIT_CATEGORIES.EXPORT,
+      entityType: 'Mail',
+      entityLabel: `Registre PDF (${mails.length} courrier(s))`,
+      metadata: { exportType, dateFrom, dateTo }
+    });
+
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=export-courriers-${new Date().toISOString().slice(0, 10)}.pdf`);
     res.send(pdfBuffer);
@@ -1672,6 +1710,16 @@ router.delete('/:id/response/:responseId', authenticate, authorize(PERMISSIONS.D
 
     mail.responses.splice(responseIndex, 1);
     await mail.save();
+
+    logAudit({
+      req,
+      action: 'mail.response_deleted',
+      category: AUDIT_CATEGORIES.DELETION,
+      entityType: 'Mail',
+      entityId: mail._id,
+      entityLabel: `${mail.reference} - ${mail.subject}`,
+      metadata: { responseId: req.params.responseId }
+    });
 
     res.json({
       success: true,

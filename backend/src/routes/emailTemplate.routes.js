@@ -2,6 +2,8 @@ import express from 'express';
 import EmailTemplate, { EMAIL_ACTIONS } from '../models/EmailTemplate.model.js';
 import { authenticate, authorize } from '../middleware/auth.middleware.js';
 import { PERMISSIONS } from '../models/Group.model.js';
+import { AUDIT_CATEGORIES } from '../models/index.js';
+import { logAudit } from '../services/audit.service.js';
 
 const router = express.Router();
 
@@ -198,7 +200,16 @@ router.delete('/:id', authenticate, authorize(PERMISSIONS.MANAGE_SETTINGS), asyn
         message: 'Template non trouvé'
       });
     }
-    
+
+    logAudit({
+      req,
+      action: 'email_template.deleted',
+      category: AUDIT_CATEGORIES.DELETION,
+      entityType: 'EmailTemplate',
+      entityId: template._id,
+      entityLabel: template.name
+    });
+
     res.json({
       success: true,
       message: 'Template supprimé avec succès'

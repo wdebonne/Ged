@@ -1,8 +1,9 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
-import { Service, User, Mail, PERMISSIONS } from '../models/index.js';
+import { Service, User, Mail, PERMISSIONS, AUDIT_CATEGORIES } from '../models/index.js';
 import { authenticate, authorize } from '../middleware/auth.middleware.js';
 import { escapeRegex } from '../utils/regex.js';
+import { logAudit } from '../services/audit.service.js';
 
 const router = express.Router();
 
@@ -220,6 +221,15 @@ router.delete('/:id', authenticate, authorize(PERMISSIONS.DELETE_SERVICES), asyn
     }
 
     await Service.findByIdAndDelete(req.params.id);
+
+    logAudit({
+      req,
+      action: 'service.deleted',
+      category: AUDIT_CATEGORIES.DELETION,
+      entityType: 'Service',
+      entityId: service._id,
+      entityLabel: service.name
+    });
 
     res.json({
       success: true,

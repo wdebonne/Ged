@@ -116,6 +116,11 @@ MAX_FILE_SIZE=50000000
 REMINDER_CRON=0 8 * * *
 
 # ═══════════════════════════════════════════════════════════════
+# CORBEILLE (optionnel)
+# ═══════════════════════════════════════════════════════════════
+TRASH_PURGE_CRON=0 3 * * *
+
+# ═══════════════════════════════════════════════════════════════
 # SMTP - Utiliser le SMTP O2Switch
 # ═══════════════════════════════════════════════════════════════
 SMTP_HOST=mail.mondomaine.com
@@ -222,6 +227,7 @@ Cliquez sur **ADD VARIABLE** pour chaque variable de votre `.env` :
 | `UPLOAD_PATH` | `./uploads` |
 | `MAX_FILE_SIZE` | `50000000` |
 | `REMINDER_CRON` | `0 8 * * *` |
+| `TRASH_PURGE_CRON` | `0 3 * * *` |
 | `SMTP_HOST` | `mail.mondomaine.com` |
 | `SMTP_PORT` | `587` |
 | `SMTP_SECURE` | `false` |

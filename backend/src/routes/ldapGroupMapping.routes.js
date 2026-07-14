@@ -1,7 +1,8 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
-import { LdapGroupMapping, PERMISSIONS } from '../models/index.js';
+import { LdapGroupMapping, PERMISSIONS, AUDIT_CATEGORIES } from '../models/index.js';
 import { authenticate, authorize } from '../middleware/auth.middleware.js';
+import { logAudit } from '../services/audit.service.js';
 
 const router = express.Router();
 
@@ -157,6 +158,15 @@ router.delete('/:id', authenticate, authorize(PERMISSIONS.MANAGE_LDAP), async (r
     }
 
     await LdapGroupMapping.findByIdAndDelete(req.params.id);
+
+    logAudit({
+      req,
+      action: 'ldap_mapping.deleted',
+      category: AUDIT_CATEGORIES.DELETION,
+      entityType: 'LdapGroupMapping',
+      entityId: mapping._id,
+      entityLabel: mapping.ldapGroupName || mapping.ldapGroupDN
+    });
 
     res.json({
       success: true,

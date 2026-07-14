@@ -12,3 +12,4 @@ export { default as Webhook, WEBHOOK_EVENTS } from './Webhook.model.js';
 export { default as Delegation, DELEGATION_STATUS } from './Delegation.model.js';
 export { default as LdapGroupMapping } from './LdapGroupMapping.model.js';
 export { default as Counter, formatChronoNumber } from './Counter.model.js';
+export { default as AuditLog, AUDIT_CATEGORIES } from './AuditLog.model.js';

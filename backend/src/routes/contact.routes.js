@@ -1,8 +1,9 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
-import { Contact, PERMISSIONS } from '../models/index.js';
+import { Contact, PERMISSIONS, AUDIT_CATEGORIES } from '../models/index.js';
 import { authenticate, authorize } from '../middleware/auth.middleware.js';
 import { escapeRegex } from '../utils/regex.js';
+import { logAudit } from '../services/audit.service.js';
 
 const router = express.Router();
 
@@ -202,6 +203,15 @@ router.delete('/:id', authenticate, authorize(PERMISSIONS.DELETE_CONTACTS), asyn
     }
 
     await Contact.findByIdAndDelete(req.params.id);
+
+    logAudit({
+      req,
+      action: 'contact.deleted',
+      category: AUDIT_CATEGORIES.DELETION,
+      entityType: 'Contact',
+      entityId: contact._id,
+      entityLabel: contact.name
+    });
 
     res.json({
       success: true,

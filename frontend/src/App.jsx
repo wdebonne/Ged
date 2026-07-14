@@ -37,6 +37,8 @@ const SubjectsPage = lazy(() => import('./pages/admin/SubjectsPage'));
 const SettingsPage = lazy(() => import('./pages/admin/SettingsPage'));
 const LdapGroupMappingsPage = lazy(() => import('./pages/admin/LdapGroupMappingsPage'));
 const BackupPage = lazy(() => import('./pages/admin/BackupPage'));
+const TrashPage = lazy(() => import('./pages/admin/TrashPage'));
+const AuditLogPage = lazy(() => import('./pages/admin/AuditLogPage'));
 const OneDriveCallback = lazy(() => import('./pages/OneDriveCallback'));
 
 // Pages Profil
@@ -215,6 +217,22 @@ function App() {
             element={
               <ProtectedRoute permissions={['manage_settings']}>
                 <BackupPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/corbeille"
+            element={
+              <ProtectedRoute permissions={['manage_trash']}>
+                <TrashPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/journal-audit"
+            element={
+              <ProtectedRoute permissions={['view_audit_log']}>
+                <AuditLogPage />
               </ProtectedRoute>
             }
           />

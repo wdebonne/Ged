@@ -7,6 +7,32 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ---
 
+## [3.17.0] - 2026-07-14
+
+### Ajouté
+
+- **Corbeille (suppression réversible)** :
+  - La suppression d'un courrier (entrant ou sortant) le déplace désormais vers une corbeille au lieu de l'effacer immédiatement — le fichier PDF est conservé
+  - Nouvelle page **Administration > Corbeille** : restauration en un clic, suppression définitive individuelle (avec confirmation) ou en masse (« Vider la corbeille »), compte à rebours par élément
+  - **Durée de rétention configurable** (30 jours par défaut, `0` pour désactiver la purge) et **purge automatique quotidienne** planifiée (personnalisable via `TRASH_PURGE_CRON`)
+  - Ne touche jamais les copies déjà synchronisées sur un stockage externe (S3/OneDrive/NextCloud) : seuls le fichier local et l'enregistrement sont supprimés à la purge
+  - Nouvelle permission `manage_trash`
+- **Journal d'audit** :
+  - Nouvelle page **Administration > Journal d'audit** traçant les suppressions (courriers, utilisateurs, contacts, services, etc.), les changements de permissions de groupe, les modifications de paramètres et les exports (PDF, Excel, sauvegardes)
+  - Chaque entrée conserve la date, l'auteur (ou « Système » pour les actions planifiées), l'action, l'entité concernée, le détail avant/après (permissions, paramètres) et l'adresse IP
+  - Filtres par catégorie (Suppression / Permission / Paramètre / Export), type d'entité, utilisateur et période
+  - Conservé indéfiniment, sans purge automatique (contrairement à la corbeille)
+  - Nouvelle permission `view_audit_log`
+
+### Technique
+
+- Nouveau modèle `AuditLog.model.js` ; champs `deletedAt`/`deletedBy`/`deleteReason` ajoutés à `Mail` et `OutgoingMail`
+- Nouveau plugin Mongoose `models/plugins/softDelete.plugin.js` : exclut automatiquement les éléments en corbeille de toutes les lectures (`find`, `findOne`, `countDocuments`) sans avoir à modifier les requêtes existantes ; les 10 pipelines d'agrégation de `stats.routes.js` ont été patchés en conséquence (les agrégations ne passent pas par les hooks Mongoose)
+- Nouveaux services : `trash.service.js` (purge manuelle/planifiée + cron `TRASH_PURGE_CRON`), `audit.service.js` (`logAudit()`, non bloquant)
+- Nouvelles routes : `backend/src/routes/trash.routes.js` (`/api/trash`), `backend/src/routes/audit.routes.js` (`/api/audit-logs`)
+- `DELETE /api/mails/:id` et `DELETE /api/outgoing-mails/:id` : suppression définitive remplacée par une mise en corbeille, à permissions inchangées (`isAdmin`)
+- Nouveau réglage `trash_retention_days` (catégorie `general`, défaut `30`)
+
 ## [3.16.0] - 2026-07-14
 
 ### Ajouté

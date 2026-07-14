@@ -120,7 +120,7 @@ Sur chaque page de liste, vous disposez de :
 - 👁️ **Voir** : Consulter le détail du courrier
 - ✏️ **Modifier** : Éditer les informations (si autorisé)
 - 📥 **Télécharger** : Télécharger le fichier PDF
-- 🗑️ **Supprimer** : Supprimer le courrier (admin uniquement)
+- 🗑️ **Supprimer** : Déplace le courrier vers la **Corbeille** (admin uniquement) — il reste récupérable, voir [section 11.9](#119-corbeille)
 
 ### 3.4 Détail d'un courrier
 
@@ -556,6 +556,44 @@ Les rappels et alertes de retard sont envoyés chaque matin à 8h00 (horaire per
 - OneDrive, S3, NextCloud
 - Synchronisation automatique
 
+### 11.9 Corbeille
+
+**Chemin : Administration > Corbeille**
+
+La suppression d'un courrier (entrant ou sortant, action réservée aux administrateurs) ne l'efface plus immédiatement : il est déplacé vers la corbeille, fichier PDF compris.
+
+| Action | Description |
+|--------|-------------|
+| **Consulter** | Deux onglets séparés : courriers entrants / courriers sortants, avec date de suppression, auteur et compte à rebours avant purge |
+| **Restaurer** | Remet le courrier dans son état d'origine (même statut, mêmes destinataires) |
+| **Supprimer définitivement** | Purge immédiate d'un élément précis (avec confirmation) — fichier et enregistrement effacés |
+| **Vider la corbeille** | Purge définitive de tout le contenu de l'onglet actif |
+| **Durée de rétention** | Réglable en haut de page (30 jours par défaut). `0` désactive la purge automatique |
+
+> ⏰ Une purge automatique s'exécute chaque nuit et supprime définitivement tout élément dépassant la durée de rétention configurée.
+
+> 💾 Si le courrier avait déjà été synchronisé vers un stockage externe (S3, OneDrive, NextCloud) avant sa suppression, cette copie externe **n'est pas touchée** par la purge : seuls le fichier local restant et l'enregistrement dans l'application sont supprimés.
+
+> 💡 Cette page n'est visible que si vous avez la permission **`manage_trash`**.
+
+### 11.10 Journal d'audit
+
+**Chemin : Administration > Journal d'audit**
+
+Historique consultable de toutes les actions sensibles effectuées dans l'application, à des fins de traçabilité et de conformité.
+
+**Ce qui est tracé :**
+- **Suppressions** : courriers (mise en corbeille, restauration, purge), utilisateurs, contacts, services, objets, délégations, webhooks, modèles d'emails, correspondances LDAP, paramètres
+- **Changements de permissions** : modification des permissions d'un groupe, avec le détail avant/après
+- **Modifications de paramètres** : changement d'un réglage, avec l'ancienne et la nouvelle valeur (masquée si secrète)
+- **Exports** : téléchargement d'un PDF de courrier, du registre Excel, d'une sauvegarde
+
+Pour chaque entrée sont affichés : la date et l'heure, l'utilisateur responsable (ou « Système » pour la purge automatique de la corbeille), l'action, le type d'entité concernée, un détail (avec un bouton « Détails » pour l'avant/après le cas échéant) et l'adresse IP.
+
+**Filtres disponibles** : catégorie (Suppression / Permission / Paramètre / Export), type d'entité, période.
+
+> 💡 Cette page n'est visible que si vous avez la permission **`view_audit_log`**. Contrairement à la corbeille, le journal d'audit est conservé indéfiniment.
+
 ---
 
 ## 12. FAQ & Astuces
@@ -602,6 +640,12 @@ Le courrier doit d'abord être **traité** avant de pouvoir être archivé.
 3. Filtrez par date si nécessaire
 </details>
 
+<details>
+<summary><strong>❓ J'ai supprimé un courrier par erreur, puis-je le récupérer ?</strong></summary>
+
+Oui. Un administrateur peut le restaurer depuis **Administration > Corbeille** tant qu'il n'a pas dépassé la durée de rétention (30 jours par défaut). Le fichier et toutes les informations sont conservés à l'identique.
+</details>
+
 ### Raccourcis et astuces
 
 | Action | Astuce |
@@ -633,5 +677,5 @@ En cas de problème ou question :
 
 ---
 
-*Guide d'utilisation GED Courrier - Version 3.16.0*
+*Guide d'utilisation GED Courrier - Version 3.17.0*
 *Dernière mise à jour : Juillet 2026*
