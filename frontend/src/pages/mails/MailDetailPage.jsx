@@ -606,7 +606,15 @@ export default function MailDetailPage() {
                 <div className="p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div>
-                      <span className="text-sm font-mono text-gray-500">{mail.reference}</span>
+                      <span className="text-sm font-mono text-gray-500">
+                        {mail.chronoNumber ? (
+                          <>
+                            <span className="font-semibold text-gray-700">N° {mail.chronoNumber}</span>
+                            <span className="mx-1.5 text-gray-300">·</span>
+                            {mail.reference}
+                          </>
+                        ) : mail.reference}
+                      </span>
                       <h1 className="text-2xl font-bold text-gray-900 mt-1">
                         {mail.subject}
                       </h1>
@@ -1194,7 +1202,7 @@ export default function MailDetailPage() {
             <div className="absolute top-0 left-0 right-0 bg-gray-800 text-white p-3 flex items-center justify-between z-10">
               <h2 className="font-semibold flex items-center gap-2">
                 <DocumentTextIcon className="w-5 h-5" />
-                {mail.reference} - {mail.subject}
+                {mail.chronoNumber || mail.reference} - {mail.subject}
               </h2>
               <div className="flex items-center gap-2">
                 <button

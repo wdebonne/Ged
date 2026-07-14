@@ -126,7 +126,7 @@ Sur chaque page de liste, vous disposez de :
 
 La page de détail affiche :
 
-- **Informations générales** : Référence, date, expéditeur, objet, **date d'échéance** (avec badge « ⚠ En retard » si dépassée) et **tags**
+- **Informations générales** : Référence, **numéro d'ordre chronologique** (ex: `2026-0001`), date, expéditeur, objet, **date d'échéance** (avec badge « ⚠ En retard » si dépassée) et **tags**
 - **Fiche contact expéditeur** : Cliquez sur le nom de l'expéditeur pour ouvrir sa fiche contact (email, téléphone, adresse) avec liens d'action directs
 - **Destinataires** : Principal et en copie
 - **Visualiseur PDF** : Aperçu du document avec zoom et navigation
@@ -316,9 +316,11 @@ Le mapping permet de choisir précisément quelle donnée va dans quelle colonne
 2. L'aperçu montre les feuilles et les en-têtes de colonnes (ligne 1)
 3. Pour chaque colonne, sélectionnez le champ correspondant dans le dropdown
 
-**Champs disponibles (courrier entrant)** : Référence, Objet, Nom/Organisation/Email/Téléphone expéditeur, Destinataire, Service, Dates (réception, import, traitement, archivage), Statut, Priorité, Réponses, Notes, Tags, Lien application, Chemin fichier...
+**Champs disponibles (courrier entrant)** : N° d'ordre, Référence, Objet, Nom/Organisation/Email/Téléphone expéditeur, Destinataire, Service, Dates (réception, import, traitement, archivage), Statut, Priorité, Réponses, Notes, Tags, Lien application, Chemin fichier...
 
-**Champs disponibles (courrier départ)** : Référence, Objet, Destinataire, Expéditeur (agent), Service, Dates, Mode d'envoi, N° de suivi, Réf. courrier entrant lié, Lien application, Chemin fichier...
+**Champs disponibles (courrier départ)** : N° d'ordre, Référence, Objet, Destinataire, Expéditeur (agent), Service, Dates, Mode d'envoi, N° de suivi, Réf. courrier entrant lié, Lien application, Chemin fichier...
+
+> 💡 **N° d'ordre** est le numéro chronologique annuel (ex: `2026-0001`) attribué automatiquement à chaque courrier, séquentiel par année et par type (entrant/sortant) — pratique pour un registre papier classique, contrairement à la référence unique qui reste alphanumérique.
 
 > 💡 **Astuce** : Le champ « Lien vers l'application » génère un hyperlien cliquable dans Excel qui ouvre directement la page de détail du courrier.
 
@@ -631,5 +633,5 @@ En cas de problème ou question :
 
 ---
 
-*Guide d'utilisation GED Courrier - Version 3.15.0*
+*Guide d'utilisation GED Courrier - Version 3.16.0*
 *Dernière mise à jour : Juillet 2026*

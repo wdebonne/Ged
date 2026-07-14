@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import Counter, { formatChronoNumber } from './Counter.model.js';
 
 export const OUTGOING_MAIL_STATUS = {
   DRAFT: 'draft',
@@ -30,6 +31,12 @@ const outgoingMailSchema = new mongoose.Schema({
   reference: {
     type: String,
     unique: true
+  },
+  // Numéro d'ordre chronologique annuel (ex: 2026-0001), immuable après attribution
+  chronoNumber: {
+    type: String,
+    unique: true,
+    sparse: true
   },
   subject: {
     type: String,
@@ -157,6 +164,15 @@ outgoingMailSchema.pre('save', async function(next) {
     const day = String(date.getDate()).padStart(2, '0');
     const random = Math.random().toString(36).substring(2, 8).toUpperCase();
     this.reference = `CRD-${year}${month}${day}-${random}`;
+  }
+  if (!this.chronoNumber) {
+    try {
+      const year = new Date().getFullYear();
+      const seq = await Counter.getNextSequence('outgoing', year);
+      this.chronoNumber = formatChronoNumber(year, seq);
+    } catch (err) {
+      return next(err);
+    }
   }
   next();
 });

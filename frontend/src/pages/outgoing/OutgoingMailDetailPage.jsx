@@ -121,7 +121,15 @@ export default function OutgoingMailDetailPage() {
                 {priorityInfo.label}
               </span>
             </div>
-            <p className="text-gray-500 mt-1 font-mono text-sm">{mail.reference}</p>
+            <p className="text-gray-500 mt-1 font-mono text-sm">
+              {mail.chronoNumber ? (
+                <>
+                  <span className="font-semibold text-gray-700">N° {mail.chronoNumber}</span>
+                  <span className="mx-1.5 text-gray-300">·</span>
+                  {mail.reference}
+                </>
+              ) : mail.reference}
+            </p>
           </div>
         </div>
 

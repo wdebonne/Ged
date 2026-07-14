@@ -92,7 +92,7 @@ export default function OutgoingMailsSentPage() {
                 mails.map((mail) => (
                   <tr key={mail._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm font-mono text-gray-700">{mail.reference}</span>
+                      <span className="text-sm font-mono text-gray-700">{mail.chronoNumber || mail.reference}</span>
                     </td>
                     <td className="px-6 py-4">
                       <p className="font-medium text-gray-900 truncate max-w-xs">{mail.subject}</p>

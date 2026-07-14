@@ -127,7 +127,7 @@ export default function MailsPendingPage() {
                             <span className="w-2 h-2 bg-warning-500 rounded-full" />
                           )}
                           <span className="text-xs font-mono text-gray-500">
-                            {mail.reference}
+                            {mail.chronoNumber || mail.reference}
                           </span>
                           <span className="badge-warning">À traiter</span>
                           {(mail.priority === 'urgent' || mail.priority === 'high') && (

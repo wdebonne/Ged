@@ -147,7 +147,7 @@ export default function MailsArchivedPage() {
                     <Link to={`/courriers/${mail._id}`} className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-xs font-mono text-gray-500">
-                          {mail.reference}
+                          {mail.chronoNumber || mail.reference}
                         </span>
                         <span className="badge bg-gray-100 text-gray-700">Archivé</span>
                       </div>

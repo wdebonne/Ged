@@ -7,6 +7,24 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ---
 
+## [3.16.0] - 2026-07-14
+
+### Ajouté
+
+- **Numéro d'ordre chronologique annuel** (`chronoNumber`, ex: `2026-0001`) sur les courriers entrants et sortants, en complément de la référence unique existante (`CRR-`/`CRD-YYYYMMDD-RANDOM`, conservée telle quelle)
+  - Séquence strictement croissante par année et par type (entrant / sortant), attribuée de façon atomique à la création — reproduit la numérotation traditionnelle d'un registre de courrier papier
+  - Immuable : contrairement à la `reference`, qui est réécrite à l'archivage selon le format configuré, le `chronoNumber` reste inchangé pour toute la durée de vie du courrier
+  - Affiché dans les listes (à traiter, traités, archivés, brouillons, envoyés) et sur les pages détail, en plus de la référence
+  - Nouveau champ mappable **« N° d'ordre »** dans le registre Excel (entrant et sortant)
+  - Recherche plein texte étendue au `chronoNumber`
+  - Script de migration `npm run backfill:chrono` (dossier `backend/`) pour numéroter rétroactivement les courriers existants, sans perturber la séquence des nouveaux courriers
+
+### Technique
+
+- Nouveau modèle `Counter` (`backend/src/models/Counter.model.js`) : compteur atomique par clé `{scope}-{year}` (`findOneAndUpdate` + `$inc`, sans risque de doublon en cas d'imports concurrents)
+- Champ `chronoNumber` (unique, sparse) ajouté à `Mail` et `OutgoingMail`, attribué dans le hook `pre('save')`
+- Nouveau script `backend/src/scripts/backfill-chrono-numbers.js`
+
 ## [3.15.0] - 2026-07-14
 
 ### Ajouté

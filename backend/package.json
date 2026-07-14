@@ -1,13 +1,14 @@
 {
   "name": "ged-courrier-backend",
-  "version": "3.15.0",
+  "version": "3.16.0",
   "description": "Backend API pour la Gestion Électronique de Courrier",
   "main": "src/server.js",
   "type": "module",
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
-    "seed": "node src/scripts/seed.js"
+    "seed": "node src/scripts/seed.js",
+    "backfill:chrono": "node src/scripts/backfill-chrono-numbers.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.948.0",

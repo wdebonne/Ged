@@ -11,3 +11,4 @@ export { default as EmailTemplate, EMAIL_ACTIONS } from './EmailTemplate.model.j
 export { default as Webhook, WEBHOOK_EVENTS } from './Webhook.model.js';
 export { default as Delegation, DELEGATION_STATUS } from './Delegation.model.js';
 export { default as LdapGroupMapping } from './LdapGroupMapping.model.js';
+export { default as Counter, formatChronoNumber } from './Counter.model.js';

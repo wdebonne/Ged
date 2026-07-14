@@ -41,6 +41,7 @@ const DEFAULTS = {
 // --- Available fields for mapping ---
 
 const INCOMING_FIELDS = [
+  { key: 'chronoNumber', label: "N° d'ordre", type: 'string' },
   { key: 'reference', label: 'Référence', type: 'string' },
   { key: 'subject', label: 'Objet', type: 'string' },
   { key: 'senderName', label: 'Nom expéditeur', type: 'string' },
@@ -67,6 +68,7 @@ const INCOMING_FIELDS = [
 ];
 
 const OUTGOING_FIELDS = [
+  { key: 'chronoNumber', label: "N° d'ordre", type: 'string' },
   { key: 'reference', label: 'Référence', type: 'string' },
   { key: 'subject', label: 'Objet', type: 'string' },
   { key: 'destinationName', label: 'Nom destinataire', type: 'string' },
@@ -189,6 +191,7 @@ const formatDate = (date, format) => {
 
 const resolveIncomingField = (mail, fieldKey, settings) => {
   switch (fieldKey) {
+    case 'chronoNumber': return mail.chronoNumber || '';
     case 'reference': return mail.reference || '';
     case 'subject': return mail.subject || '';
     case 'senderName': return mail.senderName || mail.sender?.name || '';
@@ -229,6 +232,7 @@ const resolveIncomingField = (mail, fieldKey, settings) => {
 
 const resolveOutgoingField = (mail, fieldKey, settings) => {
   switch (fieldKey) {
+    case 'chronoNumber': return mail.chronoNumber || '';
     case 'reference': return mail.reference || '';
     case 'subject': return mail.subject || '';
     case 'destinationName': return mail.destinationName || mail.destination?.name || '';

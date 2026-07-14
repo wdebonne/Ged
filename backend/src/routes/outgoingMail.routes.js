@@ -96,6 +96,7 @@ router.get('/', authenticate, async (req, res) => {
           { ocrContent: { $regex: safeSearch, $options: 'i' } },
           { fileName: { $regex: safeSearch, $options: 'i' } },
           { reference: { $regex: safeSearch, $options: 'i' } },
+          { chronoNumber: { $regex: safeSearch, $options: 'i' } },
           { notes: { $regex: safeSearch, $options: 'i' } }
         ]
       });

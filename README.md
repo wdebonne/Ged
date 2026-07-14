@@ -54,6 +54,7 @@ Application web complète de gestion de courrier avec authentification LDAP/Kerb
 - ✅ Courriers à traiter
 - ✅ Courriers traités
 - ✅ Courriers archivés
+- ✅ **Numéro d'ordre chronologique annuel** (ex: `2026-0001`) attribué à l'import, en complément de la référence unique — séquentiel par année, immuable même après archivage
 - ✅ Visualisation PDF intégrée avec zoom, navigation, **rotation** et **recadrage**
   - **Ajustement automatique à la hauteur** : l'aperçu s'adapte à la zone disponible pour afficher la page entière sans scroll
   - Rotation gauche/droite (−90°/+90°) appliquée définitivement au fichier PDF à l'import
@@ -73,7 +74,7 @@ Application web complète de gestion de courrier avec authentification LDAP/Kerb
   - Template personnalisable : uploadez votre modèle .xlsx ou récupérez-le depuis NextCloud
   - Mapping flexible des colonnes via l'interface d'administration
   - Feuilles séparées pour courrier arrivé et courrier départ
-  - 23 champs mappables (entrant) / 19 champs (sortant) avec liens hypertexte
+  - 24 champs mappables (entrant) / 20 champs (sortant) avec liens hypertexte, dont le **numéro d'ordre chronologique** annuel
   - Export à la demande avec filtres (dates, statut, service)
   - Téléchargement du registre courant auto-généré
   - Sauvegarde automatique sur NextCloud (optionnel)
@@ -118,6 +119,7 @@ Application web complète de gestion de courrier avec authentification LDAP/Kerb
 - ✅ **Module indépendant** : gestion du courrier sortant sans lien obligatoire avec un courrier entrant
 - ✅ Cycle de vie : Brouillon → Envoyé → Archivé
 - ✅ Référence auto-générée au format `CRD-YYYYMMDD-RANDOM`
+- ✅ **Numéro d'ordre chronologique annuel** (ex: `2026-0001`), séquentiel par année, immuable même après archivage
 - ✅ Méthodes d'envoi : courrier postal, email, fax, remise en main propre, autre
 - ✅ Lien optionnel vers un courrier entrant existant
 - ✅ Numéro de suivi postal optionnel
