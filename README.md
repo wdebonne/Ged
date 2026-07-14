@@ -760,35 +760,6 @@ cd frontend
 npm run dev
 ```
 
-### 🐳 Développement avec Docker
-
-Plusieurs configurations Docker sont disponibles :
-
-#### Avec MongoDB inclus (recommandé pour commencer)
-
-```bash
-# Démarrer l'environnement complet
-docker-compose -f docker-compose.dev.yml up
-
-# Avec l'interface Mongo Express (optionnel)
-docker-compose -f docker-compose.dev.yml --profile tools up
-```
-
-#### Sans MongoDB (si MongoDB est déjà installé)
-
-```bash
-# Démarrer l'environnement (MongoDB doit tourner sur l'hôte)
-docker-compose -f docker-compose.dev.standalone.yml up
-```
-
-#### Accès en développement
-
-| Service | URL |
-|---------|-----|
-| Frontend | http://localhost:5173 |
-| Backend API | http://localhost:5000/api |
-| Mongo Express | http://localhost:8081 (profil tools) |
-
 ### Production
 
 ```bash
@@ -801,35 +772,15 @@ cd ../backend
 NODE_ENV=production npm start
 ```
 
-### 🐳 Production avec Docker
+### 🐳 Production avec Docker (Portainer)
 
-#### Option 1 : Stack complète (avec MongoDB)
+Le déploiement se fait via une stack Portainer utilisant l'image pré-buildée `ghcr.io/wdebonne/ged:latest` :
 
-```bash
-cp .env.example .env
-# Éditer .env avec vos paramètres
-docker-compose up -d --build
-```
+- L'image est construite automatiquement par GitHub Actions (`.github/workflows/docker-build.yml`) à chaque push sur `main`
+- La stack Portainer utilise `docker-compose.portainer.yml`
+- Mise à jour : « Pull and redeploy » de la stack dans Portainer
 
-#### Option 2 : Sans MongoDB (MongoDB externe)
-
-```bash
-cp .env.standalone.example .env
-# Éditer .env avec vos paramètres
-docker-compose -f docker-compose.standalone.yml up -d --build
-```
-
-#### Mise à jour Docker
-
-```bash
-# Linux/Mac
-./update.sh
-
-# Windows
-update.bat
-```
-
-📖 **Documentation complète** : Voir [DEPLOYMENT.md](DEPLOYMENT.md) pour toutes les options de déploiement.
+📖 **Documentation complète** : Voir [DEPLOYMENT-PORTAINER.md](DEPLOYMENT-PORTAINER.md) (Docker/Portainer) ou [DEPLOYMENT.md](DEPLOYMENT.md) (déploiement classique Node.js).
 
 ## 📁 Structure du projet
 
