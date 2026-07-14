@@ -322,7 +322,8 @@ router.put('/', authenticate, authorize(PERMISSIONS.EDIT_SETTINGS), async (req, 
       ldap_bindDN: 'LDAP_BIND_DN',
       ldap_bindPassword: 'LDAP_BIND_PASSWORD',
       ldap_userFilter: 'LDAP_SEARCH_FILTER',
-      ldap_requiredGroupDN: 'LDAP_REQUIRED_GROUP_DN'
+      ldap_requiredGroupDN: 'LDAP_REQUIRED_GROUP_DN',
+      ldap_allowLocalFallback: 'LDAP_ALLOW_LOCAL_FALLBACK'
     };
 
     for (const { key, value } of settings) {

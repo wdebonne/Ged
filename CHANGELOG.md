@@ -12,6 +12,7 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 ### Ajouté
 
 - **Coupe-circuit LDAP** (`LDAP_FORCE_DISABLE=true`) : force la désactivation de LDAP même si `ldap_enabled` est activé dans les paramètres en base de données. Permet de retrouver l'accès avec un compte local quand l'annuaire est injoignable, sans intervention sur la base
+- **Option « Autoriser aussi la connexion avec un compte local »** dans Paramètres > LDAP : activée par défaut, elle permet à un compte local classique de se connecter même quand LDAP est actif (bascule automatique si l'utilisateur n'est pas trouvé/autorisé côté annuaire). Désactivable pour forcer un mode LDAP strict
 
 ### Corrigé
 

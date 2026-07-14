@@ -2502,7 +2502,7 @@ export default function SettingsPage() {
 
   const [formData, setFormData] = useState({
     smtp: { host: '', port: 587, user: '', password: '', from: '', fromName: '', secure: false },
-    ldap: { server: '', baseDn: '', bindDn: '', bindPassword: '', userFilter: '', groupFilter: '' },
+    ldap: { server: '', baseDn: '', bindDn: '', bindPassword: '', userFilter: '', groupFilter: '', allowLocalFallback: true },
     ldapBackup: { server: '', port: 389, baseDN: '', bindDN: '', bindPassword: '', useTLS: false },
     kerberos: { realm: '', kdc: '', adminServer: '' },
     imap: { 
@@ -4033,6 +4033,24 @@ export default function SettingsPage() {
                   <label htmlFor="ldapEnabled" className="text-gray-700">
                     Activer l'authentification LDAP
                   </label>
+                </div>
+
+                <div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id="ldapAllowLocalFallback"
+                      checked={formData.ldap?.allowLocalFallback ?? true}
+                      onChange={(e) => handleChange('ldap', 'allowLocalFallback', e.target.checked)}
+                      className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    />
+                    <label htmlFor="ldapAllowLocalFallback" className="text-gray-700">
+                      Autoriser aussi la connexion avec un compte local
+                    </label>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1 ml-6">
+                    Si activé (recommandé), un utilisateur non trouvé ou refusé par LDAP peut quand même se connecter avec un compte local classique. Désactivez pour un mode LDAP strict (aucun compte local ne pourra se connecter).
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">

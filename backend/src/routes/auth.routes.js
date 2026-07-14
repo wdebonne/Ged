@@ -72,6 +72,11 @@ router.post('/login', loginLimiter, [
     // - Sinon, tenter LDAP d'abord (si activé), puis fallback local
     const ldapEnabled = process.env.LDAP_ENABLED === 'true';
     const kerberosEnabled = process.env.KERBEROS_ENABLED === 'true';
+    // Par défaut, un compte local reste utilisable même quand LDAP est actif
+    // (bascule automatique si l'utilisateur n'est pas trouvé/authentifié côté LDAP).
+    // Décochable depuis Paramètres > LDAP pour forcer un mode LDAP strict.
+    const ldapAllowLocalFallback = process.env.LDAP_ALLOW_LOCAL_FALLBACK !== 'false';
+    const localAuthAllowed = !ldapEnabled || ldapAllowLocalFallback;
     const explicitMethod = authMethod || null;
 
     let authenticatedVia = null;
@@ -115,7 +120,14 @@ router.post('/login', loginLimiter, [
     }
 
     // === Tentative locale ===
-    if (!authenticatedVia && (!explicitMethod || explicitMethod === 'local')) {
+    if (!authenticatedVia && !localAuthAllowed && explicitMethod === 'local') {
+      return res.status(401).json({
+        success: false,
+        message: 'L\'authentification locale est désactivée : seul LDAP est autorisé'
+      });
+    }
+
+    if (!authenticatedVia && localAuthAllowed && (!explicitMethod || explicitMethod === 'local')) {
       user = await User.findOne({
         $or: [
           { username: username.toLowerCase() },

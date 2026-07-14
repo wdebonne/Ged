@@ -292,6 +292,7 @@ const startServer = async () => {
     if (ldapMap.ldap_bindPassword) process.env.LDAP_BIND_PASSWORD = ldapMap.ldap_bindPassword;
     if (ldapMap.ldap_userFilter) process.env.LDAP_SEARCH_FILTER = ldapMap.ldap_userFilter;
     if (ldapMap.ldap_requiredGroupDN !== undefined) process.env.LDAP_REQUIRED_GROUP_DN = ldapMap.ldap_requiredGroupDN || '';
+    if (ldapMap.ldap_allowLocalFallback !== undefined) process.env.LDAP_ALLOW_LOCAL_FALLBACK = String(ldapMap.ldap_allowLocalFallback);
     if (ldapMap.ldap_server) {
       const useTLS = String(ldapMap.ldap_useTLS) === 'true';
       const port = ldapMap.ldap_port || (useTLS ? 636 : 389);
