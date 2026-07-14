@@ -37,7 +37,8 @@ import {
   ChatBubbleLeftRightIcon,
   SwatchIcon,
   BellIcon,
-  TableCellsIcon
+  TableCellsIcon,
+  ClockIcon
 } from '@heroicons/react/24/outline';
 
 const TABS = [
@@ -156,6 +157,129 @@ function NotificationDefaultsSettings() {
             <>
               <CheckCircleIcon className="w-5 h-5" />
               Enregistrer les paramètres par défaut
+            </>
+          )}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// Composant Échéances : délai réglementaire par défaut + jours de rappel
+function DueDateSettings() {
+  const queryClient = useQueryClient();
+  const [dueDays, setDueDays] = useState(15);
+  const [reminderDays, setReminderDays] = useState(3);
+
+  const { data: dueDaysData } = useQuery({
+    queryKey: ['settings', 'mail_due_default_days'],
+    queryFn: async () => {
+      const res = await settingsAPI.getOne('mail_due_default_days');
+      return res.data?.data?.value;
+    },
+    retry: false
+  });
+
+  const { data: reminderDaysData } = useQuery({
+    queryKey: ['settings', 'mail_reminder_days_before'],
+    queryFn: async () => {
+      const res = await settingsAPI.getOne('mail_reminder_days_before');
+      return res.data?.data?.value;
+    },
+    retry: false
+  });
+
+  useEffect(() => {
+    if (dueDaysData !== undefined && dueDaysData !== null) setDueDays(dueDaysData);
+  }, [dueDaysData]);
+
+  useEffect(() => {
+    if (reminderDaysData !== undefined && reminderDaysData !== null) setReminderDays(reminderDaysData);
+  }, [reminderDaysData]);
+
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      await settingsAPI.update('mail_due_default_days', {
+        value: parseInt(dueDays) || 0,
+        category: 'general',
+        description: 'Délai de traitement par défaut en jours appliqué à l\'import (0 = pas d\'échéance automatique)'
+      });
+      await settingsAPI.update('mail_reminder_days_before', {
+        value: parseInt(reminderDays) || 3,
+        category: 'general',
+        description: 'Nombre de jours avant l\'échéance pour envoyer le rappel'
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(['settings', 'mail_due_default_days']);
+      queryClient.invalidateQueries(['settings', 'mail_reminder_days_before']);
+      toast.success('Paramètres d\'échéance enregistrés');
+    },
+    onError: () => {
+      toast.error('Erreur lors de l\'enregistrement');
+    }
+  });
+
+  return (
+    <div className="space-y-6 mt-10 pt-8 border-t">
+      <div>
+        <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <ClockIcon className="w-5 h-5" />
+          Échéances de traitement
+        </h2>
+        <p className="text-sm text-gray-500 mt-1">
+          Le rappel et l'alerte de retard sont envoyés par email chaque matin aux destinataires
+          des courriers à traiter (selon leurs préférences de notification ci-dessus).
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label className="label">Délai de traitement par défaut (jours)</label>
+          <input
+            type="number"
+            min="0"
+            max="365"
+            value={dueDays}
+            onChange={(e) => setDueDays(e.target.value)}
+            className="input"
+          />
+          <p className="text-xs text-gray-400 mt-1">
+            Échéance appliquée automatiquement à l'import quand aucune date n'est saisie.
+            Mettre 0 pour désactiver l'échéance automatique.
+          </p>
+        </div>
+        <div>
+          <label className="label">Rappel avant échéance (jours)</label>
+          <input
+            type="number"
+            min="1"
+            max="30"
+            value={reminderDays}
+            onChange={(e) => setReminderDays(e.target.value)}
+            className="input"
+          />
+          <p className="text-xs text-gray-400 mt-1">
+            Un email de rappel est envoyé ce nombre de jours avant l'échéance (défaut : 3).
+          </p>
+        </div>
+      </div>
+
+      <div className="flex justify-end">
+        <button
+          onClick={() => saveMutation.mutate()}
+          disabled={saveMutation.isLoading}
+          className="btn-primary flex items-center gap-2"
+        >
+          {saveMutation.isLoading ? (
+            <>
+              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Enregistrement...
+            </>
+          ) : (
+            <>
+              <CheckCircleIcon className="w-5 h-5" />
+              Enregistrer les échéances
             </>
           )}
         </button>
@@ -3451,7 +3575,10 @@ export default function SettingsPage() {
 
             {/* Notifications defaults */}
             {activeTab === 'notifications' && (
-              <NotificationDefaultsSettings />
+              <>
+                <NotificationDefaultsSettings />
+                <DueDateSettings />
+              </>
             )}
 
             {/* Email Templates */}

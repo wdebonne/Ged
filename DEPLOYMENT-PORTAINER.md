@@ -285,6 +285,7 @@ Lancez la mise à jour :
 | `JWT_REFRESH_EXPIRE` | Durée de validité des refresh tokens | `7d` |
 | `APP_NAME` | Nom affiché de l'application | `GED Courrier` |
 | `MAX_FILE_SIZE` | Taille max des fichiers (octets) | `50000000` |
+| `REMINDER_CRON` | Horaire (cron, Europe/Paris) du job quotidien de rappels d'échéance et alertes de retard | `0 8 * * *` |
 
 ### Variables SMTP (envoi d'emails)
 

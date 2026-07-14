@@ -9,6 +9,7 @@ import Pagination from '../../components/Pagination';
 import MailFilters from '../../components/MailFilters';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import EmptyState from '../../components/EmptyState';
+import TagChips from '../../components/TagChips';
 import {
   ArchiveBoxIcon,
   EyeIcon,
@@ -31,7 +32,12 @@ export default function MailsArchivedPage() {
     sender: '',
     service: '',
     dateFrom: '',
-    dateTo: ''
+    dateTo: '',
+    priority: '',
+    tag: '',
+    overdue: '',
+    sortBy: '',
+    sortOrder: ''
   });
 
   const { data, isLoading, error } = useQuery({
@@ -156,6 +162,10 @@ export default function MailsArchivedPage() {
                         <span>
                           Archivé le {format(new Date(mail.archivedDate), 'dd MMMM yyyy', { locale: fr })}
                         </span>
+                        <TagChips
+                          tags={mail.tags}
+                          onClick={(tag) => handleFilterChange({ ...filters, tag })}
+                        />
                         {mail.service && (
                           <span 
                             className="badge"

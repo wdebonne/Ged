@@ -7,6 +7,7 @@ import { fr } from 'date-fns/locale';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { mailsAPI, sendersAPI, servicesAPI, subjectsAPI, usersAPI, imapAPI } from '../../services/api';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import TagInput from '../../components/TagInput';
 import toast from 'react-hot-toast';
 import {
   DocumentTextIcon,
@@ -58,6 +59,8 @@ export default function IncomingMailsPage() {
     assignedTo: '',
     copyTo: [],
     priority: 'normal',
+    dueDate: '',
+    tags: [],
     notes: ''
   });
   const [senderSearch, setSenderSearch] = useState('');
@@ -311,6 +314,8 @@ export default function IncomingMailsPage() {
         assignedTo: '',
         copyTo: [],
         priority: 'normal',
+        dueDate: '',
+        tags: [],
         notes: ''
       });
       setSenderSearch('');
@@ -335,6 +340,8 @@ export default function IncomingMailsPage() {
       assignedTo: '',
       copyTo: [],
       priority: 'normal',
+      dueDate: '',
+      tags: [],
       notes: ''
     });
     setSenderSearch('');
@@ -391,6 +398,8 @@ export default function IncomingMailsPage() {
       recipientsCopyIds: formData.copyTo,
       priority: formData.priority,
       notes: formData.notes,
+      ...(formData.dueDate && { dueDate: formData.dueDate }),
+      ...(formData.tags.length > 0 && { tags: formData.tags }),
       ...(rotation !== 0 && { rotation }),
       ...(cropRect && { cropRect })
     });
@@ -1014,6 +1023,33 @@ export default function IncomingMailsPage() {
                     <option value="high">Haute</option>
                     <option value="urgent">Urgente</option>
                   </select>
+                </div>
+
+                {/* Date d'échéance */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Date d'échéance (optionnel)
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.dueDate}
+                    onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+                    className="input"
+                  />
+                  <p className="text-xs text-gray-400 mt-1">
+                    Laissez vide pour appliquer le délai réglementaire par défaut
+                  </p>
+                </div>
+
+                {/* Tags */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Tags (optionnel)
+                  </label>
+                  <TagInput
+                    value={formData.tags}
+                    onChange={(tags) => setFormData({ ...formData, tags })}
+                  />
                 </div>
 
                 {/* Notes */}

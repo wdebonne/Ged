@@ -126,6 +126,9 @@ const mailSchema = new mongoose.Schema({
     type: Date,
     required: true
   },
+  dueDate: {
+    type: Date
+  },
   importedDate: {
     type: Date,
     default: Date.now
@@ -157,6 +160,14 @@ const mailSchema = new mongoose.Schema({
     default: false
   },
   readLogs: [readLogSchema],
+
+  // Rappels d'échéance (envoyés une seule fois par le job quotidien)
+  reminderSentAt: {
+    type: Date
+  },
+  overdueSentAt: {
+    type: Date
+  },
   
   // Réponse
   hasResponse: {
@@ -226,6 +237,8 @@ mailSchema.index({ status: 1, recipient: 1 });
 mailSchema.index({ status: 1, service: 1 });
 mailSchema.index({ receivedDate: -1 });
 mailSchema.index({ sender: 1 });
+mailSchema.index({ status: 1, dueDate: 1 });
+mailSchema.index({ tags: 1 });
 
 // Générer une référence unique avant sauvegarde
 mailSchema.pre('save', async function(next) {

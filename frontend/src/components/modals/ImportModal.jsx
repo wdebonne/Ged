@@ -5,6 +5,7 @@ import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
 import { mailsAPI, servicesAPI, sendersAPI, subjectsAPI, usersAPI } from '../../services/api';
+import TagInput from '../TagInput';
 import {
   XMarkIcon,
   DocumentArrowUpIcon,
@@ -33,6 +34,8 @@ export default function ImportModal({ isOpen, onClose }) {
     serviceId: '',
     assignedToId: '',
     priority: 'normal',
+    dueDate: '',
+    tags: [],
     notes: ''
   });
   const [errors, setErrors] = useState({});
@@ -140,8 +143,10 @@ export default function ImportModal({ isOpen, onClose }) {
       if (data.serviceId) formDataToSend.append('serviceId', data.serviceId);
       if (data.assignedToId) formDataToSend.append('assignedToId', data.assignedToId);
       if (data.priority) formDataToSend.append('priority', data.priority);
+      if (data.dueDate) formDataToSend.append('dueDate', data.dueDate);
+      if (data.tags?.length > 0) formDataToSend.append('tags', data.tags.join(','));
       if (data.notes) formDataToSend.append('notes', data.notes);
-      
+
       return mailsAPI.create(formDataToSend);
     },
     onSuccess: () => {
@@ -199,6 +204,8 @@ export default function ImportModal({ isOpen, onClose }) {
       serviceId: '',
       assignedToId: '',
       priority: 'normal',
+      dueDate: '',
+      tags: [],
       notes: ''
     });
     setSenderSearch('');
@@ -523,6 +530,29 @@ export default function ImportModal({ isOpen, onClose }) {
                       <option value="high">Haute</option>
                       <option value="urgent">Urgente</option>
                     </select>
+                  </div>
+
+                  {/* Date d'échéance */}
+                  <div>
+                    <label className="label">Date d'échéance (optionnel)</label>
+                    <input
+                      type="date"
+                      value={formData.dueDate}
+                      onChange={(e) => setFormData(prev => ({ ...prev, dueDate: e.target.value }))}
+                      className="input"
+                    />
+                    <p className="text-xs text-gray-400 mt-1">
+                      Laissez vide pour appliquer le délai réglementaire par défaut
+                    </p>
+                  </div>
+
+                  {/* Tags */}
+                  <div>
+                    <label className="label">Tags (optionnel)</label>
+                    <TagInput
+                      value={formData.tags}
+                      onChange={(tags) => setFormData(prev => ({ ...prev, tags }))}
+                    />
                   </div>
 
                   {/* Notes */}

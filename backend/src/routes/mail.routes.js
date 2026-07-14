@@ -88,6 +88,31 @@ async function generateArchiveFileName(mail, format) {
   return fileName;
 }
 
+// Parser les tags reçus (tableau JSON ou chaîne "a, b, c")
+function parseTags(tags) {
+  if (!tags) return [];
+  const list = Array.isArray(tags) ? tags : String(tags).split(',');
+  return [...new Set(list.map(t => String(t).trim()).filter(Boolean))];
+}
+
+// Résoudre la date d'échéance : valeur saisie, sinon délai réglementaire
+// par défaut configurable (mail_due_default_days, 0 = désactivé)
+async function resolveDueDate(dueDate, receivedDate) {
+  if (dueDate) {
+    const d = new Date(dueDate);
+    if (!isNaN(d.getTime())) {
+      d.setHours(23, 59, 59, 999);
+      return d;
+    }
+  }
+  const defaultDays = parseInt(await Settings.getValue('mail_due_default_days', 15));
+  if (!Number.isFinite(defaultDays) || defaultDays <= 0) return undefined;
+  const base = receivedDate ? new Date(receivedDate) : new Date();
+  base.setDate(base.getDate() + defaultDays);
+  base.setHours(23, 59, 59, 999);
+  return base;
+}
+
 // Fonction pour créer l'arborescence d'archivage
 function createArchivePath(mail) {
   const date = mail.receivedDate || new Date();
@@ -111,6 +136,8 @@ router.get('/', authenticate, async (req, res) => {
       limit = 20,
       status = '',
       priority = '',
+      tag = '',
+      overdue = '',
       search = '',
       sender = '',
       service = '',
@@ -234,14 +261,27 @@ router.get('/', authenticate, async (req, res) => {
       query.status = status;
     }
 
-    // Filtrer par priorité
+    // Filtrer par priorité (une valeur ou liste séparée par des virgules)
     if (priority) {
-      // Supporter la valeur 'high' pour inclure 'high' et 'urgent'
-      if (priority === 'high') {
+      const priorities = priority.split(',').map(p => p.trim()).filter(Boolean);
+      if (priorities.length > 1) {
+        query.priority = { $in: priorities };
+      } else if (priority === 'high') {
+        // Rétrocompatibilité : 'high' inclut 'high' et 'urgent'
         query.priority = { $in: ['high', 'urgent'] };
       } else {
-        query.priority = priority;
+        query.priority = priorities[0];
       }
+    }
+
+    // Filtrer par tag (insensible à la casse)
+    if (tag) {
+      query.tags = { $regex: `^${escapeRegex(tag)}$`, $options: 'i' };
+    }
+
+    // Filtrer les courriers dont l'échéance est dépassée
+    if (overdue === 'true') {
+      query.dueDate = { $lt: new Date() };
     }
 
     // Recherche textuelle
@@ -291,7 +331,7 @@ router.get('/', authenticate, async (req, res) => {
 
     // Tri
     const sort = {};
-    sort[sortBy] = sortOrder === 'asc' ? 1 : -1;
+    sort[sortBy || 'receivedDate'] = sortOrder === 'asc' ? 1 : -1;
 
     const total = await Mail.countDocuments(query);
     const mails = await Mail.find(query)
@@ -357,7 +397,9 @@ router.post('/', authenticate, canImportMails, uploadCourrier.single('document')
       assignedToId,
       priority,
       notes,
-      receivedDate
+      receivedDate,
+      dueDate,
+      tags
     } = req.body;
 
     // Validation
@@ -440,6 +482,7 @@ router.post('/', authenticate, canImportMails, uploadCourrier.single('document')
     }
 
     // Créer le courrier
+    const mailReceivedDate = receivedDate ? new Date(receivedDate) : new Date();
     const mail = new Mail({
       subject: subjectText,
       sender: sender._id,
@@ -450,10 +493,12 @@ router.post('/', authenticate, canImportMails, uploadCourrier.single('document')
       ocrContent,
       service: serviceId,
       recipient: recipientId,
-      receivedDate: receivedDate ? new Date(receivedDate) : new Date(),
+      receivedDate: mailReceivedDate,
+      dueDate: await resolveDueDate(dueDate, mailReceivedDate),
       importedBy: req.user._id,
       source: 'manual',
       notes,
+      tags: parseTags(tags),
       priority: priority || 'normal',
       status: MAIL_STATUS.PENDING
     });
@@ -674,8 +719,10 @@ router.post('/import', authenticate, canImportMails, [
       recipientId,
       recipientsCopyIds = [],
       receivedDate,
+      dueDate,
       notes,
       priority,
+      tags,
       rotation,
       cropRect
     } = req.body;
@@ -770,6 +817,7 @@ router.post('/import', authenticate, canImportMails, [
     fs.renameSync(pendingMail.filePath, newFilePath);
 
     // Créer le courrier
+    const mailReceivedDate = receivedDate ? new Date(receivedDate) : pendingMail.receivedDate;
     const mail = new Mail({
       subject,
       sender: sender._id,
@@ -781,11 +829,13 @@ router.post('/import', authenticate, canImportMails, [
       service: serviceId,
       recipient: recipientId,
       recipientsCopy: recipientsCopyIds,
-      receivedDate: receivedDate ? new Date(receivedDate) : pendingMail.receivedDate,
+      receivedDate: mailReceivedDate,
+      dueDate: await resolveDueDate(dueDate, mailReceivedDate),
       importedBy: req.user._id,
       source: pendingMail.source,
       imapMessageId: pendingMail.imapMessageId,
       notes,
+      tags: parseTags(tags),
       priority: priority || 'normal',
       status: MAIL_STATUS.PENDING
     });

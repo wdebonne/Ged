@@ -23,6 +23,11 @@ export default function MailFilters({ filters, onChange }) {
     }
   });
 
+  // Synchroniser quand les filtres sont modifiés depuis l'extérieur (ex: clic sur un tag)
+  useEffect(() => {
+    setLocalFilters(filters);
+  }, [filters]);
+
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       onChange(localFilters);
@@ -34,18 +39,32 @@ export default function MailFilters({ filters, onChange }) {
     setLocalFilters(prev => ({ ...prev, [key]: value }));
   };
 
+  const handleSortChange = (value) => {
+    // L'échéance se trie de la plus proche à la plus lointaine
+    setLocalFilters(prev => ({
+      ...prev,
+      sortBy: value,
+      sortOrder: value === 'dueDate' ? 'asc' : ''
+    }));
+  };
+
   const clearFilters = () => {
     const cleared = {
       search: '',
       sender: '',
       service: '',
       dateFrom: '',
-      dateTo: ''
+      dateTo: '',
+      priority: '',
+      tag: '',
+      overdue: '',
+      sortBy: '',
+      sortOrder: ''
     };
     setLocalFilters(cleared);
   };
 
-  const hasActiveFilters = Object.values(localFilters).some(v => v !== '');
+  const hasActiveFilters = Object.values(localFilters).some(v => v !== '' && v !== undefined);
 
   return (
     <div className="card p-4 space-y-4">
@@ -132,6 +151,52 @@ export default function MailFilters({ filters, onChange }) {
               onChange={(e) => handleChange('dateTo', e.target.value)}
               className="input"
             />
+          </div>
+          <div>
+            <label className="label">Priorité</label>
+            <select
+              value={localFilters.priority || ''}
+              onChange={(e) => handleChange('priority', e.target.value)}
+              className="input"
+            >
+              <option value="">Toutes les priorités</option>
+              <option value="urgent">Urgente</option>
+              <option value="high">Haute (et urgente)</option>
+              <option value="normal">Normale</option>
+              <option value="low">Basse</option>
+            </select>
+          </div>
+          <div>
+            <label className="label">Tag</label>
+            <input
+              type="text"
+              value={localFilters.tag || ''}
+              onChange={(e) => handleChange('tag', e.target.value)}
+              placeholder="ex : subvention"
+              className="input"
+            />
+          </div>
+          <div>
+            <label className="label">Trier par</label>
+            <select
+              value={localFilters.sortBy || ''}
+              onChange={(e) => handleSortChange(e.target.value)}
+              className="input"
+            >
+              <option value="">Date de réception (récent d'abord)</option>
+              <option value="dueDate">Échéance (proche d'abord)</option>
+            </select>
+          </div>
+          <div className="flex items-end">
+            <label className="flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg border border-gray-200 hover:bg-danger-50 w-full">
+              <input
+                type="checkbox"
+                checked={localFilters.overdue === 'true'}
+                onChange={(e) => handleChange('overdue', e.target.checked ? 'true' : '')}
+                className="w-4 h-4 rounded border-gray-300 text-danger-600"
+              />
+              <span className="text-sm font-medium text-gray-700">⚠ En retard uniquement</span>
+            </label>
           </div>
         </div>
       )}

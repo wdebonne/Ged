@@ -205,16 +205,18 @@ router.get('/dashboard', authenticate, async (req, res) => {
       };
     }
 
-    const [myPending, myProcessed, myArchived] = await Promise.all([
+    const [myPending, myProcessed, myArchived, myOverdue] = await Promise.all([
       Mail.countDocuments({ ...myQuery, status: MAIL_STATUS.PENDING }),
       Mail.countDocuments({ ...myQuery, status: MAIL_STATUS.PROCESSED }),
-      Mail.countDocuments({ ...myQuery, status: MAIL_STATUS.ARCHIVED })
+      Mail.countDocuments({ ...myQuery, status: MAIL_STATUS.ARCHIVED }),
+      Mail.countDocuments({ ...myQuery, status: MAIL_STATUS.PENDING, dueDate: { $lt: now } })
     ]);
 
     dashboardStats.my = {
       pending: myPending,
       processed: myProcessed,
-      archived: myArchived
+      archived: myArchived,
+      overdue: myOverdue
     };
 
     // === COURRIERS DÉLÉGUÉS (courriers des utilisateurs qui m'ont délégué) ===
@@ -327,6 +329,13 @@ router.get('/dashboard', authenticate, async (req, res) => {
     dashboardStats.thisMonth = await Mail.countDocuments({
       ...baseQuery,
       receivedDate: { $gte: startOfMonth }
+    });
+
+    // Courriers à traiter dont l'échéance est dépassée
+    dashboardStats.pendingOverdue = await Mail.countDocuments({
+      ...baseQuery,
+      status: MAIL_STATUS.PENDING,
+      dueDate: { $lt: now }
     });
 
     // Courriers non lus pour l'utilisateur

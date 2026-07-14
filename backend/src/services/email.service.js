@@ -464,6 +464,44 @@ export const sendMailArchivedNotification = async (recipientEmail, recipientName
   });
 };
 
+// Rappel d'échéance : courrier à traiter dont l'échéance approche
+export const sendMailReminderNotification = async (recipientEmail, recipientName, mailInfo, daysRemaining, { userId } = {}) => {
+  if (userId) {
+    const allowed = await shouldNotifyUser(userId, 'email_reminder');
+    if (!allowed) return { success: true, skipped: true };
+  }
+  const appUrl = await getAppUrl();
+  return sendTemplatedEmail(EMAIL_ACTIONS.MAIL_REMINDER, recipientEmail, {
+    userName: recipientName,
+    userFirstName: recipientName.split(' ')[0],
+    mailReference: mailInfo.reference,
+    mailSubject: mailInfo.subject,
+    senderName: mailInfo.senderName,
+    daysRemaining: String(daysRemaining),
+    dueDate: new Date(mailInfo.dueDate).toLocaleDateString('fr-FR'),
+    mailUrl: `${appUrl}/courriers/${mailInfo._id}`
+  });
+};
+
+// Alerte de retard : courrier à traiter dont l'échéance est dépassée
+export const sendMailOverdueNotification = async (recipientEmail, recipientName, mailInfo, daysOverdue, { userId } = {}) => {
+  if (userId) {
+    const allowed = await shouldNotifyUser(userId, 'email_overdue');
+    if (!allowed) return { success: true, skipped: true };
+  }
+  const appUrl = await getAppUrl();
+  return sendTemplatedEmail(EMAIL_ACTIONS.MAIL_OVERDUE, recipientEmail, {
+    userName: recipientName,
+    userFirstName: recipientName.split(' ')[0],
+    mailReference: mailInfo.reference,
+    mailSubject: mailInfo.subject,
+    senderName: mailInfo.senderName,
+    daysOverdue: String(daysOverdue),
+    dueDate: new Date(mailInfo.dueDate).toLocaleDateString('fr-FR'),
+    mailUrl: `${appUrl}/courriers/${mailInfo._id}`
+  });
+};
+
 // Tester la configuration SMTP
 export const testSmtpConnection = async () => {
   try {
@@ -484,6 +522,8 @@ export default {
   sendMailProcessedNotification,
   sendMailArchivedNotification,
   sendServiceMailNotification,
+  sendMailReminderNotification,
+  sendMailOverdueNotification,
   shouldNotifyUser,
   testSmtpConnection
 };

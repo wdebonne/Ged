@@ -9,6 +9,7 @@ import Pagination from '../../components/Pagination';
 import MailFilters from '../../components/MailFilters';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import EmptyState from '../../components/EmptyState';
+import TagChips from '../../components/TagChips';
 import {
   CheckCircleIcon,
   EyeIcon,
@@ -30,7 +31,12 @@ export default function MailsProcessedPage() {
     sender: '',
     service: '',
     dateFrom: '',
-    dateTo: ''
+    dateTo: '',
+    priority: '',
+    tag: '',
+    overdue: '',
+    sortBy: '',
+    sortOrder: ''
   });
 
   const { data, isLoading, error } = useQuery({
@@ -144,6 +150,10 @@ export default function MailsProcessedPage() {
                           <span>
                             Traité le {format(new Date(mail.processedDate), 'dd MMMM yyyy', { locale: fr })}
                           </span>
+                          <TagChips
+                            tags={mail.tags}
+                            onClick={(tag) => handleFilterChange({ ...filters, tag })}
+                          />
                           {mail.service && (
                             <span 
                               className="badge"

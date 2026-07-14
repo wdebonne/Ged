@@ -7,6 +7,36 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ---
 
+## [3.15.0] - 2026-07-14
+
+### Ajouté
+
+- **Échéances de traitement et rappels automatiques** :
+  - Nouveau champ **date d'échéance** sur les courriers entrants, saisissable à l'import (formulaire principal et modale) ou calculé automatiquement selon un **délai réglementaire par défaut configurable** (Paramètres > Notifications, défaut : 15 jours, 0 = désactivé)
+  - **Job quotidien** (8h00 Europe/Paris, personnalisable via `REMINDER_CRON`) qui envoie aux destinataires :
+    - un **rappel** N jours avant l'échéance (configurable, défaut : J-3)
+    - une **alerte de retard** quand l'échéance est dépassée
+  - Les préférences « Rappels d'échéance » et « Courriers en retard » (profil + défauts admin) sont désormais réellement prises en compte — elles n'étaient jamais déclenchées auparavant
+  - Chaque rappel/alerte n'est envoyé qu'une seule fois par courrier (champs `reminderSentAt` / `overdueSentAt`)
+  - Badge **« ⚠ En retard »** et date d'échéance colorée dans la liste des courriers à traiter et sur la page détail
+  - **Carte « En retard »** sur le tableau de bord (section Mes courriers) avec lien direct vers la liste filtrée ; le compteur « En retard » des statistiques du mois est désormais alimenté
+  - Filtre **« En retard uniquement »** et **tri par échéance** dans les filtres des listes
+- **Tags sur les courriers entrants** (le champ existait en base mais sans interface) :
+  - Saisie de tags à l'import (chips, Entrée ou virgule pour ajouter)
+  - **Chips colorées** dans les listes (à traiter, traités, archivés) et sur la page détail — couleur stable dérivée du nom du tag
+  - **Filtre par tag** dans les listes + clic sur une chip pour filtrer directement
+- **Filtre Priorité** dans les listes de courriers (la route API le supportait déjà, l'interface non)
+
+### Technique
+
+- Nouveau service : `backend/src/services/reminder.service.js` (cron node-cron quotidien)
+- Nouvelles fonctions d'envoi : `sendMailReminderNotification` / `sendMailOverdueNotification` (templates `mail_reminder` / `mail_overdue` déjà existants)
+- Route liste `/api/mails` : nouveaux paramètres `tag`, `overdue`, priorités multiples (`priority=high,urgent`), garde-fou sur `sortBy`
+- `/api/stats/dashboard` : nouveaux compteurs `my.overdue` et `pendingOverdue`
+- Nouveaux réglages : `mail_due_default_days`, `mail_reminder_days_before`
+- Nouveaux index Mongo : `{ status, dueDate }` et `{ tags }`
+- Nouveaux composants : `TagChips.jsx`, `TagInput.jsx`
+
 ## [3.14.1] - 2026-07-14
 
 ### Ajouté

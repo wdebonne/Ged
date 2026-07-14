@@ -58,7 +58,7 @@ export default function DashboardPage() {
   const { data: urgentMails, isError: urgentError } = useQuery({
     queryKey: ['urgent-mails'],
     queryFn: async () => {
-      const response = await mailsAPI.getAll({ limit: 5, priority: 'high', status: 'pending' });
+      const response = await mailsAPI.getAll({ limit: 5, priority: 'high,urgent', status: 'pending' });
       return response.data.data.mails;
     }
   });
@@ -123,6 +123,13 @@ export default function DashboardPage() {
       icon: InboxIcon,
       color: 'warning',
       link: '/courriers/a-traiter?scope=mine'
+    },
+    {
+      title: 'En retard',
+      value: stats?.my?.overdue || 0,
+      icon: ExclamationTriangleIcon,
+      color: 'danger',
+      link: '/courriers/a-traiter?scope=mine&overdue=1'
     },
     {
       title: 'Traités',
@@ -466,7 +473,7 @@ export default function DashboardPage() {
               transition={{ duration: 0.3 }}
               className="overflow-hidden"
             >
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {myMailsCards.map((card, index) => (
                   <StatCard key={card.title} card={card} index={index} />
                 ))}

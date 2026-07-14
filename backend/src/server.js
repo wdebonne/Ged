@@ -38,6 +38,7 @@ import { startImapService } from './services/imap.service.js';
 import { startImapMailService } from './services/imapMail.service.js';
 import { startLdapGroupSyncService } from './services/ldapGroupSync.service.js';
 import { initBackupScheduler } from './services/backup.service.js';
+import { initReminderScheduler } from './services/reminder.service.js';
 
 // Initialisation de la base
 import { User, Settings, Group, DEFAULT_PERMISSIONS } from './models/index.js';
@@ -336,6 +337,9 @@ const startServer = async () => {
 
   // Initialiser le planificateur de sauvegardes automatiques
   initBackupScheduler().catch(e => console.error('Erreur init backup scheduler:', e.message));
+
+  // Initialiser le job quotidien de rappels d'échéance (J-N + retards)
+  initReminderScheduler();
 };
 
 startServer();

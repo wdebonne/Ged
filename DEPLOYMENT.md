@@ -95,6 +95,12 @@ UPLOAD_PATH=./uploads
 MAX_FILE_SIZE=50000000  # 50MB en octets
 
 # ═══════════════════════════════════════════════════════════════
+# RAPPELS D'ÉCHÉANCE (optionnel)
+# ═══════════════════════════════════════════════════════════════
+# Horaire du job quotidien de rappels/alertes de retard (cron, timezone Europe/Paris)
+REMINDER_CRON=0 8 * * *
+
+# ═══════════════════════════════════════════════════════════════
 # SMTP - Envoi d'emails (optionnel mais recommandé)
 # ═══════════════════════════════════════════════════════════════
 SMTP_HOST=smtp.example.com

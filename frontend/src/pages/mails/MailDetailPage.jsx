@@ -9,6 +9,7 @@ import { mailsAPI } from '../../services/api';
 import { useAuthStore } from '../../stores/authStore';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ExportOptionsModal from '../../components/modals/ExportOptionsModal';
+import TagChips from '../../components/TagChips';
 import toast from 'react-hot-toast';
 import {
   ArrowLeftIcon,
@@ -651,6 +652,20 @@ export default function MailDetailPage() {
                   <CalendarIcon className="w-4 h-4" />
                   <span>Reçu le: <strong>{format(new Date(mail.receivedDate), 'dd MMMM yyyy', { locale: fr })}</strong></span>
                 </div>
+                {mail.dueDate && (
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <ClockIcon className="w-4 h-4" />
+                    <span>
+                      Échéance:{' '}
+                      <strong className={mail.status === 'pending' && new Date(mail.dueDate) < new Date() ? 'text-danger-600' : ''}>
+                        {format(new Date(mail.dueDate), 'dd MMMM yyyy', { locale: fr })}
+                      </strong>
+                    </span>
+                    {mail.status === 'pending' && new Date(mail.dueDate) < new Date() && (
+                      <span className="badge bg-danger-100 text-danger-700 font-semibold">⚠ En retard</span>
+                    )}
+                  </div>
+                )}
                 {mail.service && (
                   <div className="flex items-center gap-2 text-gray-600">
                     <BuildingOfficeIcon className="w-4 h-4" />
@@ -674,6 +689,12 @@ export default function MailDetailPage() {
                   </div>
                 )}
               </div>
+
+              {mail.tags?.length > 0 && (
+                <div className="mt-4">
+                  <TagChips tags={mail.tags} />
+                </div>
+              )}
 
               {mail.notes && (
                 <div className="mt-4 p-4 bg-gray-50 rounded-lg">

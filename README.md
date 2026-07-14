@@ -78,7 +78,17 @@ Application web complète de gestion de courrier avec authentification LDAP/Kerb
   - Téléchargement du registre courant auto-généré
   - Sauvegarde automatique sur NextCloud (optionnel)
   - Préservation des tableaux dynamiques et formules du template grâce à `xlsx-populate`
-- ✅ Recherche et filtres avancés
+- ✅ Recherche et filtres avancés (recherche plein texte, service, expéditeur, dates, **priorité**, **tag**, **en retard uniquement**, tri par échéance)
+- ✅ **Échéances de traitement et rappels automatiques** :
+  - Date d'échéance saisissable à l'import ou calculée automatiquement (délai réglementaire par défaut configurable, ex. 15 jours — 0 pour désactiver)
+  - Job quotidien (8h00 Europe/Paris, personnalisable via `REMINDER_CRON`) : email de **rappel à J-N** avant l'échéance (configurable, défaut J-3) puis **alerte de retard** une fois l'échéance dépassée
+  - Envoi unique par courrier, au destinataire principal et aux copies, selon les préférences de notification de chacun
+  - Badge « ⚠ En retard » dans les listes et la page détail, carte « En retard » sur le dashboard
+  - Réglages dans Paramètres > Notifications (délai par défaut + jours de rappel)
+- ✅ **Tags** :
+  - Saisie libre à l'import (chips, Entrée ou virgule pour ajouter)
+  - Chips colorées dans les listes et la page détail (couleur stable dérivée du nom)
+  - Filtre par tag + clic sur une chip pour filtrer directement la liste
 - ✅ Assignation aux utilisateurs/services
 - ✅ **Notifications email automatiques** :
   - Notification au destinataire principal lors de l'import/création d'un courrier
@@ -212,6 +222,7 @@ Application web complète de gestion de courrier avec authentification LDAP/Kerb
 - ✅ **Préférences par utilisateur** : chaque utilisateur personnalise depuis son profil
 - ✅ 7 types de notifications : nouveau courrier (destinataire/copie/service), traité, archivé, rappel, en retard
 - ✅ Système de priorité : préférences utilisateur > paramètres globaux
+- ✅ **Échéances de traitement** : délai réglementaire par défaut (jours) et délai de rappel avant échéance configurables dans le même onglet — utilisés par le job quotidien de rappels/alertes de retard
 
 #### Webhooks
 - ✅ CRUD complet des webhooks
@@ -666,6 +677,14 @@ CORS_ORIGIN=http://localhost:5173,http://127.0.0.1:5173
 # ═══════════════════════════════════════════════════════════════
 UPLOAD_PATH=./uploads
 MAX_FILE_SIZE=50000000  # 50MB en octets
+
+# ═══════════════════════════════════════════════════════════════
+# RAPPELS D'ÉCHÉANCE (optionnel)
+# ═══════════════════════════════════════════════════════════════
+# Horaire du job quotidien de rappels/alertes de retard (expression cron, timezone Europe/Paris)
+# Défaut si absent : tous les jours à 8h00. Les délais (échéance par défaut, jours de rappel)
+# se configurent dans l'interface : Paramètres > Notifications.
+REMINDER_CRON=0 8 * * *
 
 # ═══════════════════════════════════════════════════════════════
 # SMTP - Envoi d'emails (optionnel mais recommandé)

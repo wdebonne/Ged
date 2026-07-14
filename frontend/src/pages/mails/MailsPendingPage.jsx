@@ -9,23 +9,31 @@ import Pagination from '../../components/Pagination';
 import MailFilters from '../../components/MailFilters';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import EmptyState from '../../components/EmptyState';
+import TagChips from '../../components/TagChips';
 import {
   EnvelopeIcon,
   EyeIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  ClockIcon
 } from '@heroicons/react/24/outline';
 
 export default function MailsPendingPage() {
   const [searchParams] = useSearchParams();
   const scope = searchParams.get('scope') || 'mine'; // 'mine' ou 'service'
-  
+  const overdueParam = ['1', 'true'].includes(searchParams.get('overdue')) ? 'true' : '';
+
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState({
     search: '',
     sender: '',
     service: '',
     dateFrom: '',
-    dateTo: ''
+    dateTo: '',
+    priority: '',
+    tag: '',
+    overdue: overdueParam,
+    sortBy: overdueParam ? 'dueDate' : '',
+    sortOrder: overdueParam ? 'asc' : ''
   });
 
   const { data, isLoading, error } = useQuery({
@@ -45,6 +53,14 @@ export default function MailsPendingPage() {
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
     setPage(1);
+  };
+
+  const isOverdue = (mail) => mail.dueDate && new Date(mail.dueDate) < new Date();
+  const isDueSoon = (mail) => {
+    if (!mail.dueDate || isOverdue(mail)) return false;
+    const threeDays = new Date();
+    threeDays.setDate(threeDays.getDate() + 3);
+    return new Date(mail.dueDate) <= threeDays;
   };
 
   if (isLoading) return <LoadingSpinner />;
@@ -114,6 +130,16 @@ export default function MailsPendingPage() {
                             {mail.reference}
                           </span>
                           <span className="badge-warning">À traiter</span>
+                          {(mail.priority === 'urgent' || mail.priority === 'high') && (
+                            <span className={`badge ${mail.priority === 'urgent' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
+                              {mail.priority === 'urgent' ? 'Urgent' : 'Prioritaire'}
+                            </span>
+                          )}
+                          {isOverdue(mail) && (
+                            <span className="badge bg-danger-100 text-danger-700 font-semibold">
+                              ⚠ En retard
+                            </span>
+                          )}
                         </div>
                         <h3 className="text-lg font-semibold text-gray-900 truncate">
                           {mail.subject}
@@ -126,6 +152,19 @@ export default function MailsPendingPage() {
                           <span>
                             Reçu le {format(new Date(mail.receivedDate), 'dd MMMM yyyy', { locale: fr })}
                           </span>
+                          {mail.dueDate && (
+                            <span className={`flex items-center gap-1 ${
+                              isOverdue(mail) ? 'text-danger-600 font-semibold' :
+                              isDueSoon(mail) ? 'text-amber-600 font-medium' : ''
+                            }`}>
+                              <ClockIcon className="w-4 h-4" />
+                              Échéance le {format(new Date(mail.dueDate), 'dd MMMM yyyy', { locale: fr })}
+                            </span>
+                          )}
+                          <TagChips
+                            tags={mail.tags}
+                            onClick={(tag) => handleFilterChange({ ...filters, tag })}
+                          />
                           {mail.service && (
                             <span 
                               className="badge"

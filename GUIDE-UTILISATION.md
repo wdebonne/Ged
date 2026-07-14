@@ -66,7 +66,7 @@ Le tableau de bord est votre page d'accueil. Il affiche une vue d'ensemble de vo
 
 | Section | Description |
 |---------|-------------|
-| **Mes Courriers** | Statistiques de vos courriers personnels (à traiter, traités, archivés) |
+| **Mes Courriers** | Statistiques de vos courriers personnels (à traiter, **en retard**, traités, archivés) |
 | **Courriers Délégués** | Courriers de collègues délégués (visible si délégations actives) |
 | **Courriers Service(s)** | Vue d'ensemble des courriers de votre service |
 | **Statistiques globales** | Chiffres clés de l'ensemble des courriers |
@@ -107,11 +107,14 @@ L'application distingue trois périmètres :
 Sur chaque page de liste, vous disposez de :
 
 #### Filtres de recherche
-- **Recherche textuelle** : Par référence, objet, expéditeur
-- **Filtre par priorité** : Normale, Urgente, Très urgente
+- **Recherche textuelle** : Par référence, objet, expéditeur (et contenu OCR)
+- **Filtre par priorité** : Basse, Normale, Haute, Urgente
+- **Filtre par tag** : Saisissez un tag (ou cliquez sur une chip de tag dans la liste)
 - **Filtre par date** : Période de réception
 - **Filtre par service** : Service assigné
-- **Filtre par destinataire** : Destinataire principal
+- **Filtre par expéditeur** : Expéditeur du courrier
+- **⚠ En retard uniquement** : Ne montrer que les courriers dont l'échéance est dépassée
+- **Tri** : Par date de réception (défaut) ou par échéance (la plus proche d'abord)
 
 #### Actions disponibles
 - 👁️ **Voir** : Consulter le détail du courrier
@@ -123,7 +126,7 @@ Sur chaque page de liste, vous disposez de :
 
 La page de détail affiche :
 
-- **Informations générales** : Référence, date, expéditeur, objet
+- **Informations générales** : Référence, date, expéditeur, objet, **date d'échéance** (avec badge « ⚠ En retard » si dépassée) et **tags**
 - **Fiche contact expéditeur** : Cliquez sur le nom de l'expéditeur pour ouvrir sa fiche contact (email, téléphone, adresse) avec liens d'action directs
 - **Destinataires** : Principal et en copie
 - **Visualiseur PDF** : Aperçu du document avec zoom et navigation
@@ -171,8 +174,22 @@ Si configuré par l'administrateur :
    - Service destinataire
    - Destinataire principal
    - Destinataires en copie
+   - Priorité
+   - **Date d'échéance** (optionnel) : laissez vide pour appliquer le délai réglementaire par défaut configuré par l'administrateur
+   - **Tags** (optionnel) : appuyez sur Entrée ou virgule pour ajouter chaque tag
 4. Cliquez sur **Valider** pour passer en "À traiter"
 5. Ou **Rejeter** pour supprimer
+
+### 4.4 Échéances et rappels automatiques
+
+Chaque courrier importé reçoit une **date d'échéance** : celle que vous saisissez à l'import, ou à défaut la date de réception + le délai réglementaire configuré (ex. 15 jours).
+
+- Un email de **rappel** est envoyé automatiquement au destinataire (et aux copies) quelques jours avant l'échéance (défaut : 3 jours avant)
+- Une **alerte de retard** est envoyée une fois l'échéance dépassée
+- Les courriers en retard sont signalés par un badge **⚠ En retard** dans les listes et sur la page détail
+- La carte **« En retard »** du tableau de bord ouvre directement la liste des courriers concernés, triés par échéance
+
+> 💡 Vous pouvez désactiver ces emails depuis **Mon Profil > Notifications** (« Rappels d'échéance » et « Courriers en retard »).
 
 ---
 
@@ -493,6 +510,15 @@ Définissez les notifications email activées par défaut pour tous les utilisat
 
 > 💡 Chaque utilisateur peut personnaliser ses propres préférences depuis **Mon Profil > Notifications**.
 
+La même page permet de configurer les **échéances de traitement** :
+
+| Paramètre | Description |
+|---|---|
+| **Délai de traitement par défaut (jours)** | Échéance appliquée automatiquement à l'import quand aucune date n'est saisie (défaut : 15 — mettre 0 pour désactiver) |
+| **Rappel avant échéance (jours)** | Nombre de jours avant l'échéance pour l'envoi du rappel (défaut : 3) |
+
+Les rappels et alertes de retard sont envoyés chaque matin à 8h00 (horaire personnalisable via la variable d'environnement `REMINDER_CRON`).
+
 ### 11.8 Paramètres système
 
 **Chemin : Administration > Paramètres**
@@ -605,5 +631,5 @@ En cas de problème ou question :
 
 ---
 
-*Guide d'utilisation GED Courrier - Version 3.14.1*
+*Guide d'utilisation GED Courrier - Version 3.15.0*
 *Dernière mise à jour : Juillet 2026*
