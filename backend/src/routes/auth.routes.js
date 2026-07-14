@@ -78,7 +78,13 @@ router.post('/login', loginLimiter, [
 
     // === Tentative LDAP ===
     if (ldapEnabled && (!explicitMethod || explicitMethod === 'ldap')) {
-      ldapResult = await authenticateLDAP(username, password);
+      try {
+        ldapResult = await authenticateLDAP(username, password);
+      } catch (ldapError) {
+        // Une erreur LDAP ne doit jamais bloquer le fallback local
+        console.error('Erreur LDAP inattendue, bascule sur l\'authentification locale:', ldapError);
+        ldapResult = { success: false, message: 'Erreur de connexion LDAP' };
+      }
       if (ldapResult.success) {
         authenticatedVia = 'ldap';
       } else if (explicitMethod === 'ldap') {
@@ -91,7 +97,13 @@ router.post('/login', loginLimiter, [
 
     // === Tentative Kerberos ===
     if (!authenticatedVia && kerberosEnabled && (!explicitMethod || explicitMethod === 'kerberos')) {
-      const kerberosResult = await authenticateKerberos(username, password);
+      let kerberosResult;
+      try {
+        kerberosResult = await authenticateKerberos(username, password);
+      } catch (kerberosError) {
+        console.error('Erreur Kerberos inattendue, bascule sur l\'authentification locale:', kerberosError);
+        kerberosResult = { success: false };
+      }
       if (kerberosResult.success) {
         authenticatedVia = 'kerberos';
       } else if (explicitMethod === 'kerberos') {

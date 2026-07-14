@@ -42,7 +42,7 @@ import { initBackupScheduler } from './services/backup.service.js';
 // Initialisation de la base
 import { User, Settings, Group, DEFAULT_PERMISSIONS } from './models/index.js';
 import { seedDatabase } from './scripts/seed.js';
-import { buildLdapUrl } from './utils/ldap.utils.js';
+import { buildLdapUrl, isLdapForceDisabled } from './utils/ldap.utils.js';
 
 // Configuration
 dotenv.config();
@@ -284,7 +284,9 @@ const startServer = async () => {
     const ldapMap = {};
     ldapSettings.forEach(s => { ldapMap[s.key] = s.value; });
 
-    if (ldapMap.ldap_enabled !== undefined) process.env.LDAP_ENABLED = String(ldapMap.ldap_enabled);
+    if (ldapMap.ldap_enabled !== undefined && !isLdapForceDisabled()) {
+      process.env.LDAP_ENABLED = String(ldapMap.ldap_enabled);
+    }
     if (ldapMap.ldap_baseDN) process.env.LDAP_SEARCH_BASE = ldapMap.ldap_baseDN;
     if (ldapMap.ldap_bindDN) process.env.LDAP_BIND_DN = ldapMap.ldap_bindDN;
     if (ldapMap.ldap_bindPassword) process.env.LDAP_BIND_PASSWORD = ldapMap.ldap_bindPassword;
@@ -296,6 +298,11 @@ const startServer = async () => {
       process.env.LDAP_URL = buildLdapUrl({ server: ldapMap.ldap_server, port, useTLS });
     }
     console.log('📂 Settings LDAP chargées depuis la base de données');
+  }
+
+  if (isLdapForceDisabled()) {
+    process.env.LDAP_ENABLED = 'false';
+    console.warn('⛔ LDAP_FORCE_DISABLE actif : LDAP désactivé, le réglage ldap_enabled en base est ignoré');
   }
 
   app.listen(PORT, () => {

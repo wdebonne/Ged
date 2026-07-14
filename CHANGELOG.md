@@ -7,6 +7,18 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ---
 
+## [3.14.1] - 2026-07-14
+
+### Ajouté
+
+- **Coupe-circuit LDAP** (`LDAP_FORCE_DISABLE=true`) : force la désactivation de LDAP même si `ldap_enabled` est activé dans les paramètres en base de données. Permet de retrouver l'accès avec un compte local quand l'annuaire est injoignable, sans intervention sur la base
+
+### Corrigé
+
+- **Login bloqué quand le serveur LDAP est injoignable** : ajout d'un timeout de connexion (5s) et d'un garde-fou global (10s) sur l'authentification LDAP — le fallback vers l'authentification locale se déclenche désormais toujours
+- Une configuration LDAP incomplète (URL, bind DN, base ou filtre de recherche manquant) échoue proprement au lieu de faire planter le processus au login
+- Une exception inattendue des services LDAP ou Kerberos pendant le login bascule sur l'authentification locale au lieu de renvoyer une erreur 500
+
 ## [3.14.0] - 2026-06-24
 
 ### Ajouté

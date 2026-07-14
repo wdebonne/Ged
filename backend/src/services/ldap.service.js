@@ -1,5 +1,5 @@
 import ldap from 'ldapjs';
-import { normalizeDN, buildLdapUrl } from '../utils/ldap.utils.js';
+import { normalizeDN, buildLdapUrl, isLdapForceDisabled } from '../utils/ldap.utils.js';
 
 // Vérifie que l'utilisateur appartient au groupe requis (via l'attribut memberOf)
 const isMemberOfRequiredGroup = (memberOf, requiredGroupDN) => {
@@ -35,11 +35,29 @@ const isBackupLDAPConfigured = () => !!(process.env.LDAP_URL_BACKUP && process.e
 
 // Tente une authentification LDAP sur le serveur décrit par `config`
 const attemptLDAPAuth = async (config, username, password) => {
+  // Config incomplète : échec immédiat plutôt qu'une exception dans un callback ldapjs
+  // (qui ferait planter le process) ou une connexion qui pend
+  if (!config.url || !config.bindDN || !config.searchBase || !config.searchFilter) {
+    console.error('Configuration LDAP incomplète (url/bindDN/searchBase/searchFilter requis)');
+    return { success: false, connectionError: true, message: 'Configuration LDAP incomplète' };
+  }
+
   return new Promise((resolve) => {
     const client = ldap.createClient({
       url: config.url,
-      tlsOptions: { rejectUnauthorized: false }
+      tlsOptions: { rejectUnauthorized: false },
+      connectTimeout: 5000,
+      timeout: 10000
     });
+
+    // Garde-fou : garantit que le login ne reste jamais bloqué sur un annuaire
+    // injoignable — au-delà de 10s on rend la main au fallback local
+    setTimeout(() => {
+      try {
+        client.destroy();
+      } catch (e) {}
+      resolve({ success: false, connectionError: true, message: 'Timeout de connexion LDAP' });
+    }, 10000);
 
     client.on('error', (err) => {
       console.error('Erreur connexion LDAP:', err);
@@ -140,7 +158,7 @@ const attemptLDAPAuth = async (config, username, password) => {
 // en cas d'erreur de connexion (serveur inaccessible), bascule automatiquement
 // sur le serveur de secours s'il est configuré (LDAP_URL_BACKUP / LDAP_BIND_DN_BACKUP).
 export const authenticateLDAP = async (username, password) => {
-  if (process.env.LDAP_ENABLED !== 'true') {
+  if (process.env.LDAP_ENABLED !== 'true' || isLdapForceDisabled()) {
     return { success: false, message: 'LDAP désactivé' };
   }
 

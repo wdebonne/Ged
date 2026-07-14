@@ -681,6 +681,9 @@ SMTP_FROM=GED Courrier <no-reply@example.com>
 # LDAP - Authentification annuaire (optionnel)
 # ═══════════════════════════════════════════════════════════════
 LDAP_ENABLED=false
+# Coupe-circuit d'urgence : true = LDAP désactivé quoi qu'il arrive (même si activé
+# dans Paramètres > LDAP). Permet de se reconnecter en local si l'annuaire est en panne.
+LDAP_FORCE_DISABLE=false
 LDAP_URL=ldap://votre-serveur-ldap:389
 LDAP_BIND_DN=cn=admin,dc=example,dc=com
 LDAP_BIND_PASSWORD=votre_mot_de_passe

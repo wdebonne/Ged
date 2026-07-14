@@ -302,6 +302,7 @@ Lancez la mise à jour :
 | Variable | Description | Défaut |
 |----------|-------------|--------|
 | `LDAP_ENABLED` | Activer LDAP | `false` |
+| `LDAP_FORCE_DISABLE` | **Coupe-circuit** : force la désactivation de LDAP, y compris si `ldap_enabled` est activé dans les paramètres en base. À utiliser pour retrouver l'accès avec un compte local quand l'annuaire est en panne | `false` |
 | `LDAP_URL` | URL du serveur LDAP | - |
 | `LDAP_BIND_DN` | DN de connexion | - |
 | `LDAP_BIND_PASSWORD` | Mot de passe LDAP | - |
@@ -310,7 +311,9 @@ Lancez la mise à jour :
 | `LDAP_REQUIRED_GROUP_DN` | DN du groupe AD requis (vide = tous autorisés). Configurable aussi depuis l'interface | - |
 | `LDAP_GROUP_CHECK_INTERVAL` | Intervalle (min) de vérification du groupe requis | `5` |
 
-> **Note** : les paramètres LDAP peuvent aussi être configurés depuis l'interface (Paramètres > LDAP). Les valeurs de l'interface sont prioritaires sur le `.env`.
+> **Note** : les paramètres LDAP peuvent aussi être configurés depuis l'interface (Paramètres > LDAP). Les valeurs de l'interface sont prioritaires sur le `.env` — **sauf** si `LDAP_FORCE_DISABLE=true`, qui désactive LDAP dans tous les cas.
+>
+> **Connexion impossible à cause de LDAP ?** Ajoutez la variable `LDAP_FORCE_DISABLE=true` puis redéployez : l'authentification locale redevient disponible immédiatement. Une fois le problème LDAP corrigé (Paramètres > LDAP), retirez la variable et redéployez.
 
 ### Variables IMAP (import automatique d'emails)
 

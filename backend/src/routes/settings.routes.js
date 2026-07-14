@@ -9,6 +9,7 @@ import EmailTemplate from '../models/EmailTemplate.model.js';
 import { authenticate, authorize, isAdmin } from '../middleware/auth.middleware.js';
 import { extractTextFromPDF, extractTextFromImage, getOCRLanguages, isOCRAvailable } from '../services/ocr.service.js';
 import { testLDAPConnection, fetchLDAPGroups, buildLdapUrl } from '../services/ldap.service.js';
+import { isLdapForceDisabled } from '../utils/ldap.utils.js';
 
 const router = express.Router();
 
@@ -326,6 +327,8 @@ router.put('/', authenticate, authorize(PERMISSIONS.EDIT_SETTINGS), async (req, 
 
     for (const { key, value } of settings) {
       if (value === '********') continue;
+      // Le coupe-circuit LDAP_FORCE_DISABLE empêche toute réactivation runtime de LDAP
+      if (key === 'ldap_enabled' && isLdapForceDisabled()) continue;
       if (ldapEnvMap[key] !== undefined) {
         if (ldapEnvMap[key]) {
           process.env[ldapEnvMap[key]] = String(value ?? '');

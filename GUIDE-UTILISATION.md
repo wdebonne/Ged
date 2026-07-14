@@ -605,5 +605,5 @@ En cas de problème ou question :
 
 ---
 
-*Guide d'utilisation GED Courrier - Version 3.14.0*
-*Dernière mise à jour : Juin 2026*
+*Guide d'utilisation GED Courrier - Version 3.14.1*
+*Dernière mise à jour : Juillet 2026*
