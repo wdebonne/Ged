@@ -19,7 +19,10 @@ import {
   notifyNewMailToCopyRecipient,
   notifyNewMailToServiceSupervisor,
   notifyMailProcessed,
-  notifyMailArchived
+  notifyMailArchived,
+  notifyMailReassigned,
+  notifyNewComment,
+  notifyCommentMention
 } from '../services/notification.service.js';
 
 const router = express.Router();
@@ -134,6 +137,198 @@ function createArchivePath(mail) {
   const cleanServiceName = serviceName.replace(/[<>:"/\\|?*]/g, '_').trim();
   
   return path.join('archives', cleanServiceName, year, monthFolder);
+}
+
+// Vérifie si l'utilisateur peut consulter un courrier (même logique que GET /:id)
+async function canViewMail(mail, user) {
+  const userPermissions = user.group?.permissions || [];
+  const userServiceIds = (user.services || []).map(s => s._id?.toString() || s.toString());
+  const recipientId = mail.recipient?._id?.toString() || mail.recipient?.toString();
+  const isRecipient = recipientId && recipientId === user._id.toString();
+  const isCopyRecipient = (mail.recipientsCopy || []).some(r => (r?._id?.toString() || r?.toString()) === user._id.toString());
+  const mailServiceId = mail.service?._id?.toString() || mail.service?.toString();
+  const isInUserService = mailServiceId && userServiceIds.includes(mailServiceId);
+  const canViewServiceMails = userPermissions.includes(PERMISSIONS.VIEW_SERVICE_MAILS) || isServiceSupervisor(user);
+
+  // Vérifier si l'utilisateur a une délégation active pour le destinataire de ce courrier
+  let hasDelegation = false;
+  if (mail.recipient) {
+    const delegators = await Delegation.getDelegatorsForUser(user._id);
+    const delegatorIds = delegators.map(d => d._id.toString());
+    hasDelegation = delegatorIds.includes(recipientId);
+    if (!hasDelegation && mail.recipientsCopy?.length > 0) {
+      hasDelegation = mail.recipientsCopy.some(r => delegatorIds.includes(r?._id?.toString() || r?.toString()));
+    }
+  }
+
+  return userPermissions.includes(PERMISSIONS.VIEW_ALL_MAILS) ||
+         (canViewServiceMails && isInUserService) ||
+         isRecipient ||
+         isCopyRecipient ||
+         hasDelegation;
+}
+
+// Vérifie si l'utilisateur peut agir sur un courrier (archiver, réattribuer, taguer)
+// delegatorIds : ids des utilisateurs ayant une délégation active vers `user` (précalculés)
+function canActOnMail(mail, user, delegatorIds = []) {
+  const userPermissions = user.group?.permissions || [];
+  const hasArchivePermission = userPermissions.includes(PERMISSIONS.ARCHIVE_MAILS);
+  const hasProcessPermission = userPermissions.includes(PERMISSIONS.PROCESS_MAILS);
+  const hasViewAllPermission = userPermissions.includes(PERMISSIONS.VIEW_ALL_MAILS);
+
+  const userServiceIds = (user.services || []).map(s => s._id?.toString() || s.toString());
+  const mailServiceId = mail.service?._id?.toString() || mail.service?.toString();
+  const isInMailService = mailServiceId && userServiceIds.includes(mailServiceId);
+  const recipientId = mail.recipient?._id?.toString() || mail.recipient?.toString();
+  const isRecipient = recipientId && recipientId === user._id.toString();
+  const isInCopy = (mail.recipientsCopy || []).some(r => (r?._id?.toString() || r?.toString()) === user._id.toString());
+  const hasDelegation = recipientId && delegatorIds.includes(recipientId);
+  const isSupervisor = mailServiceId && (user.services || []).some(s => {
+    const ids = (s.supervisors || []).map(sup => sup?._id?.toString() || sup?.toString());
+    return s._id?.toString() === mailServiceId && ids.includes(user._id.toString());
+  });
+
+  return hasArchivePermission || (
+    hasProcessPermission && (
+      hasViewAllPermission ||
+      isInMailService ||
+      isRecipient ||
+      isInCopy ||
+      hasDelegation ||
+      isSupervisor
+    )
+  );
+}
+
+// Archive un courrier : renommage/déplacement des fichiers, statut, notifications.
+// `mail` doit être populate('service') et populate('recipient'/'recipientsCopy').
+async function performArchive(mail, user) {
+  // Récupérer le format de référence depuis les paramètres
+  const referenceFormatSetting = await Settings.findOne({ key: 'general_referenceFormat' });
+  const referenceFormat = referenceFormatSetting?.value || 'GED-{YEAR}-{SERVICE}-{NUMBER}';
+
+  // Générer le nouveau nom de fichier
+  const archiveFileName = await generateArchiveFileName(mail, referenceFormat);
+  const fileExtension = path.extname(mail.fileName);
+  const newFileName = `${archiveFileName}${fileExtension}`;
+
+  // Créer le chemin d'archivage
+  const uploadPath = process.env.UPLOAD_PATH || './uploads';
+  const archiveRelativePath = createArchivePath(mail);
+  const archiveFullPath = path.join(uploadPath, archiveRelativePath);
+
+  // Créer les dossiers si nécessaire
+  if (!fs.existsSync(archiveFullPath)) {
+    fs.mkdirSync(archiveFullPath, { recursive: true });
+  }
+
+  // Déplacer le fichier principal
+  const oldFilePath = path.join(uploadPath, mail.filePath);
+  const newRelativeFilePath = path.join(archiveRelativePath, newFileName);
+  const newFullFilePath = path.join(uploadPath, newRelativeFilePath);
+
+  if (fs.existsSync(oldFilePath)) {
+    // Vérifier si un fichier avec ce nom existe déjà
+    let finalFilePath = newFullFilePath;
+    let finalRelativePath = newRelativeFilePath;
+    let counter = 1;
+
+    while (fs.existsSync(finalFilePath)) {
+      const nameWithoutExt = archiveFileName;
+      finalRelativePath = path.join(archiveRelativePath, `${nameWithoutExt}_${counter}${fileExtension}`);
+      finalFilePath = path.join(uploadPath, finalRelativePath);
+      counter++;
+    }
+
+    // Copier le fichier (plutôt que déplacer pour éviter les problèmes de permissions)
+    fs.copyFileSync(oldFilePath, finalFilePath);
+    fs.unlinkSync(oldFilePath);
+
+    // Mettre à jour le chemin du fichier
+    mail.filePath = finalRelativePath;
+    mail.fileName = path.basename(finalFilePath);
+  }
+
+  // Déplacer les fichiers de réponse également
+  for (let i = 0; i < mail.responses.length; i++) {
+    const response = mail.responses[i];
+    if (response.filePath) {
+      const oldResponsePath = path.join(uploadPath, response.filePath);
+      if (fs.existsSync(oldResponsePath)) {
+        const responseExt = path.extname(response.fileName);
+        const responseNewName = `${archiveFileName}_reponse_${i + 1}${responseExt}`;
+        const newResponseRelativePath = path.join(archiveRelativePath, responseNewName);
+        const newResponseFullPath = path.join(uploadPath, newResponseRelativePath);
+
+        fs.copyFileSync(oldResponsePath, newResponseFullPath);
+        fs.unlinkSync(oldResponsePath);
+
+        mail.responses[i].filePath = newResponseRelativePath;
+        mail.responses[i].fileName = responseNewName;
+      }
+    }
+  }
+
+  // Archiver le courrier
+  mail.status = MAIL_STATUS.ARCHIVED;
+  mail.archivedDate = new Date();
+  mail.archivedBy = user._id;
+  mail.reference = archiveFileName; // Mettre à jour la référence
+  await mail.save();
+
+  // Synchroniser avec OneDrive si activé (en arrière-plan)
+  const fullFilePath = path.join(uploadPath, mail.filePath);
+  syncToOneDrive(mail, fullFilePath).catch(err => {
+    console.error('Erreur sync OneDrive (non bloquante):', err.message);
+  });
+
+  // Notifier les autres destinataires de l'archivage
+  const archivedByName = `${user.firstName} ${user.lastName}`;
+  const mailInfo = {
+    _id: mail._id,
+    reference: archiveFileName,
+    subject: mail.subject,
+    senderName: mail.senderName,
+    filePath: mail.filePath,
+    fileName: mail.fileName
+  };
+
+  // Import dynamique pour éviter les dépendances circulaires
+  const { sendMailArchivedNotification } = await import('../services/email.service.js');
+
+  // Notifier le destinataire principal s'il existe et n'est pas celui qui a archivé
+  if (mail.recipient && mail.recipient._id.toString() !== user._id.toString() && mail.recipient.email) {
+    sendMailArchivedNotification(
+      mail.recipient.email,
+      `${mail.recipient.firstName} ${mail.recipient.lastName}`,
+      mailInfo,
+      archivedByName,
+      { userId: mail.recipient._id }
+    ).catch(err => console.error('Erreur notification recipient:', err));
+    notifyMailArchived(mail, mail.recipient, user);
+  }
+
+  // Notifier les destinataires en copie
+  if (mail.recipientsCopy && mail.recipientsCopy.length > 0) {
+    for (const cc of mail.recipientsCopy) {
+      if (cc._id.toString() !== user._id.toString() && cc.email) {
+        sendMailArchivedNotification(
+          cc.email,
+          `${cc.firstName} ${cc.lastName}`,
+          mailInfo,
+          archivedByName,
+          { userId: cc._id }
+        ).catch(err => console.error('Erreur notification CC:', err));
+        notifyMailArchived(mail, cc, user);
+      }
+    }
+  }
+
+  return {
+    reference: archiveFileName,
+    archivePath: archiveRelativePath,
+    fileName: mail.fileName
+  };
 }
 
 // GET /api/mails - Liste des courriers
@@ -344,6 +539,7 @@ router.get('/', authenticate, async (req, res) => {
 
     const total = await Mail.countDocuments(query);
     const mails = await Mail.find(query)
+      .select('-comments')
       .populate('sender', 'name organization')
       .populate('service', 'name code color')
       .populate('recipient', 'firstName lastName email avatar')
@@ -1170,7 +1366,9 @@ router.get('/:id', authenticate, async (req, res) => {
       .populate('processedBy', 'firstName lastName')
       .populate('archivedBy', 'firstName lastName')
       .populate('readLogs.user', 'firstName lastName')
-      .populate('responses.respondedBy', 'firstName lastName');
+      .populate('responses.respondedBy', 'firstName lastName')
+      .populate('comments.author', 'firstName lastName avatar')
+      .populate('comments.mentions', 'firstName lastName');
 
     if (!mail) {
       return res.status(404).json({
@@ -1180,31 +1378,7 @@ router.get('/:id', authenticate, async (req, res) => {
     }
 
     // Vérifier les permissions d'accès
-    const userPermissions = req.user.group.permissions;
-    const userServiceIds = req.user.services.map(s => s._id.toString());
-    const isRecipient = mail.recipient && mail.recipient._id.toString() === req.user._id.toString();
-    const isCopyRecipient = mail.recipientsCopy && mail.recipientsCopy.some(r => r._id && r._id.toString() === req.user._id.toString());
-    const isInUserService = mail.service && userServiceIds.includes(mail.service._id.toString());
-    const canViewServiceMails = userPermissions.includes(PERMISSIONS.VIEW_SERVICE_MAILS) || isServiceSupervisor(req.user);
-
-    // Vérifier si l'utilisateur a une délégation active pour le destinataire de ce courrier
-    let hasDelegation = false;
-    if (mail.recipient) {
-      const delegators = await Delegation.getDelegatorsForUser(req.user._id);
-      const delegatorIds = delegators.map(d => d._id.toString());
-      hasDelegation = delegatorIds.includes(mail.recipient._id.toString());
-      
-      // Vérifier aussi les destinataires en copie
-      if (!hasDelegation && mail.recipientsCopy?.length > 0) {
-        hasDelegation = mail.recipientsCopy.some(r => r._id && delegatorIds.includes(r._id.toString()));
-      }
-    }
-
-    const canView = userPermissions.includes(PERMISSIONS.VIEW_ALL_MAILS) ||
-                    (canViewServiceMails && isInUserService) ||
-                    isRecipient ||
-                    isCopyRecipient ||
-                    hasDelegation;
+    const canView = await canViewMail(mail, req.user);
 
     if (!canView) {
       return res.status(403).json({
@@ -1415,186 +1589,310 @@ router.post('/:id/archive', authenticate, async (req, res) => {
       });
     }
 
-    // Vérifier les permissions
-    const userPermissions = req.user.group?.permissions || [];
-    const hasArchivePermission = userPermissions.includes(PERMISSIONS.ARCHIVE_MAILS);
-    const hasProcessPermission = userPermissions.includes(PERMISSIONS.PROCESS_MAILS);
-    const hasViewAllPermission = userPermissions.includes(PERMISSIONS.VIEW_ALL_MAILS);
-    
-    // Vérifier si l'utilisateur est dans le service du courrier
-    const userServiceIds = req.user.services?.map(s => s._id?.toString() || s.toString()) || [];
-    const isInMailService = mail.service && userServiceIds.includes(mail.service._id.toString());
-    
-    // Vérifier si l'utilisateur est le destinataire
-    const isRecipient = mail.recipient && mail.recipient._id.toString() === req.user._id.toString();
-    
-    // Vérifier si l'utilisateur est en copie
-    const isInCopy = mail.recipientsCopy?.some(r => r._id.toString() === req.user._id.toString());
-    
-    // Vérifier si l'utilisateur a une délégation active
+    // Vérifier les permissions (délégations actives précalculées)
     const delegators = await Delegation.getDelegatorsForUser(req.user._id);
     const delegatorIds = delegators.map(d => d._id.toString());
-    const hasDelegation = mail.recipient && delegatorIds.includes(mail.recipient._id.toString());
-    
-    const isSupervisor = mail.service && req.user.services?.some(s => {
-      const ids = (s.supervisors || []).map(sup => sup?._id?.toString() || sup?.toString());
-      return s._id?.toString() === mail.service._id.toString() &&
-             ids.includes(req.user._id.toString());
-    });
-    
-    // L'utilisateur peut archiver si:
-    // - Il a la permission archive_mails OU
-    // - Il peut traiter les courriers ET est concerné par ce courrier
-    const canArchive = hasArchivePermission || (
-      hasProcessPermission && (
-        hasViewAllPermission ||
-        isInMailService ||
-        isRecipient ||
-        isInCopy ||
-        hasDelegation ||
-        isSupervisor
-      )
-    );
 
-    if (!canArchive) {
+    if (!canActOnMail(mail, req.user, delegatorIds)) {
       return res.status(403).json({
         success: false,
         message: 'Permission refusée'
       });
     }
 
-    // Récupérer le format de référence depuis les paramètres
-    const referenceFormatSetting = await Settings.findOne({ key: 'general_referenceFormat' });
-    const referenceFormat = referenceFormatSetting?.value || 'GED-{YEAR}-{SERVICE}-{NUMBER}';
-    
-    // Générer le nouveau nom de fichier
-    const archiveFileName = await generateArchiveFileName(mail, referenceFormat);
-    const fileExtension = path.extname(mail.fileName);
-    const newFileName = `${archiveFileName}${fileExtension}`;
-    
-    // Créer le chemin d'archivage
-    const uploadPath = process.env.UPLOAD_PATH || './uploads';
-    const archiveRelativePath = createArchivePath(mail);
-    const archiveFullPath = path.join(uploadPath, archiveRelativePath);
-    
-    // Créer les dossiers si nécessaire
-    if (!fs.existsSync(archiveFullPath)) {
-      fs.mkdirSync(archiveFullPath, { recursive: true });
-    }
-    
-    // Déplacer le fichier principal
-    const oldFilePath = path.join(uploadPath, mail.filePath);
-    const newRelativeFilePath = path.join(archiveRelativePath, newFileName);
-    const newFullFilePath = path.join(uploadPath, newRelativeFilePath);
-    
-    if (fs.existsSync(oldFilePath)) {
-      // Vérifier si un fichier avec ce nom existe déjà
-      let finalFilePath = newFullFilePath;
-      let finalRelativePath = newRelativeFilePath;
-      let counter = 1;
-      
-      while (fs.existsSync(finalFilePath)) {
-        const nameWithoutExt = archiveFileName;
-        finalRelativePath = path.join(archiveRelativePath, `${nameWithoutExt}_${counter}${fileExtension}`);
-        finalFilePath = path.join(uploadPath, finalRelativePath);
-        counter++;
-      }
-      
-      // Copier le fichier (plutôt que déplacer pour éviter les problèmes de permissions)
-      fs.copyFileSync(oldFilePath, finalFilePath);
-      fs.unlinkSync(oldFilePath);
-      
-      // Mettre à jour le chemin du fichier
-      mail.filePath = finalRelativePath;
-      mail.fileName = path.basename(finalFilePath);
-    }
-    
-    // Déplacer les fichiers de réponse également
-    for (let i = 0; i < mail.responses.length; i++) {
-      const response = mail.responses[i];
-      if (response.filePath) {
-        const oldResponsePath = path.join(uploadPath, response.filePath);
-        if (fs.existsSync(oldResponsePath)) {
-          const responseExt = path.extname(response.fileName);
-          const responseNewName = `${archiveFileName}_reponse_${i + 1}${responseExt}`;
-          const newResponseRelativePath = path.join(archiveRelativePath, responseNewName);
-          const newResponseFullPath = path.join(uploadPath, newResponseRelativePath);
-          
-          fs.copyFileSync(oldResponsePath, newResponseFullPath);
-          fs.unlinkSync(oldResponsePath);
-          
-          mail.responses[i].filePath = newResponseRelativePath;
-          mail.responses[i].fileName = responseNewName;
-        }
-      }
-    }
+    const result = await performArchive(mail, req.user);
 
-    // Archiver le courrier
-    mail.status = MAIL_STATUS.ARCHIVED;
-    mail.archivedDate = new Date();
-    mail.archivedBy = req.user._id;
-    mail.reference = archiveFileName; // Mettre à jour la référence
-    await mail.save();
-
-    // Synchroniser avec OneDrive si activé (en arrière-plan)
-    const fullFilePath = path.join(uploadPath, mail.filePath);
-    syncToOneDrive(mail, fullFilePath).catch(err => {
-      console.error('Erreur sync OneDrive (non bloquante):', err.message);
+    res.json({
+      success: true,
+      message: 'Courrier archivé',
+      data: result
     });
+  } catch (error) {
+    console.error('Erreur archivage:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur serveur'
+    });
+  }
+});
 
-    // Notifier les autres destinataires de l'archivage
-    const archivedByName = `${req.user.firstName} ${req.user.lastName}`;
-    const mailInfo = {
-      _id: mail._id,
-      reference: archiveFileName,
-      subject: mail.subject,
-      senderName: mail.senderName,
-      filePath: mail.filePath,
-      fileName: mail.fileName
-    };
+// POST /api/mails/bulk - Actions groupées (archiver / réattribuer / taguer)
+router.post('/bulk', authenticate, async (req, res) => {
+  try {
+    const { ids, action, recipientId, serviceId, tags, tagMode = 'add' } = req.body;
 
-    // Import dynamique pour éviter les dépendances circulaires
-    const { sendMailArchivedNotification } = await import('../services/email.service.js');
+    const validIds = [...new Set(Array.isArray(ids) ? ids : [])]
+      .filter(id => mongoose.Types.ObjectId.isValid(id));
 
-    // Notifier le destinataire principal s'il existe et n'est pas celui qui a archivé
-    if (mail.recipient && mail.recipient._id.toString() !== req.user._id.toString() && mail.recipient.email) {
-      sendMailArchivedNotification(
-        mail.recipient.email,
-        `${mail.recipient.firstName} ${mail.recipient.lastName}`,
-        mailInfo,
-        archivedByName,
-        { userId: mail.recipient._id }
-      ).catch(err => console.error('Erreur notification recipient:', err));
-      notifyMailArchived(mail, mail.recipient, req.user);
+    if (validIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Aucun courrier sélectionné'
+      });
     }
 
-    // Notifier les destinataires en copie
-    if (mail.recipientsCopy && mail.recipientsCopy.length > 0) {
-      for (const cc of mail.recipientsCopy) {
-        if (cc._id.toString() !== req.user._id.toString() && cc.email) {
-          sendMailArchivedNotification(
-            cc.email,
-            `${cc.firstName} ${cc.lastName}`,
-            mailInfo,
-            archivedByName,
-            { userId: cc._id }
-          ).catch(err => console.error('Erreur notification CC:', err));
-          notifyMailArchived(mail, cc, req.user);
+    if (validIds.length > 100) {
+      return res.status(400).json({
+        success: false,
+        message: 'Maximum 100 courriers par action groupée'
+      });
+    }
+
+    if (!['archive', 'reassign', 'tag'].includes(action)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Action invalide'
+      });
+    }
+
+    // Valider les paramètres propres à chaque action
+    let newRecipient = null;
+    let newService = null;
+    if (action === 'reassign') {
+      if (!mongoose.Types.ObjectId.isValid(recipientId)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Destinataire invalide'
+        });
+      }
+      newRecipient = await User.findOne({ _id: recipientId, isActive: true })
+        .select('firstName lastName email');
+      if (!newRecipient) {
+        return res.status(400).json({
+          success: false,
+          message: 'Destinataire introuvable ou inactif'
+        });
+      }
+      if (serviceId) {
+        if (!mongoose.Types.ObjectId.isValid(serviceId)) {
+          return res.status(400).json({
+            success: false,
+            message: 'Service invalide'
+          });
         }
+        newService = await Service.findById(serviceId);
+        if (!newService) {
+          return res.status(400).json({
+            success: false,
+            message: 'Service introuvable'
+          });
+        }
+      }
+    }
+
+    let tagList = [];
+    if (action === 'tag') {
+      tagList = parseTags(tags);
+      if (tagList.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'Aucun tag fourni'
+        });
+      }
+      if (!['add', 'remove'].includes(tagMode)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Mode de tag invalide'
+        });
+      }
+    }
+
+    // Délégations actives précalculées (une seule requête pour tout le lot)
+    const delegators = await Delegation.getDelegatorsForUser(req.user._id);
+    const delegatorIds = delegators.map(d => d._id.toString());
+
+    const done = [];
+    const skipped = [];
+
+    for (const id of validIds) {
+      try {
+        const mail = await Mail.findById(id)
+          .populate('service')
+          .populate('recipient', 'firstName lastName email')
+          .populate('recipientsCopy', 'firstName lastName email');
+
+        if (!mail) {
+          skipped.push({ id, reason: 'Courrier introuvable' });
+          continue;
+        }
+
+        if (!canActOnMail(mail, req.user, delegatorIds)) {
+          skipped.push({ id, reason: 'Permission refusée' });
+          continue;
+        }
+
+        if (action === 'archive') {
+          if (mail.status !== MAIL_STATUS.PROCESSED) {
+            skipped.push({ id, reason: 'Seuls les courriers traités peuvent être archivés' });
+            continue;
+          }
+          await performArchive(mail, req.user);
+        } else if (action === 'reassign') {
+          if (mail.status === MAIL_STATUS.ARCHIVED) {
+            skipped.push({ id, reason: 'Courrier archivé' });
+            continue;
+          }
+          const previousRecipientId = mail.recipient?._id?.toString();
+          mail.recipient = newRecipient._id;
+          if (newService) {
+            mail.service = newService._id;
+          }
+          // Le nouveau destinataire doit voir le courrier comme non lu
+          if (previousRecipientId !== newRecipient._id.toString()) {
+            mail.isRead = false;
+          }
+          await mail.save();
+          if (newRecipient._id.toString() !== req.user._id.toString()) {
+            notifyMailReassigned(mail, newRecipient, req.user);
+          }
+        } else {
+          // action === 'tag'
+          if (tagMode === 'add') {
+            mail.tags = [...new Set([...(mail.tags || []), ...tagList])];
+          } else {
+            mail.tags = (mail.tags || []).filter(t => !tagList.includes(t));
+          }
+          await mail.save();
+        }
+
+        done.push(id);
+      } catch (err) {
+        console.error(`Erreur action groupée [${action}] sur ${id}:`, err);
+        skipped.push({ id, reason: 'Erreur serveur' });
       }
     }
 
     res.json({
       success: true,
-      message: 'Courrier archivé',
-      data: {
-        reference: archiveFileName,
-        archivePath: archiveRelativePath,
-        fileName: mail.fileName
-      }
+      message: `${done.length} courrier(s) traité(s)${skipped.length ? `, ${skipped.length} ignoré(s)` : ''}`,
+      data: { done, skipped }
     });
   } catch (error) {
-    console.error('Erreur archivage:', error);
+    console.error('Erreur action groupée:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur serveur'
+    });
+  }
+});
+
+// POST /api/mails/:id/comments - Ajouter un commentaire interne
+router.post('/:id/comments', authenticate, async (req, res) => {
+  try {
+    const content = (req.body.content || '').trim();
+    if (!content) {
+      return res.status(400).json({
+        success: false,
+        message: 'Le commentaire ne peut pas être vide'
+      });
+    }
+    if (content.length > 2000) {
+      return res.status(400).json({
+        success: false,
+        message: 'Commentaire trop long (2000 caractères maximum)'
+      });
+    }
+
+    const mail = await Mail.findById(req.params.id)
+      .populate('recipient', 'firstName lastName email')
+      .populate('recipientsCopy', 'firstName lastName email')
+      .populate('service', 'name supervisors');
+
+    if (!mail) {
+      return res.status(404).json({
+        success: false,
+        message: 'Courrier non trouvé'
+      });
+    }
+
+    if (!(await canViewMail(mail, req.user))) {
+      return res.status(403).json({
+        success: false,
+        message: 'Accès refusé'
+      });
+    }
+
+    // Résoudre les mentions (utilisateurs actifs uniquement)
+    const mentionIds = [...new Set((Array.isArray(req.body.mentions) ? req.body.mentions : [])
+      .filter(m => mongoose.Types.ObjectId.isValid(m)))];
+    const mentionedUsers = mentionIds.length > 0
+      ? await User.find({ _id: { $in: mentionIds }, isActive: true }).select('firstName lastName email')
+      : [];
+
+    mail.comments.push({
+      author: req.user._id,
+      content,
+      mentions: mentionedUsers.map(u => u._id)
+    });
+    await mail.save();
+
+    // Notifications : utilisateurs mentionnés, puis destinataire principal (sans doublon ni auto-notification)
+    const notified = new Set([req.user._id.toString()]);
+    for (const mentioned of mentionedUsers) {
+      if (!notified.has(mentioned._id.toString())) {
+        notifyCommentMention(mail, mentioned, req.user);
+        notified.add(mentioned._id.toString());
+      }
+    }
+    if (mail.recipient && !notified.has(mail.recipient._id.toString())) {
+      notifyNewComment(mail, mail.recipient, req.user);
+    }
+
+    const updatedMail = await Mail.findById(mail._id)
+      .populate('comments.author', 'firstName lastName avatar')
+      .populate('comments.mentions', 'firstName lastName');
+
+    res.status(201).json({
+      success: true,
+      message: 'Commentaire ajouté',
+      data: updatedMail.comments[updatedMail.comments.length - 1]
+    });
+  } catch (error) {
+    console.error('Erreur ajout commentaire:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur serveur'
+    });
+  }
+});
+
+// DELETE /api/mails/:id/comments/:commentId - Supprimer un commentaire (auteur ou admin)
+router.delete('/:id/comments/:commentId', authenticate, async (req, res) => {
+  try {
+    const mail = await Mail.findById(req.params.id);
+    if (!mail) {
+      return res.status(404).json({
+        success: false,
+        message: 'Courrier non trouvé'
+      });
+    }
+
+    const comment = mail.comments.id(req.params.commentId);
+    if (!comment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Commentaire non trouvé'
+      });
+    }
+
+    const isAuthor = comment.author.toString() === req.user._id.toString();
+    const isAdminUser = req.user.group?.name === 'Administrateur';
+    if (!isAuthor && !isAdminUser) {
+      return res.status(403).json({
+        success: false,
+        message: 'Permission refusée'
+      });
+    }
+
+    comment.deleteOne();
+    await mail.save();
+
+    res.json({
+      success: true,
+      message: 'Commentaire supprimé'
+    });
+  } catch (error) {
+    console.error('Erreur suppression commentaire:', error);
     res.status(500).json({
       success: false,
       message: 'Erreur serveur'

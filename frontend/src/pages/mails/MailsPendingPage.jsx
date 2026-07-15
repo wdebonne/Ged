@@ -10,6 +10,7 @@ import MailFilters from '../../components/MailFilters';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import EmptyState from '../../components/EmptyState';
 import TagChips from '../../components/TagChips';
+import BulkActionsBar, { SelectCheckbox, SelectAllRow } from '../../components/BulkActionsBar';
 import {
   EnvelopeIcon,
   EyeIcon,
@@ -23,6 +24,7 @@ export default function MailsPendingPage() {
   const overdueParam = ['1', 'true'].includes(searchParams.get('overdue')) ? 'true' : '';
 
   const [page, setPage] = useState(1);
+  const [selectedIds, setSelectedIds] = useState([]);
   const [filters, setFilters] = useState({
     search: '',
     sender: '',
@@ -53,6 +55,11 @@ export default function MailsPendingPage() {
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
     setPage(1);
+    setSelectedIds([]);
+  };
+
+  const toggleSelected = (id) => {
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
   };
 
   const isOverdue = (mail) => mail.dueDate && new Date(mail.dueDate) < new Date();
@@ -106,6 +113,11 @@ export default function MailsPendingPage() {
         />
       ) : (
         <>
+          <SelectAllRow
+            pageIds={(data?.mails || []).map(m => m._id)}
+            selectedIds={selectedIds}
+            onChange={setSelectedIds}
+          />
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -121,6 +133,12 @@ export default function MailsPendingPage() {
                 <Link to={`/courriers/${mail._id}`}>
                   <div className={`card-hover p-4 border-l-4 ${mail.isRead ? 'border-gray-200' : 'border-warning-500 bg-warning-50'}`}>
                     <div className="flex items-start justify-between gap-4">
+                      <div className="pt-1">
+                        <SelectCheckbox
+                          checked={selectedIds.includes(mail._id)}
+                          onToggle={() => toggleSelected(mail._id)}
+                        />
+                      </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           {!mail.isRead && (
@@ -217,6 +235,13 @@ export default function MailsPendingPage() {
           )}
         </>
       )}
+
+      {/* Actions groupées */}
+      <BulkActionsBar
+        selectedIds={selectedIds}
+        onClear={() => setSelectedIds([])}
+        actions={['reassign', 'tag']}
+      />
     </div>
   );
 }

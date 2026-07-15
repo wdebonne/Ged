@@ -10,6 +10,7 @@ import MailFilters from '../../components/MailFilters';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import EmptyState from '../../components/EmptyState';
 import TagChips from '../../components/TagChips';
+import BulkActionsBar, { SelectCheckbox, SelectAllRow } from '../../components/BulkActionsBar';
 import {
   CheckCircleIcon,
   EyeIcon,
@@ -26,6 +27,7 @@ export default function MailsProcessedPage() {
   const scope = searchParams.get('scope') || 'mine';
   
   const [page, setPage] = useState(1);
+  const [selectedIds, setSelectedIds] = useState([]);
   const [filters, setFilters] = useState({
     search: '',
     sender: '',
@@ -56,6 +58,11 @@ export default function MailsProcessedPage() {
   const handleFilterChange = (newFilters) => {
     setFilters(newFilters);
     setPage(1);
+    setSelectedIds([]);
+  };
+
+  const toggleSelected = (id) => {
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
   };
 
   if (isLoading) return <LoadingSpinner />;
@@ -112,6 +119,11 @@ export default function MailsProcessedPage() {
         />
       ) : (
         <>
+          <SelectAllRow
+            pageIds={(data?.mails || []).map(m => m._id)}
+            selectedIds={selectedIds}
+            onChange={setSelectedIds}
+          />
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -127,6 +139,12 @@ export default function MailsProcessedPage() {
                 <Link to={`/courriers/${mail._id}`}>
                   <div className="card-hover p-4 border-l-4 border-success-500">
                     <div className="flex items-start justify-between gap-4">
+                      <div className="pt-1">
+                        <SelectCheckbox
+                          checked={selectedIds.includes(mail._id)}
+                          onToggle={() => toggleSelected(mail._id)}
+                        />
+                      </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-xs font-mono text-gray-500">
@@ -194,6 +212,12 @@ export default function MailsProcessedPage() {
           )}
         </>
       )}
+      {/* Actions groupées */}
+      <BulkActionsBar
+        selectedIds={selectedIds}
+        onClear={() => setSelectedIds([])}
+        actions={['archive', 'reassign', 'tag']}
+      />
       <ExcelExportModal isOpen={showExcelExport} onClose={() => setShowExcelExport(false)} />
     </div>
   );

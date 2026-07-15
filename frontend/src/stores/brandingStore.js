@@ -3,7 +3,7 @@ import { settingsAPI } from '../services/api';
 
 const useBrandingStore = create((set) => ({
   appName: 'GED Courrier',
-  appVersion: 'v3.15.0',
+  appVersion: 'v3.19.0',
   appLogo: '',
   footerText: 'Fait avec ❤️ par le Service Informatique de Pavilly',
   footerVisible: true,

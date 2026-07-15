@@ -10,6 +10,7 @@ import { useAuthStore } from '../../stores/authStore';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ExportOptionsModal from '../../components/modals/ExportOptionsModal';
 import TagChips from '../../components/TagChips';
+import CommentThread from '../../components/CommentThread';
 import toast from 'react-hot-toast';
 import {
   ArrowLeftIcon,
@@ -994,6 +995,16 @@ export default function MailDetailPage() {
                 </div>
               )}
             </div>
+          </motion.div>
+
+          {/* Commentaires internes */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            className="card"
+          >
+            <CommentThread mailId={mail._id} comments={mail.comments || []} />
           </motion.div>
         </div>
 

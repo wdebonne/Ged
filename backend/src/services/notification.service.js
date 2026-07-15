@@ -72,3 +72,33 @@ export const notifyMailOverdue = (mail, recipientUser, daysOverdue) => createNot
   link: `/courriers/${mail._id}`,
   relatedMail: mail._id
 });
+
+export const notifyMailReassigned = (mail, recipientUser, reassignedByUser) => createNotification({
+  recipient: recipientUser._id,
+  type: NOTIFICATION_TYPES.MAIL_REASSIGNED,
+  title: 'Courrier attribué',
+  message: `${mail.subject} — attribué par ${reassignedByUser.firstName} ${reassignedByUser.lastName}`,
+  link: `/courriers/${mail._id}`,
+  relatedMail: mail._id,
+  actor: reassignedByUser._id
+});
+
+export const notifyNewComment = (mail, recipientUser, authorUser) => createNotification({
+  recipient: recipientUser._id,
+  type: NOTIFICATION_TYPES.MAIL_COMMENT,
+  title: 'Nouveau commentaire',
+  message: `${authorUser.firstName} ${authorUser.lastName} a commenté « ${mail.subject} »`,
+  link: `/courriers/${mail._id}`,
+  relatedMail: mail._id,
+  actor: authorUser._id
+});
+
+export const notifyCommentMention = (mail, mentionedUser, authorUser) => createNotification({
+  recipient: mentionedUser._id,
+  type: NOTIFICATION_TYPES.COMMENT_MENTION,
+  title: 'Vous avez été mentionné',
+  message: `${authorUser.firstName} ${authorUser.lastName} vous a mentionné sur « ${mail.subject} »`,
+  link: `/courriers/${mail._id}`,
+  relatedMail: mail._id,
+  actor: authorUser._id
+});

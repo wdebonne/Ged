@@ -7,7 +7,10 @@ export const NOTIFICATION_TYPES = {
   MAIL_PROCESSED: 'mail_processed',
   MAIL_ARCHIVED: 'mail_archived',
   MAIL_REMINDER: 'mail_reminder',
-  MAIL_OVERDUE: 'mail_overdue'
+  MAIL_OVERDUE: 'mail_overdue',
+  MAIL_REASSIGNED: 'mail_reassigned',
+  MAIL_COMMENT: 'mail_comment',
+  COMMENT_MENTION: 'comment_mention'
 };
 
 const notificationSchema = new mongoose.Schema({

@@ -28,6 +28,25 @@ const readLogSchema = new mongoose.Schema({
   }
 }, { _id: false });
 
+// Commentaire interne (fil de discussion entre agents, jamais visible de l'expéditeur)
+const commentSchema = new mongoose.Schema({
+  author: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  content: {
+    type: String,
+    required: true,
+    trim: true,
+    maxlength: 2000
+  },
+  mentions: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }]
+}, { _id: true, timestamps: true });
+
 const responseSchema = new mongoose.Schema({
   type: {
     type: String,
@@ -214,6 +233,9 @@ const mailSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+
+  // Commentaires internes
+  comments: [commentSchema],
   
   // Tags
   tags: [{

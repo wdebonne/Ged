@@ -7,6 +7,47 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ---
 
+## [3.20.0] - 2026-07-15
+
+### Ajouté
+
+- **Actions groupées sur les listes de courriers entrants** :
+  - Case à cocher sur chaque courrier (option « Tout sélectionner sur cette page ») dans les listes À traiter, Traités et Archivés
+  - Barre d'actions flottante dès qu'une sélection est active : **Archiver**, **Réattribuer** (destinataire + service optionnel) et **Taguer** (ajout ou retrait de tags), selon la page et les permissions
+  - Jusqu'à 100 courriers par action ; chaque courrier est vérifié individuellement (permissions, statut) et les éléments non autorisés sont ignorés sans bloquer les autres
+  - La réattribution repasse le courrier en non-lu pour le nouveau destinataire et déclenche une notification in-app
+- **Commentaires internes avec @mention** sur la page de détail d'un courrier entrant :
+  - Fil de discussion horodaté (non visible de l'expéditeur), distinct du champ Notes existant
+  - Saisie d'une mention `@Prénom Nom` avec auto-complétion des utilisateurs actifs, mise en évidence des mentions dans le fil
+  - Suppression d'un commentaire par son auteur ou un administrateur
+  - Notifications in-app : utilisateur mentionné (« Vous avez été mentionné ») et destinataire principal du courrier (« Nouveau commentaire »)
+
+### Technique
+
+- `POST /api/mails/bulk` : actions groupées `archive` / `reassign` / `tag`, réponse `{ done, skipped: [{id, reason}] }`
+- Extraction de `canViewMail()`, `canActOnMail()` et `performArchive()` dans `mail.routes.js`, réutilisés par les routes unitaires (`GET /:id`, `POST /:id/archive`) et la route `bulk` — élimine la duplication de la logique de permissions et d'archivage
+- Nouveau sous-schéma `Mail.comments` (auteur, contenu ≤ 2000 caractères, mentions, horodatage), exclu des listes (`GET /api/mails` fait un `.select('-comments')`)
+- Nouvelles routes `POST /api/mails/:id/comments` et `DELETE /api/mails/:id/comments/:commentId`
+- Nouveaux types de notification `mail_reassigned`, `mail_comment`, `comment_mention`
+- Nouveaux composants frontend `BulkActionsBar.jsx` et `CommentThread.jsx`
+
+## [3.19.0] - 2026-07-15
+
+### Ajouté
+
+- **Notifications in-app** : cloche dans l'en-tête avec badge du nombre de non-lues (rafraîchi toutes les 45s), liste des dernières notifications avec date relative, clic pour marquer comme lue et naviguer vers l'élément concerné, « Tout marquer comme lu »
+  - Créées indépendamment des préférences email de l'utilisateur (toujours enregistrées en base, même si la notification email correspondante est désactivée)
+- **Recherche globale (Ctrl+K / Cmd+K)** : palette de commande accessible depuis n'importe quelle page, recherche simultanée dans les courriers entrants, courriers départ et contacts, résultats groupés par catégorie avec navigation directe au clic
+  - Un contact trouvé isole et surligne automatiquement la ligne correspondante dans Administration > Contacts
+
+### Technique
+
+- Nouveau modèle `Notification.model.js` (recipient/type/title/message/link/relatedMail/actor/isRead), indexes `{recipient,isRead}` et `{recipient,createdAt}`
+- Nouvelles routes `backend/src/routes/notifications.routes.js` (`/api/notifications`) et `backend/src/routes/search.routes.js` (`GET /api/search?q=`, interroge Mail/OutgoingMail/Contact en parallèle)
+- Nouveau service `notification.service.js`, appelé à côté de chaque notification email existante (`mail.routes.js`, `reminder.service.js`)
+- Nouveau helper partagé `utils/mailVisibility.js` (logique de visibilité mail/service factorisée, utilisée par la recherche globale)
+- Nouveaux composants frontend `NotificationBell.jsx` et `CommandPalette.jsx` (première utilisation de `@headlessui/react` dans le projet)
+
 ## [3.18.0] - 2026-07-15
 
 ### Ajouté

@@ -122,6 +122,18 @@ Sur chaque page de liste, vous disposez de :
 - 📥 **Télécharger** : Télécharger le fichier PDF
 - 🗑️ **Supprimer** : Déplace le courrier vers la **Corbeille** (admin uniquement) — il reste récupérable, voir [section 11.9](#119-corbeille)
 
+#### Sélection multiple et actions groupées
+
+Sur les listes À traiter, Traités et Archivés, cochez plusieurs courriers (ou utilisez **« Tout sélectionner sur cette page »**) pour faire apparaître une barre d'actions en bas de l'écran :
+
+| Action | Disponible sur | Effet |
+|--------|-----------------|-------|
+| **Archiver** | Traités | Archive tous les courriers sélectionnés (mêmes règles que l'archivage individuel) |
+| **Réattribuer** | À traiter, Traités | Change le destinataire (et optionnellement le service) de tous les courriers sélectionnés ; le nouveau destinataire est notifié |
+| **Taguer** | À traiter, Traités, Archivés | Ajoute ou retire un ou plusieurs tags sur tous les courriers sélectionnés |
+
+> 💡 Jusqu'à 100 courriers par action. Un courrier sur lequel vous n'avez pas les droits nécessaires est ignoré sans bloquer le traitement des autres — un message récapitule le nombre de courriers traités et ignorés.
+
 ### 3.4 Détail d'un courrier
 
 La page de détail affiche :
@@ -223,7 +235,17 @@ Chaque courrier importé reçoit une **date d'échéance** : celle que vous sais
    - **Fichier** : Pièce jointe (optionnel)
 4. Cliquez sur **Enregistrer**
 
-### 5.4 Export du courrier
+### 5.4 Commentaires internes
+
+Sous les réponses, la section **Commentaires internes** permet d'échanger avec vos collègues à propos d'un courrier, sans que cela soit visible de l'expéditeur (à ne pas confondre avec le champ **Notes**, un texte libre unique) :
+
+1. Tapez votre message dans le champ en bas de la section
+2. Tapez `@` suivi du début d'un nom pour ouvrir la liste des utilisateurs et mentionner un collègue (flèches + Entrée, ou clic)
+3. Envoyez avec le bouton ✈️ ou **Ctrl+Entrée**
+
+La personne mentionnée reçoit une notification « Vous avez été mentionné » ; le destinataire principal du courrier reçoit « Nouveau commentaire » s'il n'est pas déjà l'auteur ou mentionné. Vous pouvez supprimer vos propres commentaires (les administrateurs peuvent supprimer n'importe quel commentaire).
+
+### 5.5 Export du courrier
 
 Plusieurs options d'export sont disponibles :
 

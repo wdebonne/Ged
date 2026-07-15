@@ -30,6 +30,7 @@ Application web complète de gestion de courrier avec authentification LDAP/Kerb
 - **TanStack React Query** pour le data fetching
 - **Framer Motion** pour les animations fluides et transitions
 - **Heroicons** pour les icônes
+- **Headless UI** (`@headlessui/react`) pour les composants accessibles (palette de recherche Ctrl+K)
 - **React Hot Toast** pour les notifications
 - **react-pdf** pour l'affichage de documents PDF
 - **Chart.js / react-chartjs-2** pour les graphiques statistiques
@@ -80,6 +81,8 @@ Application web complète de gestion de courrier avec authentification LDAP/Kerb
   - Sauvegarde automatique sur NextCloud (optionnel)
   - Préservation des tableaux dynamiques et formules du template grâce à `xlsx-populate`
 - ✅ Recherche et filtres avancés (recherche plein texte, service, expéditeur, dates, **priorité**, **tag**, **en retard uniquement**, tri par échéance)
+- ✅ **Actions groupées** sur les listes (À traiter, Traités, Archivés) : sélection multiple par case à cocher, puis **archiver**, **réattribuer** (destinataire + service) ou **taguer** (ajout/retrait) en une seule action jusqu'à 100 courriers, avec vérification individuelle des permissions
+- ✅ **Commentaires internes** sur la page détail : fil de discussion horodaté avec **@mention** (auto-complétion, notification in-app du mentionné et du destinataire du courrier), distinct des Notes
 - ✅ **Échéances de traitement et rappels automatiques** :
   - Date d'échéance saisissable à l'import ou calculée automatiquement (délai réglementaire par défaut configurable, ex. 15 jours — 0 pour désactiver)
   - Job quotidien (8h00 Europe/Paris, personnalisable via `REMINDER_CRON`) : email de **rappel à J-N** avant l'échéance (configurable, défaut J-3) puis **alerte de retard** une fois l'échéance dépassée
@@ -103,6 +106,11 @@ Application web complète de gestion de courrier avec authentification LDAP/Kerb
   - Toggle global/personnalisé : par défaut les paramètres globaux s'appliquent
   - 7 types de notifications configurables individuellement
   - Paramètres par défaut définis par l'administrateur (Paramètres > Notifications)
+- ✅ **Notifications in-app** :
+  - Cloche dans l'en-tête avec badge du nombre de non-lues, rafraîchi automatiquement (toutes les 45s)
+  - Liste des dernières notifications (titre, message, date relative) ; clic → marque comme lue et navigue vers l'élément concerné
+  - « Tout marquer comme lu » en un clic
+  - Générées **indépendamment des préférences email** : toujours créées en base même si les notifications email correspondantes sont désactivées
 - ✅ **Délégation de courriers** :
   - Transfert temporaire de ses courriers à un collègue
   - Gestion des dates de début/fin de délégation
@@ -587,6 +595,10 @@ Sans effet si `LDAP_REQUIRED_GROUP_DN` n'est pas défini (aucune restriction de 
 - ✅ **Interface dédiée** : onglet "Délégations" dans Mon Profil
 
 ### Interface utilisateur
+- ✅ **Recherche globale (Ctrl+K / Cmd+K)** : palette de commande accessible depuis n'importe quelle page
+  - Recherche simultanée dans les courriers entrants, courriers départ et contacts (objet, expéditeur/destinataire, référence, contenu OCR)
+  - Résultats groupés par catégorie (Entrants / Sortants / Contacts) avec aperçu, navigation directe au clic
+  - Un contact trouvé isole et surligne automatiquement la ligne correspondante dans Administration > Contacts
 - ✅ **Sidebar avec sections distinctes** :
   - Import (pour utilisateurs autorisés)
   - Courrier Départ (nouveau, brouillons, envoyés, archivés)
