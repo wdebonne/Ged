@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { contactsAPI } from '../../services/api';
@@ -20,11 +21,15 @@ import {
 
 export default function ContactsPage() {
   const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
+  const highlightId = searchParams.get('highlight');
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingSender, setEditingSender] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [showHighlight, setShowHighlight] = useState(!!highlightId);
+  const highlightRef = useRef(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ['contacts', page, search],
@@ -33,6 +38,23 @@ export default function ContactsPage() {
       return response.data;
     }
   });
+
+  // Contact ciblé depuis la recherche globale (Ctrl+K) : la liste étant paginée/triée par nom,
+  // on isole le contact en préremplissant la recherche avec son nom pour garantir qu'il soit affiché.
+  useEffect(() => {
+    if (!highlightId) return;
+    contactsAPI.getOne(highlightId)
+      .then((res) => setSearch(res.data.data.name))
+      .catch(() => {});
+  }, [highlightId]);
+
+  useEffect(() => {
+    if (highlightId && highlightRef.current) {
+      highlightRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const timeoutId = setTimeout(() => setShowHighlight(false), 4000);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [highlightId, data]);
 
   const deleteMutation = useMutation({
     mutationFn: (id) => contactsAPI.delete(id),
@@ -119,7 +141,13 @@ export default function ContactsPage() {
                 </tr>
               ) : (
                 senders.map((sender) => (
-                  <tr key={sender._id} className="hover:bg-gray-50">
+                  <tr
+                    key={sender._id}
+                    ref={sender._id === highlightId ? highlightRef : null}
+                    className={`hover:bg-gray-50 transition-colors ${
+                      sender._id === highlightId && showHighlight ? 'bg-amber-50 ring-2 ring-inset ring-amber-300' : ''
+                    }`}
+                  >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">

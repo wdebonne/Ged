@@ -13,3 +13,4 @@ export { default as Delegation, DELEGATION_STATUS } from './Delegation.model.js'
 export { default as LdapGroupMapping } from './LdapGroupMapping.model.js';
 export { default as Counter, formatChronoNumber } from './Counter.model.js';
 export { default as AuditLog, AUDIT_CATEGORIES } from './AuditLog.model.js';
+export { default as Notification, NOTIFICATION_TYPES } from './Notification.model.js';

@@ -7,6 +7,8 @@ import { useQuery } from '@tanstack/react-query';
 import { statsAPI } from '../services/api';
 import UserMenu from '../components/UserMenu';
 import ChatBotButton from '../components/ChatBotButton';
+import NotificationBell from '../components/NotificationBell';
+import CommandPalette from '../components/CommandPalette';
 import {
   HomeIcon,
   InboxIcon,
@@ -33,7 +35,8 @@ import {
   PlusIcon,
   DocumentTextIcon,
   TrashIcon,
-  ClipboardDocumentListIcon
+  ClipboardDocumentListIcon,
+  MagnifyingGlassIcon
 } from '@heroicons/react/24/outline';
 
 export default function MainLayout() {
@@ -53,6 +56,7 @@ export default function MainLayout() {
   const [courrierDepartOpen, setCourrierDepartOpen] = useState(true);
   const [serviceOpen, setServiceOpen] = useState(true);
   const [adminOpen, setAdminOpen] = useState(true);
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const { user, logout, hasPermission, canImport } = useAuthStore();
@@ -90,6 +94,18 @@ export default function MainLayout() {
   useEffect(() => {
     setSidebarOpen(false);
   }, [location.pathname]);
+
+  // Raccourci clavier Ctrl+K / Cmd+K pour ouvrir la recherche globale
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setPaletteOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Lien Tableau de bord séparé
   const dashboardLink = { name: 'Tableau de bord', href: '/', icon: HomeIcon };
@@ -612,10 +628,27 @@ export default function MainLayout() {
             </div>
 
             <div className="flex items-center gap-3">
+              <button
+                onClick={() => setPaletteOpen(true)}
+                className="hidden sm:flex items-center gap-2 px-3 py-1.5 text-sm text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <MagnifyingGlassIcon className="w-4 h-4" />
+                <span>Rechercher…</span>
+                <kbd className="text-[10px] border rounded px-1 py-0.5 bg-gray-50">Ctrl K</kbd>
+              </button>
+              <button
+                onClick={() => setPaletteOpen(true)}
+                className="sm:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <MagnifyingGlassIcon className="w-5 h-5 text-gray-600" />
+              </button>
+              <NotificationBell />
               <UserMenu />
             </div>
           </div>
         </header>
+
+        <CommandPalette isOpen={paletteOpen} onClose={() => setPaletteOpen(false)} />
 
         {/* ChatBot Button - Flottant en bas à droite */}
         <ChatBotButton />

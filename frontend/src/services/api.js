@@ -350,6 +350,19 @@ export const webhooksAPI = {
   resetStats: (id) => api.post(`/webhooks/${id}/reset-stats`)
 };
 
+// Notifications in-app
+export const notificationsAPI = {
+  getAll: (params) => api.get('/notifications', { params }),
+  getUnreadCount: () => api.get('/notifications/unread-count'),
+  markRead: (id) => api.post(`/notifications/${id}/read`),
+  markAllRead: () => api.post('/notifications/mark-all-read')
+};
+
+// Recherche globale
+export const searchAPI = {
+  global: (q) => api.get('/search', { params: { q } })
+};
+
 // OneDrive
 export const onedriveAPI = {
   getStatus: () => api.get('/onedrive/status'),

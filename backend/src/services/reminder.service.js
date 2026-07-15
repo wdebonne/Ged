@@ -1,6 +1,7 @@
 import cron from 'node-cron';
 import { Mail, Settings, MAIL_STATUS } from '../models/index.js';
 import { sendMailReminderNotification, sendMailOverdueNotification } from './email.service.js';
+import { notifyMailReminder, notifyMailOverdue } from './notification.service.js';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -15,7 +16,7 @@ export const getReminderDaysBefore = async () => {
 // Notifier le destinataire principal + les copies.
 // Retourne false si au moins un envoi a échoué (SMTP indisponible…),
 // pour que le courrier soit retenté au prochain passage du job.
-const notifyRecipients = async (mail, sendFn, days) => {
+const notifyRecipients = async (mail, sendFn, notifyFn, days) => {
   const recipients = [mail.recipient, ...(mail.recipientsCopy || [])].filter(u => u?.email);
   let allOk = true;
   for (const user of recipients) {
@@ -32,6 +33,8 @@ const notifyRecipients = async (mail, sendFn, days) => {
       allOk = false;
       console.error(`Erreur envoi rappel échéance (${mail.reference}):`, err.message);
     }
+    // Notification in-app : inconditionnelle, n'affecte jamais allOk/le retry email
+    await notifyFn(mail, user, days);
   }
   return allOk;
 };
@@ -60,7 +63,7 @@ export const runDueDateCheck = async () => {
 
   for (const mail of upcomingMails) {
     const daysRemaining = Math.max(1, Math.ceil((mail.dueDate - now) / DAY_MS));
-    const sent = await notifyRecipients(mail, sendMailReminderNotification, daysRemaining);
+    const sent = await notifyRecipients(mail, sendMailReminderNotification, notifyMailReminder, daysRemaining);
     if (sent) {
       await Mail.updateOne({ _id: mail._id }, { $set: { reminderSentAt: now } });
     }
@@ -75,7 +78,7 @@ export const runDueDateCheck = async () => {
 
   for (const mail of overdueMails) {
     const daysOverdue = Math.max(1, Math.ceil((now - mail.dueDate) / DAY_MS));
-    const sent = await notifyRecipients(mail, sendMailOverdueNotification, daysOverdue);
+    const sent = await notifyRecipients(mail, sendMailOverdueNotification, notifyMailOverdue, daysOverdue);
     if (sent) {
       await Mail.updateOne({ _id: mail._id }, { $set: { overdueSentAt: now } });
     }

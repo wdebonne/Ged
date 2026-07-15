@@ -31,6 +31,8 @@ import backupRoutes from './routes/backup.routes.js';
 import excelRoutes from './routes/excel.routes.js';
 import trashRoutes from './routes/trash.routes.js';
 import auditRoutes from './routes/audit.routes.js';
+import notificationRoutes from './routes/notifications.routes.js';
+import searchRoutes from './routes/search.routes.js';
 
 // Middleware
 import { serveMailFiles } from './middleware/serveMailFiles.middleware.js';
@@ -154,6 +156,8 @@ app.use('/api/backup', backupRoutes);
 app.use('/api/excel', excelRoutes);
 app.use('/api/trash', trashRoutes);
 app.use('/api/audit-logs', auditRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/search', searchRoutes);
 
 // Route de santé
 app.get('/api/health', (req, res) => {

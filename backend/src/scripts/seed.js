@@ -93,8 +93,10 @@ export const seedDatabase = async () => {
   console.log('✅ Administrateur créé (login: admin / mot de passe: admin123)');
 
   // Créer quelques utilisateurs de démonstration
+  // (User.create() déclenche le hook pre('save') qui hash le mot de passe,
+  // contrairement à insertMany() qui l'ignore et stockerait le mot de passe en clair)
   console.log('👥 Création des utilisateurs de démonstration...');
-  await User.insertMany([
+  await User.create([
     {
       username: 'superviseur',
       email: 'superviseur@ged.local',

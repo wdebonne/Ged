@@ -14,6 +14,13 @@ import { syncArchivedMail as syncToOneDrive } from '../services/onedrive.service
 import { escapeRegex } from '../utils/regex.js';
 import { queueRegisterUpdate } from '../services/excel.service.js';
 import { logAudit } from '../services/audit.service.js';
+import {
+  notifyNewMailToRecipient,
+  notifyNewMailToCopyRecipient,
+  notifyNewMailToServiceSupervisor,
+  notifyMailProcessed,
+  notifyMailArchived
+} from '../services/notification.service.js';
 
 const router = express.Router();
 
@@ -527,6 +534,7 @@ router.post('/', authenticate, canImportMails, uploadCourrier.single('document')
           mail,
           { userId: mail.recipient._id, notifType: 'email_newMail_recipient' }
         ).catch(err => console.error('Erreur notification destinataire:', err.message));
+        notifyNewMailToRecipient(mail);
       }
 
       // Notifier les superviseurs du service
@@ -543,6 +551,7 @@ router.post('/', authenticate, canImportMails, uploadCourrier.single('document')
             ).catch(err =>
               console.error('Erreur notification superviseur:', err.message)
             );
+            notifyNewMailToServiceSupervisor(mail, supervisor, serviceWithSupervisors.name);
           }
         }
       }
@@ -884,6 +893,7 @@ router.post('/import', authenticate, canImportMails, [
           populatedMail,
           { userId: populatedMail.recipient._id, notifType: 'email_newMail_recipient' }
         ).catch(err => console.error('Erreur notification destinataire:', err.message));
+        notifyNewMailToRecipient(populatedMail);
       }
 
       // Notifier les destinataires en copie
@@ -896,6 +906,7 @@ router.post('/import', authenticate, canImportMails, [
               populatedMail,
               { userId: cc._id, notifType: 'email_newMail_copy' }
             ).catch(err => console.error('Erreur notification CC:', err.message));
+            notifyNewMailToCopyRecipient(populatedMail, cc);
           }
         }
       }
@@ -914,6 +925,7 @@ router.post('/import', authenticate, canImportMails, [
             ).catch(err =>
               console.error('Erreur notification superviseur:', err.message)
             );
+            notifyNewMailToServiceSupervisor(populatedMail, supervisor, serviceWithSupervisors.name);
           }
         }
       }
@@ -1298,6 +1310,7 @@ router.post('/:id/process', authenticate, async (req, res) => {
         processedByName,
         { userId: mail.recipient._id }
       ).catch(err => console.error('Erreur notification recipient:', err));
+      notifyMailProcessed(mail, mail.recipient, req.user);
     }
 
     // Notifier les destinataires en copie
@@ -1311,6 +1324,7 @@ router.post('/:id/process', authenticate, async (req, res) => {
             processedByName,
             { userId: cc._id }
           ).catch(err => console.error('Erreur notification CC:', err));
+          notifyMailProcessed(mail, cc, req.user);
         }
       }
     }
@@ -1551,6 +1565,7 @@ router.post('/:id/archive', authenticate, async (req, res) => {
         archivedByName,
         { userId: mail.recipient._id }
       ).catch(err => console.error('Erreur notification recipient:', err));
+      notifyMailArchived(mail, mail.recipient, req.user);
     }
 
     // Notifier les destinataires en copie
@@ -1564,6 +1579,7 @@ router.post('/:id/archive', authenticate, async (req, res) => {
             archivedByName,
             { userId: cc._id }
           ).catch(err => console.error('Erreur notification CC:', err));
+          notifyMailArchived(mail, cc, req.user);
         }
       }
     }
