@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { outgoingMailsAPI, contactsAPI, servicesAPI, subjectsAPI } from '../../services/api';
 import { useAuthStore } from '../../stores/authStore';
@@ -9,7 +9,8 @@ import {
   DocumentArrowUpIcon,
   XMarkIcon,
   CheckCircleIcon,
-  ExclamationTriangleIcon
+  ExclamationTriangleIcon,
+  ArrowUturnLeftIcon
 } from '@heroicons/react/24/outline';
 
 const SENDING_METHODS = [
@@ -29,20 +30,32 @@ const PRIORITIES = [
 
 export default function CreateOutgoingMailPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuthStore();
+
+  // Réponse à un courrier entrant (bouton « Répondre par courrier départ »)
+  const replyTo = location.state?.replyTo || null;
+  const replySubject = replyTo?.subject
+    ? (replyTo.subject.startsWith('RE:') ? replyTo.subject : `RE: ${replyTo.subject}`)
+    : '';
+
   const [file, setFile] = useState(null);
   const [errors, setErrors] = useState({});
-  const [subjectSearch, setSubjectSearch] = useState('');
+  const [subjectSearch, setSubjectSearch] = useState(replySubject);
   const [subjectResults, setSubjectResults] = useState([]);
   const [showSubjectResults, setShowSubjectResults] = useState(false);
-  const [destinationSearch, setDestinationSearch] = useState('');
+  const [destinationSearch, setDestinationSearch] = useState(
+    replyTo?.contactName
+      ? replyTo.contactName + (replyTo.contactOrganization ? ` (${replyTo.contactOrganization})` : '')
+      : ''
+  );
   const [destinationResults, setDestinationResults] = useState([]);
   const [showDestResults, setShowDestResults] = useState(false);
 
   const [formData, setFormData] = useState({
-    subject: '',
-    destinationId: '',
-    destinationName: '',
+    subject: replySubject,
+    destinationId: replyTo?.contactId || '',
+    destinationName: replyTo?.contactName || '',
     service: user?.services?.[0]?._id || '',
     content: '',
     priority: 'normal',
@@ -108,6 +121,7 @@ export default function CreateOutgoingMailPage() {
       if (formData.content) fd.append('content', formData.content);
       if (formData.trackingNumber) fd.append('trackingNumber', formData.trackingNumber);
       if (formData.notes) fd.append('notes', formData.notes);
+      if (replyTo?.mailId) fd.append('linkedIncomingMail', replyTo.mailId);
 
       const result = await outgoingMailsAPI.create(fd);
 
@@ -156,6 +170,21 @@ export default function CreateOutgoingMailPage() {
         <h1 className="text-2xl font-bold text-gray-900">Nouveau courrier départ</h1>
         <p className="text-gray-600 mt-1">Créer un nouveau courrier sortant</p>
       </div>
+
+      {replyTo && (
+        <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <ArrowUturnLeftIcon className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-blue-800">
+            <p>
+              En réponse au courrier entrant <strong>{replyTo.reference}</strong>
+              {replyTo.subject ? <> — « {replyTo.subject} »</> : null}
+            </p>
+            <p className="text-blue-600 mt-1">
+              Le courrier entrant passera automatiquement en « traité » lors de l'envoi de ce courrier départ.
+            </p>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={(e) => handleSubmit(e, false)} className="card p-6 space-y-6">
         {/* Objet */}

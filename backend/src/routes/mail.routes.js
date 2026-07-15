@@ -517,7 +517,7 @@ router.post('/', authenticate, canImportMails, uploadCourrier.single('document')
 
     // Notifications email
     try {
-      const { sendNewMailNotification, sendServiceMailNotification } = await import('../services/email.service.js');
+      const { sendNewMailNotification, sendServiceMailNotification, sendAckReceiptEmail } = await import('../services/email.service.js');
 
       // Notifier le destinataire principal
       if (mail.recipient && mail.recipient.email && mail.recipient._id.toString() !== req.user._id.toString()) {
@@ -545,6 +545,16 @@ router.post('/', authenticate, canImportMails, uploadCourrier.single('document')
             );
           }
         }
+      }
+
+      // Accusé de réception automatique à l'expéditeur (si activé dans les paramètres)
+      if (mail.sender?.email) {
+        sendAckReceiptEmail(
+          mail.sender.email,
+          mail.senderName || mail.sender.name,
+          mail,
+          mail.service?.name || ''
+        ).catch(err => console.error('Erreur accusé de réception:', err.message));
       }
     } catch (notifError) {
       console.error('Erreur notification:', notifError.message);
@@ -857,14 +867,14 @@ router.post('/import', authenticate, canImportMails, [
     await PendingMail.findByIdAndDelete(pendingMailId);
 
     const populatedMail = await Mail.findById(mail._id)
-      .populate('sender', 'name organization')
+      .populate('sender', 'name organization email')
       .populate('service', 'name code')
       .populate('recipient', 'firstName lastName email')
       .populate('recipientsCopy', 'firstName lastName email');
 
     // Notifications email
     try {
-      const { sendNewMailNotification, sendServiceMailNotification } = await import('../services/email.service.js');
+      const { sendNewMailNotification, sendServiceMailNotification, sendAckReceiptEmail } = await import('../services/email.service.js');
 
       // Notifier le destinataire principal
       if (populatedMail.recipient && populatedMail.recipient.email && populatedMail.recipient._id.toString() !== req.user._id.toString()) {
@@ -906,6 +916,16 @@ router.post('/import', authenticate, canImportMails, [
             );
           }
         }
+      }
+
+      // Accusé de réception automatique à l'expéditeur (si activé dans les paramètres)
+      if (populatedMail.sender?.email) {
+        sendAckReceiptEmail(
+          populatedMail.sender.email,
+          populatedMail.senderName || populatedMail.sender.name,
+          populatedMail,
+          populatedMail.service?.name || ''
+        ).catch(err => console.error('Erreur accusé de réception:', err.message));
       }
     } catch (notifError) {
       console.error('Erreur notification:', notifError.message);

@@ -165,6 +165,98 @@ function NotificationDefaultsSettings() {
   );
 }
 
+// Composant Accusé de réception automatique à l'expéditeur
+function AckReceiptSettings() {
+  const queryClient = useQueryClient();
+  const [enabled, setEnabled] = useState(false);
+
+  const { data: enabledData } = useQuery({
+    queryKey: ['settings', 'ack_receipt_enabled'],
+    queryFn: async () => {
+      const res = await settingsAPI.getOne('ack_receipt_enabled');
+      return res.data?.data?.value;
+    },
+    retry: false
+  });
+
+  useEffect(() => {
+    if (enabledData !== undefined && enabledData !== null) {
+      setEnabled(enabledData === true || enabledData === 'true');
+    }
+  }, [enabledData]);
+
+  const saveMutation = useMutation({
+    mutationFn: () => settingsAPI.update('ack_receipt_enabled', {
+      value: enabled,
+      category: 'general',
+      description: 'Envoi automatique d\'un accusé de réception par email à l\'expéditeur lors de l\'enregistrement d\'un courrier entrant'
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['settings', 'ack_receipt_enabled']);
+      toast.success('Paramètre d\'accusé de réception enregistré');
+    },
+    onError: () => {
+      toast.error('Erreur lors de l\'enregistrement');
+    }
+  });
+
+  return (
+    <div className="space-y-6 mt-10 pt-8 border-t">
+      <div>
+        <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <EnvelopeIcon className="w-5 h-5" />
+          Accusé de réception automatique
+        </h2>
+        <p className="text-sm text-gray-500 mt-1">
+          Lorsqu'un courrier entrant est enregistré, un email d'accusé de réception mentionnant
+          le numéro de référence est envoyé automatiquement à l'expéditeur, à condition que sa
+          fiche contact comporte une adresse email. Le contenu de l'email est personnalisable
+          dans l'onglet « Modèles de mail » (action « Accusé de réception (expéditeur) »).
+        </p>
+      </div>
+
+      <div className="rounded-lg border overflow-hidden">
+        <label className="flex items-center gap-4 p-4 hover:bg-gray-50 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={enabled}
+            onChange={(e) => setEnabled(e.target.checked)}
+            className="w-4 h-4 rounded border-gray-300 text-primary-600"
+          />
+          <div className="flex-1 min-w-0">
+            <span className="text-sm font-medium text-gray-900">
+              Activer l'accusé de réception automatique
+            </span>
+            <p className="text-xs text-gray-500">
+              Envoyé à l'expéditeur lors de l'enregistrement de son courrier (saisie manuelle ou import)
+            </p>
+          </div>
+        </label>
+      </div>
+
+      <div className="flex justify-end">
+        <button
+          onClick={() => saveMutation.mutate()}
+          disabled={saveMutation.isLoading}
+          className="btn-primary flex items-center gap-2"
+        >
+          {saveMutation.isLoading ? (
+            <>
+              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              Enregistrement...
+            </>
+          ) : (
+            <>
+              <CheckCircleIcon className="w-5 h-5" />
+              Enregistrer
+            </>
+          )}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // Composant Échéances : délai réglementaire par défaut + jours de rappel
 function DueDateSettings() {
   const queryClient = useQueryClient();
@@ -3577,6 +3669,7 @@ export default function SettingsPage() {
             {activeTab === 'notifications' && (
               <>
                 <NotificationDefaultsSettings />
+                <AckReceiptSettings />
                 <DueDateSettings />
               </>
             )}

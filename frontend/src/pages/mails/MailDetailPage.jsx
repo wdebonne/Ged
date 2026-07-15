@@ -344,6 +344,24 @@ export default function MailDetailPage() {
   const isAdmin = hasPermission('delete_mails');
   const canReopen = isAdmin && mail.status !== 'pending';
 
+  // Répondre par courrier départ (crée un brouillon pré-rempli lié à ce courrier)
+  const canReplyOutgoing = mail.status !== 'archived' && hasPermission('create_outgoing');
+
+  const handleReplyOutgoing = () => {
+    navigate('/courriers/depart/nouveau', {
+      state: {
+        replyTo: {
+          mailId: mail._id,
+          reference: mail.chronoNumber || mail.reference,
+          subject: mail.subject,
+          contactId: mail.sender?._id || '',
+          contactName: mail.senderName || mail.sender?.name || '',
+          contactOrganization: mail.sender?.organization || ''
+        }
+      }
+    });
+  };
+
   return (
     <div className="space-y-6">
       {/* Modal Options d'export */}
@@ -436,6 +454,16 @@ export default function MailDetailPage() {
             )}
           </div>
           
+          {canReplyOutgoing && (
+            <button
+              onClick={handleReplyOutgoing}
+              className="btn-primary flex items-center gap-2"
+              title="Créer un brouillon de courrier départ pré-rempli en réponse à ce courrier"
+            >
+              <PaperAirplaneIcon className="w-4 h-4" />
+              Répondre par courrier départ
+            </button>
+          )}
           {canProcess && (
             <button
               onClick={() => processMutation.mutate()}

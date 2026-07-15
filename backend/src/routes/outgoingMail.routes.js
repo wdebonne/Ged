@@ -3,7 +3,7 @@ import { body, validationResult } from 'express-validator';
 import mongoose from 'mongoose';
 import fs from 'fs';
 import path from 'path';
-import { OutgoingMail, Contact, Subject, User, Service, OUTGOING_MAIL_STATUS, PERMISSIONS, AUDIT_CATEGORIES } from '../models/index.js';
+import { OutgoingMail, Contact, Subject, User, Service, Mail, MAIL_STATUS, OUTGOING_MAIL_STATUS, PERMISSIONS, AUDIT_CATEGORIES } from '../models/index.js';
 import { authenticate, authorize, isAdmin } from '../middleware/auth.middleware.js';
 import { uploadOutgoing, handleUploadError, validateMagicBytes } from '../middleware/upload.middleware.js';
 import { extractTextFromPDF } from '../services/ocr.service.js';
@@ -371,6 +371,25 @@ router.post('/:id/send', authenticate, authorize(PERMISSIONS.SEND_OUTGOING), asy
 
     await mail.markAsSent(req.user._id);
 
+    // Boucle entrant→sortant : passer le courrier entrant lié en « traité »
+    // avec une trace dans son historique de réponses
+    let incomingProcessed = false;
+    if (mail.linkedIncomingMail) {
+      try {
+        const incoming = await Mail.findById(mail.linkedIncomingMail);
+        if (incoming && incoming.status === MAIL_STATUS.PENDING) {
+          await incoming.addResponse({
+            type: 'courrier',
+            content: `Réponse envoyée par courrier départ ${mail.chronoNumber || mail.reference} — « ${mail.subject} »`,
+            respondedBy: req.user._id
+          });
+          incomingProcessed = true;
+        }
+      } catch (linkError) {
+        console.error('Erreur mise à jour du courrier entrant lié:', linkError.message);
+      }
+    }
+
     const populated = await OutgoingMail.findById(mail._id)
       .populate('destination', 'name organization email')
       .populate('service', 'name code color')
@@ -378,7 +397,9 @@ router.post('/:id/send', authenticate, authorize(PERMISSIONS.SEND_OUTGOING), asy
 
     res.json({
       success: true,
-      message: 'Courrier marqué comme envoyé',
+      message: incomingProcessed
+        ? 'Courrier marqué comme envoyé — le courrier entrant lié est passé en « traité »'
+        : 'Courrier marqué comme envoyé',
       data: populated
     });
   } catch (error) {

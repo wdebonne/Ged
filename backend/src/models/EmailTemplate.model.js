@@ -11,6 +11,7 @@ const EMAIL_ACTIONS = {
   SUPERVISOR_NEW_MAIL: 'supervisor_new_mail',
   CORECIPIENT_PROCESSED: 'corecipient_processed',
   CORECIPIENT_ARCHIVED: 'corecipient_archived',
+  ACK_RECEIPT: 'ack_receipt',
   CUSTOM: 'custom'
 };
 
@@ -110,6 +111,10 @@ emailTemplateSchema.statics.getAvailableVariables = function(action) {
     [EMAIL_ACTIONS.CORECIPIENT_ARCHIVED]: [
       '{{userName}}', '{{userFirstName}}', '{{mailReference}}', '{{mailSubject}}',
       '{{senderName}}', '{{archivedBy}}', '{{archivedDate}}', '{{mailUrl}}'
+    ],
+    [EMAIL_ACTIONS.ACK_RECEIPT]: [
+      '{{senderName}}', '{{mailReference}}', '{{mailChronoNumber}}',
+      '{{mailSubject}}', '{{mailDate}}', '{{serviceName}}'
     ],
     [EMAIL_ACTIONS.CUSTOM]: []
   };

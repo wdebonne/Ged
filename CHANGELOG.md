@@ -7,6 +7,27 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ---
 
+## [3.18.0] - 2026-07-15
+
+### Ajouté
+
+- **Bouton « Répondre par courrier départ »** sur la page détail d'un courrier entrant (visible avec la permission `create_outgoing`, sauf courrier archivé) :
+  - Ouvre le formulaire de nouveau courrier départ **pré-rempli** : destinataire (l'expéditeur du courrier entrant), objet « RE: … » et lien vers le courrier entrant (`linkedIncomingMail`)
+  - Un bandeau sur le formulaire rappelle le courrier auquel on répond
+  - **Boucle entrant→sortant** : à l'envoi du courrier départ lié, le courrier entrant passe automatiquement en « traité », avec une trace dans son historique de réponses (type courrier, référence du départ)
+- **Accusé de réception automatique** à l'expéditeur d'un courrier entrant :
+  - Email envoyé automatiquement lors de l'enregistrement du courrier (saisie manuelle ou import), mentionnant la référence, le numéro d'ordre, l'objet, la date et le service en charge — pratique courante en administration
+  - Nécessite une adresse email sur la fiche contact de l'expéditeur
+  - **Désactivé par défaut**, activable dans Paramètres > Notifications > « Accusé de réception automatique »
+  - Contenu personnalisable via un modèle de mail (nouvelle action « Accusé de réception (expéditeur) »)
+
+### Technique
+
+- `POST /api/outgoing-mails/:id/send` : si `linkedIncomingMail` pointe vers un courrier entrant en attente, appel de `addResponse()` (statut « traité » + entrée d'historique)
+- Nouvelle action de template `ack_receipt` (variables : `{{senderName}}`, `{{mailReference}}`, `{{mailChronoNumber}}`, `{{mailSubject}}`, `{{mailDate}}`, `{{serviceName}}`) + template par défaut
+- Nouvelle fonction `sendAckReceiptEmail()` dans `email.service.js`, appelée depuis `POST /api/mails` et `POST /api/mails/import` (non bloquante, gardée par le réglage)
+- Nouveau réglage `ack_receipt_enabled` (catégorie `general`, défaut `false`)
+
 ## [3.17.0] - 2026-07-14
 
 ### Ajouté

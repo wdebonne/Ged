@@ -344,6 +344,20 @@ const getDefaultTemplates = (vars) => ({
       </p>
     `)
   },
+  [EMAIL_ACTIONS.ACK_RECEIPT]: {
+    subject: `Accusé de réception de votre courrier - ${vars.mailReference}`,
+    html: getDefaultTemplate('#0ea5e9', '📨', 'Accusé de réception', `
+      <h2>Bonjour ${vars.senderName},</h2>
+      <p>Nous accusons réception de votre courrier, enregistré dans nos services le <strong>${vars.mailDate}</strong>.</p>
+      <div class="info">
+        <p><strong>Référence :</strong> ${vars.mailReference}</p>
+        ${vars.mailChronoNumber ? `<p><strong>Numéro d'ordre :</strong> ${vars.mailChronoNumber}</p>` : ''}
+        <p><strong>Objet :</strong> ${vars.mailSubject}</p>
+        ${vars.serviceName ? `<p><strong>Service en charge :</strong> ${vars.serviceName}</p>` : ''}
+      </div>
+      <p>Votre courrier est en cours de traitement. Merci de rappeler la référence ci-dessus dans toute correspondance ultérieure.</p>
+    `)
+  },
   [EMAIL_ACTIONS.CORECIPIENT_ARCHIVED]: {
     subject: `Courrier archivé - ${vars.mailReference || vars.mailSubject}`,
     html: getDefaultTemplate('#6b7280', '📦', 'Courrier archivé', `
@@ -464,6 +478,23 @@ export const sendMailArchivedNotification = async (recipientEmail, recipientName
   });
 };
 
+// Accusé de réception automatique à l'expéditeur d'un courrier entrant
+// (envoyé uniquement si le paramètre ack_receipt_enabled est activé)
+export const sendAckReceiptEmail = async (senderEmail, senderName, mailInfo, serviceName = '') => {
+  const enabled = await Settings.getValue('ack_receipt_enabled', false);
+  if (enabled !== true && enabled !== 'true') return { success: true, skipped: true };
+  return sendTemplatedEmail(EMAIL_ACTIONS.ACK_RECEIPT, senderEmail, {
+    senderName,
+    userName: senderName,
+    userFirstName: senderName.split(' ')[0],
+    mailReference: mailInfo.reference,
+    mailChronoNumber: mailInfo.chronoNumber || '',
+    mailSubject: mailInfo.subject,
+    mailDate: new Date(mailInfo.receivedDate || Date.now()).toLocaleDateString('fr-FR'),
+    serviceName
+  });
+};
+
 // Rappel d'échéance : courrier à traiter dont l'échéance approche
 export const sendMailReminderNotification = async (recipientEmail, recipientName, mailInfo, daysRemaining, { userId } = {}) => {
   if (userId) {
@@ -524,6 +555,7 @@ export default {
   sendServiceMailNotification,
   sendMailReminderNotification,
   sendMailOverdueNotification,
+  sendAckReceiptEmail,
   shouldNotifyUser,
   testSmtpConnection
 };

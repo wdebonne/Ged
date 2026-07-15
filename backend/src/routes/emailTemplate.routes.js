@@ -18,6 +18,7 @@ const ACTION_LABELS = {
   [EMAIL_ACTIONS.SUPERVISOR_NEW_MAIL]: 'Notification superviseur (nouveau courrier)',
   [EMAIL_ACTIONS.CORECIPIENT_PROCESSED]: 'Notification co-destinataire (traitement)',
   [EMAIL_ACTIONS.CORECIPIENT_ARCHIVED]: 'Notification co-destinataire (archivage)',
+  [EMAIL_ACTIONS.ACK_RECEIPT]: 'Accusé de réception (expéditeur)',
   [EMAIL_ACTIONS.CUSTOM]: 'Personnalisé'
 };
 
