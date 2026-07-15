@@ -8,6 +8,7 @@ import { authenticate, authorize, isAdmin } from '../middleware/auth.middleware.
 import { uploadOutgoing, handleUploadError, validateMagicBytes } from '../middleware/upload.middleware.js';
 import { extractTextFromPDF } from '../services/ocr.service.js';
 import { escapeRegex } from '../utils/regex.js';
+import { buildSearchOr } from '../utils/mailSearch.js';
 import { queueRegisterUpdate } from '../services/excel.service.js';
 import { logAudit } from '../services/audit.service.js';
 
@@ -88,18 +89,12 @@ router.get('/', authenticate, async (req, res) => {
     }
 
     if (search) {
-      const safeSearch = escapeRegex(search);
+      // Le contenu OCR passe par l'index $text (via buildSearchOr), pas par $regex
       query.$and = query.$and || [];
       query.$and.push({
-        $or: [
-          { subject: { $regex: safeSearch, $options: 'i' } },
-          { destinationName: { $regex: safeSearch, $options: 'i' } },
-          { ocrContent: { $regex: safeSearch, $options: 'i' } },
-          { fileName: { $regex: safeSearch, $options: 'i' } },
-          { reference: { $regex: safeSearch, $options: 'i' } },
-          { chronoNumber: { $regex: safeSearch, $options: 'i' } },
-          { notes: { $regex: safeSearch, $options: 'i' } }
-        ]
+        $or: await buildSearchOr(OutgoingMail, search, [
+          'subject', 'destinationName', 'fileName', 'reference', 'chronoNumber', 'notes'
+        ])
       });
     }
 

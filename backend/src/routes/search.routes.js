@@ -2,6 +2,7 @@ import express from 'express';
 import { Mail, OutgoingMail, Contact } from '../models/index.js';
 import { authenticate } from '../middleware/auth.middleware.js';
 import { escapeRegex } from '../utils/regex.js';
+import { buildSearchOr } from '../utils/mailSearch.js';
 import { buildMailVisibilityQuery, buildOutgoingMailVisibilityQuery } from '../utils/mailVisibility.js';
 
 const router = express.Router();
@@ -25,16 +26,19 @@ router.get('/', authenticate, async (req, res) => {
 
     const safeSearch = escapeRegex(q);
 
-    const [mailVisibility, outgoingVisibility] = await Promise.all([
+    const [mailVisibility, outgoingVisibility, mailSearchOr, outgoingSearchOr] = await Promise.all([
       buildMailVisibilityQuery(req.user),
-      buildOutgoingMailVisibilityQuery(req.user)
+      buildOutgoingMailVisibilityQuery(req.user),
+      // Le contenu OCR passe par l'index $text (via buildSearchOr), pas par $regex
+      buildSearchOr(Mail, q, ['subject', 'senderName', 'fileName', 'reference', 'chronoNumber']),
+      buildSearchOr(OutgoingMail, q, ['subject', 'destinationName', 'notes'])
     ]);
 
     const [mails, outgoingMails, contacts] = await Promise.all([
       Mail.find({
         $and: [
           mailVisibility,
-          textOr(safeSearch, ['subject', 'senderName', 'ocrContent', 'fileName', 'reference', 'chronoNumber'])
+          { $or: mailSearchOr }
         ]
       })
         .select('subject senderName reference chronoNumber receivedDate status')
@@ -44,7 +48,7 @@ router.get('/', authenticate, async (req, res) => {
       OutgoingMail.find({
         $and: [
           outgoingVisibility,
-          textOr(safeSearch, ['subject', 'destinationName', 'ocrContent', 'notes'])
+          { $or: outgoingSearchOr }
         ]
       })
         .select('subject destinationName reference chronoNumber sentDate createdAt status')
