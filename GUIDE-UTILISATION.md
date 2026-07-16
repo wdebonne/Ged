@@ -55,7 +55,7 @@ L'interface est composée de :
   - ⚙️ **Administration** : Paramètres (si vous êtes admin)
 
 - **Zone principale** : Contenu de la page sélectionnée
-- **Barre supérieure** : Menu utilisateur et notifications
+- **Barre supérieure** : Recherche globale, bouton mode sombre/clair (🌙/☀️), notifications et menu utilisateur
 
 ### 1.4 Recherche globale et notifications
 
@@ -679,6 +679,7 @@ Oui. Un administrateur peut le restaurer depuis **Administration > Corbeille** t
 | Action | Astuce |
 |--------|--------|
 | **Recherche rapide** | Utilisez le champ de recherche global |
+| **Mode sombre** | Cliquez sur l'icône 🌙/☀️ dans la barre supérieure ; votre préférence est mémorisée |
 | **Navigation clavier** | Utilisez Tab pour naviguer entre les champs |
 | **Glisser-déposer** | Déposez directement vos PDF sur la zone d'import |
 | **Clic droit** | Sur certains éléments pour accéder aux actions rapides |

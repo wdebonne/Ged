@@ -7,6 +7,24 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ---
 
+## [3.21.0] - 2026-07-16
+
+### Ajouté
+
+- **Mode sombre** sur l'ensemble de l'application : chrome principal (sidebar, en-tête, menus), listes de courriers (entrants et départ), pages de détail, dashboard, statistiques (graphiques compris), toutes les pages d'administration, profil, délégations, notifications, authentification et modals (import, export, actions groupées, commentaires)
+  - Bouton bascule soleil/lune dans l'en-tête et sur la page de connexion
+  - Préférence mémorisée (`localStorage`) ; détecte automatiquement la préférence système (`prefers-color-scheme`) au premier lancement
+- **Skeleton loaders** sur les listes : remplacent les spinners de chargement sur les principales listes de courriers (à traiter, traités, archivés, brouillons, envoyés, archivés départ) et plusieurs tableaux d'administration — le titre et la barre de recherche restent visibles pendant le chargement au lieu d'être masqués par un spinner plein écran
+
+### Technique
+
+- `darkMode: 'class'` (Tailwind) piloté par un nouveau store `frontend/src/stores/themeStore.js` (zustand + `persist`)
+- Variantes `dark:` ajoutées aux classes composants partagées d'`index.css` (`.card`, `.btn-*`, `.input`, `.badge-*`, `.table*`, `.modal*`, `.sidebar-link*`, `.dropdown*`, react-select) : la majorité des composants du projet héritent du mode sombre sans modification supplémentaire ; les classes Tailwind « brutes » (tableaux HTML manuels, conteneurs `bg-white` ad hoc) ont été patchées fichier par fichier
+- Nouveaux composants frontend `ThemeToggle.jsx` et `Skeleton.jsx` (exporte `Skeleton`, `SkeletonMailList`, `SkeletonTableRows`, `SkeletonStatCards`)
+- Exception volontaire : les aperçus d'email HTML (iframe `srcDoc` dans les modèles de mail) gardent un fond blanc fixe, indépendant du thème — ils simulent le rendu réel d'un client mail
+
+---
+
 ## [3.20.1] - 2026-07-15
 
 ### Corrigé

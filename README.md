@@ -595,6 +595,8 @@ Sans effet si `LDAP_REQUIRED_GROUP_DN` n'est pas défini (aucune restriction de 
 - ✅ **Interface dédiée** : onglet "Délégations" dans Mon Profil
 
 ### Interface utilisateur
+- ✅ **Mode sombre** : bouton bascule (soleil/lune) dans l'en-tête et sur la page de connexion, disponible sur l'ensemble de l'application (listes, détail, administration, statistiques, profil, modals). Préférence mémorisée et détection automatique de la préférence système au premier lancement
+- ✅ **Skeleton loaders** : sur les principales listes de courriers et tableaux d'administration, le contenu en cours de chargement est représenté par des blocs animés plutôt qu'un spinner plein écran — le titre et la barre de recherche restent visibles pendant le chargement
 - ✅ **Recherche globale (Ctrl+K / Cmd+K)** : palette de commande accessible depuis n'importe quelle page
   - Recherche simultanée dans les courriers entrants, courriers départ et contacts (objet, expéditeur/destinataire, référence, contenu OCR)
   - Résultats groupés par catégorie (Entrants / Sortants / Contacts) avec aperçu, navigation directe au clic
