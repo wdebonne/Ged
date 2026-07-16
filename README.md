@@ -820,6 +820,18 @@ cd frontend
 npm run dev
 ```
 
+### 🧪 Tests
+
+Le backend dispose d'une suite de tests API (vitest + supertest + `mongodb-memory-server`, base MongoDB isolée en mémoire — aucune base réelle requise) :
+
+```bash
+cd backend
+npm test          # Exécute la suite une fois
+npm run test:watch  # Mode watch pendant le développement
+```
+
+Couverture actuelle : authentification (login local, JWT, refresh, comptes désactivés), visibilité et permissions des courriers entrants (par service, délégation, action groupée, corbeille), recherche plein texte, flux complet d'import (upload → import).
+
 ### Production
 
 ```bash
@@ -848,6 +860,7 @@ Le déploiement se fait via une stack Portainer utilisant l'image pré-buildée 
 GED/
 ├── backend/
 │   ├── src/
+│   │   ├── controllers/    # Contrôleurs (mail/ : list, pending, import, actions, comments, export)
 │   │   ├── middleware/     # Auth, upload middleware
 │   │   ├── models/         # Schémas Mongoose
 │   │   │   ├── AuditLog.model.js
@@ -864,7 +877,10 @@ GED/
 │   │   ├── routes/         # Routes API
 │   │   ├── services/       # Services (IMAP, LDAP, OCR, etc.)
 │   │   ├── scripts/        # Scripts (seed, migration)
-│   │   └── server.js       # Point d'entrée
+│   │   ├── utils/          # Helpers (recherche $text, regex, visibilité...)
+│   │   ├── app.js          # Application Express (middlewares + routes)
+│   │   └── server.js       # Point d'entrée (connexion DB, migrations, démarrage)
+│   ├── tests/              # Tests API (vitest + supertest + mongodb-memory-server)
 │   ├── uploads/            # Fichiers uploadés
 │   │   └── branding/       # Logo personnalisé
 │   └── package.json

@@ -49,11 +49,11 @@ export default function ResetPasswordPage() {
         animate={{ opacity: 1, y: 0 }}
         className="text-center"
       >
-        <div className="w-16 h-16 bg-success-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <CheckCircleIcon className="w-8 h-8 text-success-600" />
+        <div className="w-16 h-16 bg-success-100 dark:bg-success-900/40 rounded-full flex items-center justify-center mx-auto mb-4">
+          <CheckCircleIcon className="w-8 h-8 text-success-600 dark:text-success-400" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Mot de passe modifié !</h2>
-        <p className="text-gray-600 mb-6">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Mot de passe modifié !</h2>
+        <p className="text-gray-600 dark:text-gray-400 mb-6">
           Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.
         </p>
         <Link to="/login" className="btn-primary">
@@ -65,14 +65,14 @@ export default function ResetPasswordPage() {
 
   return (
     <div>
-      <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-        <LockClosedIcon className="w-6 h-6 text-primary-600" />
+      <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/40 rounded-full flex items-center justify-center mx-auto mb-4">
+        <LockClosedIcon className="w-6 h-6 text-primary-600 dark:text-primary-400" />
       </div>
-      
-      <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
+
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2 text-center">
         Nouveau mot de passe
       </h2>
-      <p className="text-gray-600 mb-6 text-center">
+      <p className="text-gray-600 dark:text-gray-400 mb-6 text-center">
         Choisissez un nouveau mot de passe sécurisé.
       </p>
 
@@ -112,7 +112,7 @@ export default function ResetPasswordPage() {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-3 bg-danger-50 border border-danger-200 rounded-lg text-danger-700 text-sm"
+            className="p-3 bg-danger-50 border border-danger-200 rounded-lg text-danger-700 text-sm dark:bg-danger-900/20 dark:border-danger-800 dark:text-danger-400"
           >
             {error}
           </motion.div>
@@ -151,7 +151,7 @@ export default function ResetPasswordPage() {
         <div className="text-center">
           <Link
             to="/login"
-            className="text-sm text-gray-600 hover:text-gray-900"
+            className="text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
           >
             Retour à la connexion
           </Link>

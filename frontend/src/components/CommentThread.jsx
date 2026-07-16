@@ -27,7 +27,7 @@ function renderContent(content, mentions) {
   const regex = new RegExp(`(${escaped.join('|')})`, 'g');
   return content.split(regex).map((part, i) =>
     names.includes(part) ? (
-      <span key={i} className="text-primary-700 bg-primary-50 font-medium rounded px-0.5">
+      <span key={i} className="text-primary-700 bg-primary-50 dark:text-primary-300 dark:bg-primary-900/40 font-medium rounded px-0.5">
         {part}
       </span>
     ) : (
@@ -166,18 +166,18 @@ export default function CommentThread({ mailId, comments = [] }) {
 
   return (
     <>
-      <div className="p-4 border-b">
-        <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+      <div className="p-4 border-b dark:border-gray-700">
+        <h2 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
           <ChatBubbleOvalLeftEllipsisIcon className="w-5 h-5" />
           Commentaires internes ({comments.length})
         </h2>
-        <p className="text-xs text-gray-500 mt-1">
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
           Visibles uniquement en interne — mentionnez un collègue avec @ pour le notifier
         </p>
       </div>
       <div className="p-4">
         {comments.length === 0 ? (
-          <p className="text-center text-gray-500 py-6 text-sm">
+          <p className="text-center text-gray-500 dark:text-gray-400 py-6 text-sm">
             Aucun commentaire pour ce courrier
           </p>
         ) : (
@@ -193,19 +193,19 @@ export default function CommentThread({ mailId, comments = [] }) {
                       className="w-8 h-8 rounded-full object-cover flex-shrink-0"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0">
-                      <span className="text-primary-600 text-sm font-semibold">
+                    <div className="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900/40 flex items-center justify-center flex-shrink-0">
+                      <span className="text-primary-600 dark:text-primary-400 text-sm font-semibold">
                         {comment.author?.firstName?.[0]}{comment.author?.lastName?.[0]}
                       </span>
                     </div>
                   )}
-                  <div className="flex-1 min-w-0 bg-gray-50 rounded-lg px-3 py-2">
+                  <div className="flex-1 min-w-0 bg-gray-50 dark:bg-gray-900 rounded-lg px-3 py-2">
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex items-baseline gap-2">
-                        <span className="text-sm font-medium text-gray-900">
+                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                           {comment.author?.firstName} {comment.author?.lastName}
                         </span>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
                           {format(new Date(comment.createdAt), 'dd MMM yyyy à HH:mm', { locale: fr })}
                         </span>
                       </div>
@@ -217,14 +217,14 @@ export default function CommentThread({ mailId, comments = [] }) {
                             }
                           }}
                           disabled={deleteCommentMutation.isLoading}
-                          className="text-gray-400 hover:text-danger-600 p-0.5 transition-colors"
+                          className="text-gray-400 hover:text-danger-600 dark:text-gray-500 dark:hover:text-danger-400 p-0.5 transition-colors"
                           title="Supprimer le commentaire"
                         >
                           <TrashIcon className="w-4 h-4" />
                         </button>
                       )}
                     </div>
-                    <p className="text-sm text-gray-700 whitespace-pre-wrap mt-1">
+                    <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap mt-1">
                       {renderContent(comment.content, comment.mentions)}
                     </p>
                   </div>
@@ -251,7 +251,7 @@ export default function CommentThread({ mailId, comments = [] }) {
 
           {/* Dropdown de mentions */}
           {mentionQuery !== null && suggestions.length > 0 && (
-            <div className="absolute bottom-full left-0 mb-1 w-72 max-h-56 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-lg z-20">
+            <div className="absolute bottom-full left-0 mb-1 w-72 max-h-56 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-lg z-20 dark:bg-gray-800 dark:border-gray-700">
               {suggestions.map((u, i) => (
                 <button
                   key={u._id}
@@ -261,12 +261,12 @@ export default function CommentThread({ mailId, comments = [] }) {
                     insertMention(u);
                   }}
                   className={`w-full flex items-center gap-2 px-3 py-2 text-left text-sm transition-colors ${
-                    i === activeIndex ? 'bg-primary-50 text-primary-700' : 'hover:bg-gray-50 text-gray-700'
+                    i === activeIndex ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-300' : 'hover:bg-gray-50 text-gray-700 dark:hover:bg-gray-700 dark:text-gray-300'
                   }`}
                 >
-                  <AtSymbolIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  <AtSymbolIcon className="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
                   <span className="font-medium">{u.firstName} {u.lastName}</span>
-                  {u.email && <span className="text-xs text-gray-400 truncate">{u.email}</span>}
+                  {u.email && <span className="text-xs text-gray-400 dark:text-gray-500 truncate">{u.email}</span>}
                 </button>
               ))}
             </div>

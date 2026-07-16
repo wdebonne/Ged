@@ -2,10 +2,11 @@ import { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import useBrandingStore from '../stores/brandingStore';
+import ThemeToggle from '../components/ThemeToggle';
 
 export default function AuthLayout() {
   const { appName, appLogo, footerText, footerVisible, fetchBranding, isLoaded } = useBrandingStore();
-  
+
   // Charger les paramètres de branding au montage
   useEffect(() => {
     if (!isLoaded) {
@@ -14,12 +15,14 @@ export default function AuthLayout() {
   }, [isLoaded, fetchBranding]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-600 via-primary-700 to-purple-800 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-primary-600 via-primary-700 to-purple-800 dark:from-gray-900 dark:via-primary-950 dark:to-purple-950 flex items-center justify-center p-4">
       {/* Background pattern */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-white/10 rounded-full blur-3xl" />
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl" />
       </div>
+
+      <ThemeToggle className="absolute top-4 right-4 z-20 bg-white/10 hover:bg-white/20 dark:hover:bg-gray-700 text-white dark:text-gray-300" />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -51,7 +54,7 @@ export default function AuthLayout() {
         </div>
 
         {/* Content */}
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8">
           <Outlet />
         </div>
 

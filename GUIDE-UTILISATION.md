@@ -9,6 +9,7 @@ Ce guide vous accompagne dans l'utilisation quotidienne de l'application GED Cou
 ## 📑 Table des matières
 
 1. [Premiers pas](#1-premiers-pas)
+   - [1.4 Recherche globale et notifications](#14-recherche-globale-et-notifications)
 2. [Tableau de bord](#2-tableau-de-bord)
 3. [Gestion des courriers](#3-gestion-des-courriers)
 4. [Import de courriers](#4-import-de-courriers)
@@ -55,6 +56,11 @@ L'interface est composée de :
 
 - **Zone principale** : Contenu de la page sélectionnée
 - **Barre supérieure** : Menu utilisateur et notifications
+
+### 1.4 Recherche globale et notifications
+
+- **Recherche globale (Ctrl+K / Cmd+K)** : ouvre depuis n'importe quelle page une palette de recherche interrogeant simultanément les courriers entrants, les courriers départ et les contacts (objet, expéditeur/destinataire, référence, contenu OCR). Les résultats sont groupés par catégorie ; cliquez sur un résultat pour y accéder directement. Pour un contact, la fiche s'ouvre automatiquement mise en évidence dans **Administration > Contacts**
+- **Notifications in-app** : la 🔔 cloche dans la barre supérieure affiche un badge avec le nombre de notifications non lues (mise à jour automatique toutes les 45 secondes). Cliquez sur la cloche pour voir la liste, sur une notification pour la marquer comme lue et naviguer vers l'élément concerné, ou sur **« Tout marquer comme lu »**. Vous recevez une notification lors d'un nouveau courrier qui vous est assigné, d'une réattribution, d'une mention dans un commentaire, etc. — indépendamment de vos préférences d'emails (voir [section 10.3](#103-onglet-notifications))
 
 ---
 
@@ -699,5 +705,5 @@ En cas de problème ou question :
 
 ---
 
-*Guide d'utilisation GED Courrier - Version 3.17.0*
+*Guide d'utilisation GED Courrier - Version 3.20.1*
 *Dernière mise à jour : Juillet 2026*

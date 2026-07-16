@@ -9,6 +9,7 @@ import UserMenu from '../components/UserMenu';
 import ChatBotButton from '../components/ChatBotButton';
 import NotificationBell from '../components/NotificationBell';
 import CommandPalette from '../components/CommandPalette';
+import ThemeToggle from '../components/ThemeToggle';
 import {
   HomeIcon,
   InboxIcon,
@@ -176,7 +177,7 @@ export default function MainLayout() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Mobile sidebar backdrop */}
       <AnimatePresence>
         {sidebarOpen && (
@@ -192,17 +193,17 @@ export default function MainLayout() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-full bg-white border-r border-gray-200 z-50 transform transition-all duration-300 lg:translate-x-0 ${
+        className={`fixed top-0 left-0 h-full bg-white border-r border-gray-200 dark:bg-gray-800 dark:border-gray-700 z-50 transform transition-all duration-300 lg:translate-x-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } ${sidebarCollapsed ? 'lg:w-16' : 'lg:w-64'} w-64`}
       >
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className={`flex items-center gap-3 px-4 py-5 border-b border-gray-100 ${sidebarCollapsed ? 'lg:justify-center lg:px-2' : ''}`}>
+          <div className={`flex items-center gap-3 px-4 py-5 border-b border-gray-100 dark:border-gray-700 ${sidebarCollapsed ? 'lg:justify-center lg:px-2' : ''}`}>
             {appLogo ? (
-              <img 
-                src={`/uploads/${appLogo}`} 
-                alt={appName} 
+              <img
+                src={`/uploads/${appLogo}`}
+                alt={appName}
                 className="w-10 h-10 rounded-xl object-contain flex-shrink-0"
               />
             ) : (
@@ -214,13 +215,13 @@ export default function MainLayout() {
             )}
             {!sidebarCollapsed && (
               <div className="lg:block">
-                <h1 className="text-lg font-bold text-gray-900">{appName}</h1>
-                <p className="text-xs text-gray-500">{appVersion}</p>
+                <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">{appName}</h1>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{appVersion}</p>
               </div>
             )}
             <button
               onClick={() => setSidebarOpen(false)}
-              className="ml-auto lg:hidden p-1 text-gray-500 hover:text-gray-700"
+              className="ml-auto lg:hidden p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
             >
               <XMarkIcon className="w-6 h-6" />
             </button>
@@ -258,7 +259,7 @@ export default function MainLayout() {
                 {!sidebarCollapsed ? (
                   <button
                     onClick={() => setImportOpen(!importOpen)}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider hover:text-gray-600 transition-colors"
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
                   >
                     {importOpen ? (
                       <ChevronDownIcon className="w-4 h-4" />
@@ -268,7 +269,7 @@ export default function MainLayout() {
                     <span>Import</span>
                   </button>
                 ) : (
-                  <div className="hidden lg:block border-t border-gray-200 my-2"></div>
+                  <div className="hidden lg:block border-t border-gray-200 dark:border-gray-700 my-2"></div>
                 )}
                 <AnimatePresence initial={false}>
                   {(importOpen || sidebarCollapsed) && (
@@ -291,7 +292,7 @@ export default function MainLayout() {
                           <item.icon className="w-5 h-5 flex-shrink-0" />
                           {!sidebarCollapsed && <span className="flex-1 lg:inline">{item.name}</span>}
                           {item.badge > 0 && !sidebarCollapsed && (
-                            <span className="bg-primary-100 text-primary-700 text-xs font-semibold px-2 py-0.5 rounded-full">
+                            <span className="bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300 text-xs font-semibold px-2 py-0.5 rounded-full">
                               {item.badge}
                             </span>
                           )}
@@ -309,7 +310,7 @@ export default function MainLayout() {
                 {!sidebarCollapsed ? (
                   <button
                     onClick={() => setCourrierDepartOpen(!courrierDepartOpen)}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider hover:text-gray-600 transition-colors"
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
                   >
                     {courrierDepartOpen ? (
                       <ChevronDownIcon className="w-4 h-4" />
@@ -319,7 +320,7 @@ export default function MainLayout() {
                     <span>Courrier Départ</span>
                   </button>
                 ) : (
-                  <div className="hidden lg:block border-t border-gray-200 my-2"></div>
+                  <div className="hidden lg:block border-t border-gray-200 dark:border-gray-700 my-2"></div>
                 )}
                 <AnimatePresence initial={false}>
                   {(courrierDepartOpen || sidebarCollapsed) && (
@@ -411,7 +412,7 @@ export default function MainLayout() {
                 {!sidebarCollapsed ? (
                   <button
                     onClick={() => setDelegatedOpen(!delegatedOpen)}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider hover:text-gray-600 transition-colors"
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
                   >
                     {delegatedOpen ? (
                       <ChevronDownIcon className="w-4 h-4" />
@@ -421,7 +422,7 @@ export default function MainLayout() {
                     <span>Courriers Délégués</span>
                   </button>
                 ) : (
-                  <div className="hidden lg:block border-t border-gray-200 my-2"></div>
+                  <div className="hidden lg:block border-t border-gray-200 dark:border-gray-700 my-2"></div>
                 )}
                 <AnimatePresence initial={false}>
                   {(delegatedOpen || sidebarCollapsed) && (
@@ -444,7 +445,7 @@ export default function MainLayout() {
                           <item.icon className="w-5 h-5 flex-shrink-0" />
                           {!sidebarCollapsed && <span className="flex-1 lg:inline">{item.name}</span>}
                           {item.badge !== undefined && item.badge > 0 && !sidebarCollapsed && (
-                            <span className="bg-purple-100 text-purple-700 text-xs font-semibold px-2 py-0.5 rounded-full">
+                            <span className="bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 text-xs font-semibold px-2 py-0.5 rounded-full">
                               {item.badge}
                             </span>
                           )}
@@ -462,7 +463,7 @@ export default function MainLayout() {
                 {!sidebarCollapsed ? (
                   <button
                     onClick={() => setServiceOpen(!serviceOpen)}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider hover:text-gray-600 transition-colors"
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
                   >
                     {serviceOpen ? (
                       <ChevronDownIcon className="w-4 h-4" />
@@ -472,7 +473,7 @@ export default function MainLayout() {
                     <span>Courriers Service(s)</span>
                   </button>
                 ) : (
-                  <div className="hidden lg:block border-t border-gray-200 my-2"></div>
+                  <div className="hidden lg:block border-t border-gray-200 dark:border-gray-700 my-2"></div>
                 )}
                 <AnimatePresence initial={false}>
                   {(serviceOpen || sidebarCollapsed) && (
@@ -495,7 +496,7 @@ export default function MainLayout() {
                           <item.icon className="w-5 h-5 flex-shrink-0" />
                           {!sidebarCollapsed && <span className="flex-1 lg:inline">{item.name}</span>}
                           {item.badge !== undefined && item.badge > 0 && !sidebarCollapsed && (
-                            <span className="bg-orange-100 text-orange-700 text-xs font-semibold px-2 py-0.5 rounded-full">
+                            <span className="bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300 text-xs font-semibold px-2 py-0.5 rounded-full">
                               {item.badge}
                             </span>
                           )}
@@ -513,7 +514,7 @@ export default function MainLayout() {
                 {!sidebarCollapsed ? (
                   <button
                     onClick={() => setAdminOpen(!adminOpen)}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider hover:text-gray-600 transition-colors"
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors"
                   >
                     {adminOpen ? (
                       <ChevronDownIcon className="w-4 h-4" />
@@ -523,7 +524,7 @@ export default function MainLayout() {
                     <span>Administration</span>
                   </button>
                 ) : (
-                  <div className="hidden lg:block border-t border-gray-200 my-2"></div>
+                  <div className="hidden lg:block border-t border-gray-200 dark:border-gray-700 my-2"></div>
                 )}
                 <AnimatePresence initial={false}>
                   {(adminOpen || sidebarCollapsed) && (
@@ -555,11 +556,11 @@ export default function MainLayout() {
           </nav>
 
           {/* User section */}
-          <div className={`border-t border-gray-100 ${sidebarCollapsed ? 'lg:p-2' : 'p-4'}`}>
+          <div className={`border-t border-gray-100 dark:border-gray-700 ${sidebarCollapsed ? 'lg:p-2' : 'p-4'}`}>
             <NavLink
               to="/profil"
               title={sidebarCollapsed ? user?.fullName : undefined}
-              className={`flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors ${sidebarCollapsed ? 'lg:justify-center lg:p-1' : ''}`}
+              className={`flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${sidebarCollapsed ? 'lg:justify-center lg:p-1' : ''}`}
             >
               {user?.avatar ? (
                 <img
@@ -568,16 +569,16 @@ export default function MainLayout() {
                   className="w-10 h-10 rounded-full object-cover flex-shrink-0"
                 />
               ) : (
-                <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0">
-                  <span className="text-primary-700 font-semibold">
+                <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/40 flex items-center justify-center flex-shrink-0">
+                  <span className="text-primary-700 dark:text-primary-300 font-semibold">
                     {user?.firstName?.[0]}{user?.lastName?.[0]}
                   </span>
                 </div>
               )}
               {!sidebarCollapsed && (
                 <div className="flex-1 min-w-0 lg:block">
-                  <p className="text-sm font-medium text-gray-900 truncate">{user?.fullName}</p>
-                  <p className="text-xs text-gray-500 truncate">{user?.group?.name}</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{user?.fullName}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user?.group?.name}</p>
                 </div>
               )}
             </NavLink>
@@ -589,11 +590,11 @@ export default function MainLayout() {
               <ArrowRightOnRectangleIcon className="w-5 h-5 flex-shrink-0" />
               {!sidebarCollapsed && <span className="lg:inline">Déconnexion</span>}
             </button>
-            
+
             {/* Bouton pour réduire/agrandir la sidebar */}
             <button
               onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              className="hidden lg:flex mt-3 w-full items-center justify-center gap-2 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              className="hidden lg:flex mt-3 w-full items-center justify-center gap-2 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:text-gray-300 dark:hover:bg-gray-700 rounded-lg transition-colors"
               title={sidebarCollapsed ? 'Agrandir le menu' : 'Réduire le menu'}
             >
               {sidebarCollapsed ? (
@@ -612,17 +613,17 @@ export default function MainLayout() {
       {/* Main content */}
       <div className={`transition-all duration-300 ${sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-64'}`}>
         {/* Top bar */}
-        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-lg border-b border-gray-100">
+        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-lg border-b border-gray-100 dark:bg-gray-800/80 dark:border-gray-700">
           <div className="flex items-center justify-between px-4 py-3">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+              className="lg:hidden p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 rounded-lg"
             >
               <Bars3Icon className="w-6 h-6" />
             </button>
 
             <div className="flex-1 lg:pl-0 pl-2">
-              <h2 className="text-lg font-semibold text-gray-800">
+              <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
                 {getPageTitle(location.pathname)}
               </h2>
             </div>
@@ -630,18 +631,19 @@ export default function MainLayout() {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setPaletteOpen(true)}
-                className="hidden sm:flex items-center gap-2 px-3 py-1.5 text-sm text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                className="hidden sm:flex items-center gap-2 px-3 py-1.5 text-sm text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700"
               >
                 <MagnifyingGlassIcon className="w-4 h-4" />
                 <span>Rechercher…</span>
-                <kbd className="text-[10px] border rounded px-1 py-0.5 bg-gray-50">Ctrl K</kbd>
+                <kbd className="text-[10px] border rounded px-1 py-0.5 bg-gray-50 dark:bg-gray-700 dark:border-gray-600">Ctrl K</kbd>
               </button>
               <button
                 onClick={() => setPaletteOpen(true)}
-                className="sm:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                className="sm:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               >
-                <MagnifyingGlassIcon className="w-5 h-5 text-gray-600" />
+                <MagnifyingGlassIcon className="w-5 h-5 text-gray-600 dark:text-gray-300" />
               </button>
+              <ThemeToggle />
               <NotificationBell />
               <UserMenu />
             </div>
@@ -660,7 +662,7 @@ export default function MainLayout() {
 
         {/* Footer */}
         {footerVisible && (
-          <footer className="px-4 py-6 text-center text-sm text-gray-500 border-t border-gray-100">
+          <footer className="px-4 py-6 text-center text-sm text-gray-500 border-t border-gray-100 dark:text-gray-400 dark:border-gray-700">
             {footerText}
           </footer>
         )}

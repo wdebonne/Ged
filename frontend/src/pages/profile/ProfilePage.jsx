@@ -148,8 +148,8 @@ export default function ProfilePage() {
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Mon profil</h1>
-        <p className="text-gray-600 mt-1">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Mon profil</h1>
+        <p className="text-gray-600 dark:text-gray-400 mt-1">
           Gérez vos informations personnelles et votre mot de passe
         </p>
       </div>
@@ -159,7 +159,7 @@ export default function ProfilePage() {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-2 p-4 bg-success-50 text-success-700 rounded-lg"
+          className="flex items-center gap-2 p-4 bg-success-50 text-success-700 dark:bg-success-900/20 dark:text-success-400 rounded-lg"
         >
           <CheckCircleIcon className="w-5 h-5" />
           Profil mis à jour avec succès
@@ -170,7 +170,7 @@ export default function ProfilePage() {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-2 p-4 bg-success-50 text-success-700 rounded-lg"
+          className="flex items-center gap-2 p-4 bg-success-50 text-success-700 dark:bg-success-900/20 dark:text-success-400 rounded-lg"
         >
           <CheckCircleIcon className="w-5 h-5" />
           Mot de passe changé avec succès
@@ -178,14 +178,14 @@ export default function ProfilePage() {
       )}
 
       {/* Tabs */}
-      <div className="border-b">
+      <div className="border-b dark:border-gray-700">
         <nav className="flex gap-8">
           <button
             onClick={() => setActiveTab('profile')}
             className={`pb-4 px-1 border-b-2 font-medium transition-colors ${
               activeTab === 'profile'
                 ? 'border-primary-600 text-primary-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
             }`}
           >
             Informations personnelles
@@ -195,7 +195,7 @@ export default function ProfilePage() {
             className={`pb-4 px-1 border-b-2 font-medium transition-colors ${
               activeTab === 'password'
                 ? 'border-primary-600 text-primary-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
             }`}
           >
             Mot de passe
@@ -205,7 +205,7 @@ export default function ProfilePage() {
             className={`pb-4 px-1 border-b-2 font-medium transition-colors flex items-center gap-2 ${
               activeTab === 'notifications'
                 ? 'border-primary-600 text-primary-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
             }`}
           >
             <BellIcon className="w-5 h-5" />
@@ -216,7 +216,7 @@ export default function ProfilePage() {
             className={`pb-4 px-1 border-b-2 font-medium transition-colors flex items-center gap-2 ${
               activeTab === 'delegations'
                 ? 'border-primary-600 text-primary-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+                : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
             }`}
           >
             <UserGroupIcon className="w-5 h-5" />
@@ -243,8 +243,8 @@ export default function ProfilePage() {
                     className="w-24 h-24 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="w-24 h-24 rounded-full bg-primary-100 flex items-center justify-center">
-                    <UserCircleIcon className="w-12 h-12 text-primary-600" />
+                  <div className="w-24 h-24 rounded-full bg-primary-100 dark:bg-primary-900/40 flex items-center justify-center">
+                    <UserCircleIcon className="w-12 h-12 text-primary-600 dark:text-primary-400" />
                   </div>
                 )}
                 <button
@@ -263,8 +263,8 @@ export default function ProfilePage() {
                 />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900">Photo de profil</h3>
-                <p className="text-sm text-gray-500">JPG, PNG ou GIF. Max 5 MB</p>
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100">Photo de profil</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">JPG, PNG ou GIF. Max 5 MB</p>
                 {errors.avatar && (
                   <p className="text-sm text-danger-600 mt-1">{errors.avatar}</p>
                 )}
@@ -272,15 +272,15 @@ export default function ProfilePage() {
             </div>
 
             {/* User Info Display */}
-            <div className="p-4 bg-gray-50 rounded-lg">
+            <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="text-gray-500">Nom d'utilisateur</span>
-                  <p className="font-medium text-gray-900">@{user?.username}</p>
+                  <span className="text-gray-500 dark:text-gray-400">Nom d'utilisateur</span>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">@{user?.username}</p>
                 </div>
                 <div>
-                  <span className="text-gray-500">Groupe</span>
-                  <p className="font-medium text-gray-900">{user?.group?.name || 'Aucun'}</p>
+                  <span className="text-gray-500 dark:text-gray-400">Groupe</span>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{user?.group?.name || 'Aucun'}</p>
                 </div>
               </div>
             </div>
@@ -327,7 +327,7 @@ export default function ProfilePage() {
             </div>
 
             {errors.profile && (
-              <div className="flex items-center gap-2 p-3 bg-danger-50 text-danger-700 rounded-lg">
+              <div className="flex items-center gap-2 p-3 bg-danger-50 text-danger-700 dark:bg-danger-900/20 dark:text-danger-400 rounded-lg">
                 <ExclamationTriangleIcon className="w-5 h-5" />
                 {errors.profile}
               </div>
@@ -379,9 +379,9 @@ export default function ProfilePage() {
                   className="absolute right-3 top-1/2 -translate-y-1/2"
                 >
                   {showPasswords.current ? (
-                    <EyeSlashIcon className="w-5 h-5 text-gray-400" />
+                    <EyeSlashIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                   ) : (
-                    <EyeIcon className="w-5 h-5 text-gray-400" />
+                    <EyeIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                   )}
                 </button>
               </div>
@@ -405,16 +405,16 @@ export default function ProfilePage() {
                   className="absolute right-3 top-1/2 -translate-y-1/2"
                 >
                   {showPasswords.new ? (
-                    <EyeSlashIcon className="w-5 h-5 text-gray-400" />
+                    <EyeSlashIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                   ) : (
-                    <EyeIcon className="w-5 h-5 text-gray-400" />
+                    <EyeIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                   )}
                 </button>
               </div>
               {errors.newPassword && (
                 <p className="text-sm text-danger-600 mt-1">{errors.newPassword}</p>
               )}
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 Minimum 8 caractères
               </p>
             </div>
@@ -434,9 +434,9 @@ export default function ProfilePage() {
                   className="absolute right-3 top-1/2 -translate-y-1/2"
                 >
                   {showPasswords.confirm ? (
-                    <EyeSlashIcon className="w-5 h-5 text-gray-400" />
+                    <EyeSlashIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                   ) : (
-                    <EyeIcon className="w-5 h-5 text-gray-400" />
+                    <EyeIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                   )}
                 </button>
               </div>
@@ -446,7 +446,7 @@ export default function ProfilePage() {
             </div>
 
             {errors.password && (
-              <div className="flex items-center gap-2 p-3 bg-danger-50 text-danger-700 rounded-lg">
+              <div className="flex items-center gap-2 p-3 bg-danger-50 text-danger-700 dark:bg-danger-900/20 dark:text-danger-400 rounded-lg">
                 <ExclamationTriangleIcon className="w-5 h-5" />
                 {errors.password}
               </div>

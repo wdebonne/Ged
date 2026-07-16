@@ -115,11 +115,11 @@ function NotificationDefaultsSettings() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
           <BellIcon className="w-5 h-5" />
           Notifications par défaut
         </h2>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
           Définissez les notifications email activées par défaut pour tous les utilisateurs.
           Chaque utilisateur peut ensuite personnaliser ses propres préférences depuis son profil.
         </p>
@@ -127,16 +127,16 @@ function NotificationDefaultsSettings() {
 
       <div className="divide-y rounded-lg border overflow-hidden">
         {NOTIFICATION_OPTIONS.map((opt) => (
-          <label key={opt.key} className="flex items-center gap-4 p-4 hover:bg-gray-50 cursor-pointer">
+          <label key={opt.key} className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
             <input
               type="checkbox"
               checked={defaults[opt.key] ?? true}
               onChange={(e) => setDefaults({ ...defaults, [opt.key]: e.target.checked })}
-              className="w-4 h-4 rounded border-gray-300 text-primary-600"
+              className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600"
             />
             <div className="flex-1 min-w-0">
-              <span className="text-sm font-medium text-gray-900">{opt.label}</span>
-              <p className="text-xs text-gray-500">{opt.description}</p>
+              <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{opt.label}</span>
+              <p className="text-xs text-gray-500 dark:text-gray-400">{opt.description}</p>
             </div>
           </label>
         ))}
@@ -203,11 +203,11 @@ function AckReceiptSettings() {
   return (
     <div className="space-y-6 mt-10 pt-8 border-t">
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
           <EnvelopeIcon className="w-5 h-5" />
           Accusé de réception automatique
         </h2>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
           Lorsqu'un courrier entrant est enregistré, un email d'accusé de réception mentionnant
           le numéro de référence est envoyé automatiquement à l'expéditeur, à condition que sa
           fiche contact comporte une adresse email. Le contenu de l'email est personnalisable
@@ -216,18 +216,18 @@ function AckReceiptSettings() {
       </div>
 
       <div className="rounded-lg border overflow-hidden">
-        <label className="flex items-center gap-4 p-4 hover:bg-gray-50 cursor-pointer">
+        <label className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer">
           <input
             type="checkbox"
             checked={enabled}
             onChange={(e) => setEnabled(e.target.checked)}
-            className="w-4 h-4 rounded border-gray-300 text-primary-600"
+            className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600"
           />
           <div className="flex-1 min-w-0">
-            <span className="text-sm font-medium text-gray-900">
+            <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
               Activer l'accusé de réception automatique
             </span>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               Envoyé à l'expéditeur lors de l'enregistrement de son courrier (saisie manuelle ou import)
             </p>
           </div>
@@ -315,11 +315,11 @@ function DueDateSettings() {
   return (
     <div className="space-y-6 mt-10 pt-8 border-t">
       <div>
-        <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
           <ClockIcon className="w-5 h-5" />
           Échéances de traitement
         </h2>
-        <p className="text-sm text-gray-500 mt-1">
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
           Le rappel et l'alerte de retard sont envoyés par email chaque matin aux destinataires
           des courriers à traiter (selon leurs préférences de notification ci-dessus).
         </p>
@@ -336,7 +336,7 @@ function DueDateSettings() {
             onChange={(e) => setDueDays(e.target.value)}
             className="input"
           />
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
             Échéance appliquée automatiquement à l'import quand aucune date n'est saisie.
             Mettre 0 pour désactiver l'échéance automatique.
           </p>
@@ -351,7 +351,7 @@ function DueDateSettings() {
             onChange={(e) => setReminderDays(e.target.value)}
             className="input"
           />
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
             Un email de rappel est envoyé ce nombre de jours avant l'échéance (défaut : 3).
           </p>
         </div>
@@ -466,7 +466,7 @@ function ImapMailSettings() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
           <EnvelopeIcon className="w-5 h-5" />
           IMAP Email-to-PDF
         </h2>
@@ -480,8 +480,8 @@ function ImapMailSettings() {
         </div>
       </div>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <p className="text-sm text-blue-800">
+      <div className="bg-blue-50 dark:bg-blue-900/40 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <p className="text-sm text-blue-800 dark:text-blue-300">
           Ce service IMAP convertit automatiquement les emails en documents PDF pour import dans la GED.
           Si l'email contient des pièces jointes PDF, elles sont importées directement.
           Si l'email n'a pas de PJ PDF, le corps du mail est converti en PDF.
@@ -491,15 +491,15 @@ function ImapMailSettings() {
       {status && (
         <div className="card p-4">
           <div className="flex items-center gap-4 text-sm">
-            <span className={`px-2 py-1 rounded-full ${status.running ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
+            <span className={`px-2 py-1 rounded-full ${status.running ? 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'}`}>
               {status.running ? 'En cours' : 'Arrêté'}
             </span>
             {status.lastCheck && (
-              <span className="text-gray-500">
+              <span className="text-gray-500 dark:text-gray-400">
                 Dernière vérification: {new Date(status.lastCheck).toLocaleString('fr-FR')}
               </span>
             )}
-            <span className="text-gray-500">{status.messagesProcessed} document(s) traité(s)</span>
+            <span className="text-gray-500 dark:text-gray-400">{status.messagesProcessed} document(s) traité(s)</span>
             {status.lastError && (
               <span className="text-red-600">Erreur: {status.lastError}</span>
             )}
@@ -511,8 +511,8 @@ function ImapMailSettings() {
         <div className="flex items-center gap-3">
           <input type="checkbox" id="imap_mail_enabled" checked={formData.enabled}
             onChange={(e) => update('enabled', e.target.checked)}
-            className="w-4 h-4 rounded border-gray-300 text-primary-600" />
-          <label htmlFor="imap_mail_enabled" className="font-medium text-gray-700">Activer le service IMAP Email-PDF</label>
+            className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600" />
+          <label htmlFor="imap_mail_enabled" className="font-medium text-gray-700 dark:text-gray-300">Activer le service IMAP Email-PDF</label>
         </div>
 
         <div className="grid grid-cols-3 gap-4">
@@ -540,7 +540,7 @@ function ImapMailSettings() {
               <input type={showPassword ? 'text' : 'password'} value={formData.password}
                 onChange={(e) => update('password', e.target.value)} className="input pr-10" />
               <button type="button" onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs">
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 text-xs">
                 {showPassword ? 'Masquer' : 'Afficher'}
               </button>
             </div>
@@ -563,32 +563,32 @@ function ImapMailSettings() {
         <div className="flex items-center gap-3">
           <input type="checkbox" id="imap_mail_tls" checked={formData.tls}
             onChange={(e) => update('tls', e.target.checked)}
-            className="w-4 h-4 rounded border-gray-300 text-primary-600" />
-          <label htmlFor="imap_mail_tls" className="text-gray-700">Utiliser TLS</label>
+            className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600" />
+          <label htmlFor="imap_mail_tls" className="text-gray-700 dark:text-gray-300">Utiliser TLS</label>
         </div>
 
         <div className="border-t pt-4">
-          <h3 className="font-medium text-gray-900 mb-3">Conversion Email-PDF</h3>
+          <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Conversion Email-PDF</h3>
           <div className="flex items-center gap-3">
             <input type="checkbox" id="imap_mail_alwaysBody" checked={formData.alwaysGenerateBodyPdf}
               onChange={(e) => update('alwaysGenerateBodyPdf', e.target.checked)}
-              className="w-4 h-4 rounded border-gray-300 text-primary-600" />
-            <label htmlFor="imap_mail_alwaysBody" className="text-gray-700">
+              className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600" />
+            <label htmlFor="imap_mail_alwaysBody" className="text-gray-700 dark:text-gray-300">
               Toujours générer le PDF du corps du mail (même si l'email a des pièces jointes PDF)
             </label>
           </div>
-          <p className="text-xs text-gray-500 mt-1 ml-7">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 ml-7">
             Si désactivé, le PDF du corps est généré uniquement quand l'email n'a pas de pièce jointe PDF.
           </p>
         </div>
 
         <div className="border-t pt-4">
-          <h3 className="font-medium text-gray-900 mb-3">Filtres</h3>
+          <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Filtres</h3>
           <div className="flex items-center gap-3 mb-3">
             <input type="checkbox" id="imap_mail_autoImport" checked={formData.autoImport}
               onChange={(e) => update('autoImport', e.target.checked)}
-              className="w-4 h-4 rounded border-gray-300 text-primary-600" />
-            <label htmlFor="imap_mail_autoImport" className="text-gray-700">Importer tous les emails</label>
+              className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600" />
+            <label htmlFor="imap_mail_autoImport" className="text-gray-700 dark:text-gray-300">Importer tous les emails</label>
           </div>
 
           {!formData.autoImport && (
@@ -618,7 +618,7 @@ function ImapMailSettings() {
         </div>
 
         <div className="border-t pt-4">
-          <h3 className="font-medium text-gray-900 mb-3">Post-traitement</h3>
+          <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Post-traitement</h3>
           <div className="space-y-3">
             <div>
               <label className="label">Dossier des traités</label>
@@ -628,20 +628,20 @@ function ImapMailSettings() {
             <div className="flex items-center gap-3">
               <input type="checkbox" checked={formData.markAsRead}
                 onChange={(e) => update('markAsRead', e.target.checked)}
-                className="w-4 h-4 rounded border-gray-300 text-primary-600" />
-              <span className="text-gray-700">Marquer comme lu après traitement</span>
+                className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600" />
+              <span className="text-gray-700 dark:text-gray-300">Marquer comme lu après traitement</span>
             </div>
             <div className="flex items-center gap-3">
               <input type="checkbox" checked={formData.processAllMails}
                 onChange={(e) => update('processAllMails', e.target.checked)}
-                className="w-4 h-4 rounded border-gray-300 text-primary-600" />
-              <span className="text-gray-700">Traiter tous les emails (pas seulement les non lus)</span>
+                className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600" />
+              <span className="text-gray-700 dark:text-gray-300">Traiter tous les emails (pas seulement les non lus)</span>
             </div>
             <div className="flex items-center gap-3">
               <input type="checkbox" checked={formData.deleteAfterProcess}
                 onChange={(e) => update('deleteAfterProcess', e.target.checked)}
-                className="w-4 h-4 rounded border-gray-300 text-primary-600" />
-              <span className="text-gray-700">Supprimer au lieu de déplacer</span>
+                className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600" />
+              <span className="text-gray-700 dark:text-gray-300">Supprimer au lieu de déplacer</span>
             </div>
           </div>
         </div>
@@ -962,7 +962,7 @@ function StorageSettings() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
           <CloudIcon className="w-5 h-5" />
           Stockage externe
         </h2>
@@ -977,7 +977,7 @@ function StorageSettings() {
             className={`px-4 py-2 rounded-t-lg font-medium text-sm transition-colors ${
               activeStorage === provider.id
                 ? `bg-${provider.color}-100 text-${provider.color}-700 border-b-2 border-${provider.color}-500`
-                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700'
             }`}
           >
             <span className="mr-2">{provider.icon}</span>
@@ -990,7 +990,7 @@ function StorageSettings() {
       {activeStorage === 'onedrive' && (
         <div className="border rounded-lg overflow-hidden">
           <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-4 flex items-center gap-3">
-            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-2xl">☁️</div>
+            <div className="w-10 h-10 bg-white dark:bg-gray-700 rounded-lg flex items-center justify-center text-2xl">☁️</div>
             <div className="flex-1">
               <h3 className="text-white font-semibold">Microsoft OneDrive</h3>
               <p className="text-blue-100 text-sm">Synchronisez vos courriers avec OneDrive</p>
@@ -1012,9 +1012,9 @@ function StorageSettings() {
                   id="onedriveEnabled"
                   checked={oneDriveConfig.enabled}
                   onChange={(e) => setOneDriveConfig(prev => ({ ...prev, enabled: e.target.checked }))}
-                  className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                  className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
                 />
-                <label htmlFor="onedriveEnabled" className="text-gray-700 font-medium">Activer OneDrive</label>
+                <label htmlFor="onedriveEnabled" className="text-gray-700 dark:text-gray-300 font-medium">Activer OneDrive</label>
               </div>
               <button
                 onClick={() => saveOneDriveMutation.mutate(oneDriveConfig)}
@@ -1027,9 +1027,9 @@ function StorageSettings() {
 
             {oneDriveConfig.enabled && (
               <>
-                <div className="bg-gray-50 rounded-lg p-4 space-y-4">
-                  <h4 className="font-medium text-gray-900">Configuration Azure AD</h4>
-                  <p className="text-sm text-gray-600">
+                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 space-y-4">
+                  <h4 className="font-medium text-gray-900 dark:text-gray-100">Configuration Azure AD</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
                     Créez une application dans le <a href="https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationsListBlade" target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:underline">portail Azure</a>
                   </p>
                   
@@ -1066,7 +1066,7 @@ function StorageSettings() {
                         className="input pr-10 font-mono text-sm"
                       />
                       <button type="button" onClick={() => setShowPasswords(prev => ({ ...prev, onedriveSecret: !prev.onedriveSecret }))} className="absolute right-3 top-1/2 -translate-y-1/2">
-                        {showPasswords.onedriveSecret ? <EyeSlashIcon className="w-5 h-5 text-gray-400" /> : <EyeIcon className="w-5 h-5 text-gray-400" />}
+                        {showPasswords.onedriveSecret ? <EyeSlashIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" /> : <EyeIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />}
                       </button>
                     </div>
                   </div>
@@ -1089,8 +1089,8 @@ function StorageSettings() {
                   </div>
                 </div>
 
-                <div className="bg-gray-50 rounded-lg p-4 space-y-4">
-                  <h4 className="font-medium text-gray-900">Options de synchronisation</h4>
+                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 space-y-4">
+                  <h4 className="font-medium text-gray-900 dark:text-gray-100">Options de synchronisation</h4>
                   <div className="space-y-2">
                     <label className="flex items-center gap-2">
                       <input type="checkbox" checked={oneDriveConfig.syncArchived} onChange={(e) => setOneDriveConfig(prev => ({ ...prev, syncArchived: e.target.checked }))} className="w-4 h-4 rounded" />
@@ -1104,18 +1104,18 @@ function StorageSettings() {
                       <input type="checkbox" checked={oneDriveConfig.deleteLocalAfterSync} onChange={(e) => setOneDriveConfig(prev => ({ ...prev, deleteLocalAfterSync: e.target.checked }))} className="w-4 h-4 rounded" />
                       <span className="flex items-center gap-2">
                         Supprimer les fichiers locaux après synchronisation
-                        <span className="text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded">⚠️ Stockage externe uniquement</span>
+                        <span className="text-xs text-amber-600 bg-amber-50 dark:bg-amber-900/40 px-2 py-0.5 rounded">⚠️ Stockage externe uniquement</span>
                       </span>
                     </label>
                   </div>
                 </div>
 
-                <div className="bg-gray-50 rounded-lg p-4 space-y-4">
-                  <h4 className="font-medium text-gray-900">Dossier de destination</h4>
+                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 space-y-4">
+                  <h4 className="font-medium text-gray-900 dark:text-gray-100">Dossier de destination</h4>
                   <div className="flex gap-2">
                     <input type="text" value={oneDriveConfig.targetFolder || ''} onChange={(e) => setOneDriveConfig(prev => ({ ...prev, targetFolder: e.target.value }))} className="input flex-1" placeholder="GED-Courrier/Archives" />
                     {onedriveStatus?.connected && (
-                      <button onClick={() => openFolderBrowser('onedrive')} className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                      <button onClick={() => openFolderBrowser('onedrive')} className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50">
                         <FolderIcon className="w-4 h-4" />
                       </button>
                     )}
@@ -1145,7 +1145,7 @@ function StorageSettings() {
       {activeStorage === 's3' && (
         <div className="border rounded-lg overflow-hidden">
           <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-4 flex items-center gap-3">
-            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-2xl">🪣</div>
+            <div className="w-10 h-10 bg-white dark:bg-gray-700 rounded-lg flex items-center justify-center text-2xl">🪣</div>
             <div className="flex-1">
               <h3 className="text-white font-semibold">Amazon S3 / Compatible S3</h3>
               <p className="text-orange-100 text-sm">AWS S3, MinIO, Wasabi, DigitalOcean Spaces...</p>
@@ -1162,8 +1162,8 @@ function StorageSettings() {
           <div className="p-4 space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <input type="checkbox" id="s3Enabled" checked={s3Config.enabled} onChange={(e) => setS3Config(prev => ({ ...prev, enabled: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-primary-600" />
-                <label htmlFor="s3Enabled" className="text-gray-700 font-medium">Activer S3</label>
+                <input type="checkbox" id="s3Enabled" checked={s3Config.enabled} onChange={(e) => setS3Config(prev => ({ ...prev, enabled: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600" />
+                <label htmlFor="s3Enabled" className="text-gray-700 dark:text-gray-300 font-medium">Activer S3</label>
               </div>
               <button onClick={() => saveS3Mutation.mutate(s3Config)} disabled={saveS3Mutation.isLoading} className="px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700">
                 {saveS3Mutation.isLoading ? 'Enregistrement...' : 'Enregistrer'}
@@ -1172,8 +1172,8 @@ function StorageSettings() {
 
             {s3Config.enabled && (
               <>
-                <div className="bg-gray-50 rounded-lg p-4 space-y-4">
-                  <h4 className="font-medium text-gray-900">Configuration S3</h4>
+                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 space-y-4">
+                  <h4 className="font-medium text-gray-900 dark:text-gray-100">Configuration S3</h4>
 
                   <div>
                     <label className="label">Fournisseur</label>
@@ -1214,7 +1214,7 @@ function StorageSettings() {
                       <div className="relative">
                         <input type={showPasswords.s3Secret ? 'text' : 'password'} value={s3Config.secretAccessKey || ''} onChange={(e) => setS3Config(prev => ({ ...prev, secretAccessKey: e.target.value }))} className="input pr-10 font-mono text-sm" />
                         <button type="button" onClick={() => setShowPasswords(prev => ({ ...prev, s3Secret: !prev.s3Secret }))} className="absolute right-3 top-1/2 -translate-y-1/2">
-                          {showPasswords.s3Secret ? <EyeSlashIcon className="w-5 h-5 text-gray-400" /> : <EyeIcon className="w-5 h-5 text-gray-400" />}
+                          {showPasswords.s3Secret ? <EyeSlashIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" /> : <EyeIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />}
                         </button>
                       </div>
                     </div>
@@ -1232,8 +1232,8 @@ function StorageSettings() {
                   </div>
                 </div>
 
-                <div className="bg-gray-50 rounded-lg p-4 space-y-4">
-                  <h4 className="font-medium text-gray-900">Options de synchronisation</h4>
+                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 space-y-4">
+                  <h4 className="font-medium text-gray-900 dark:text-gray-100">Options de synchronisation</h4>
                   <div className="space-y-2">
                     <label className="flex items-center gap-2">
                       <input type="checkbox" checked={s3Config.syncArchivedMails} onChange={(e) => setS3Config(prev => ({ ...prev, syncArchivedMails: e.target.checked }))} className="w-4 h-4 rounded" />
@@ -1247,14 +1247,14 @@ function StorageSettings() {
                       <input type="checkbox" checked={s3Config.deleteLocalAfterSync} onChange={(e) => setS3Config(prev => ({ ...prev, deleteLocalAfterSync: e.target.checked }))} className="w-4 h-4 rounded" />
                       <span className="flex items-center gap-2">
                         Supprimer les fichiers locaux après synchronisation
-                        <span className="text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded">⚠️ Stockage externe uniquement</span>
+                        <span className="text-xs text-amber-600 bg-amber-50 dark:bg-amber-900/40 px-2 py-0.5 rounded">⚠️ Stockage externe uniquement</span>
                       </span>
                     </label>
                   </div>
                 </div>
 
-                <div className="bg-gray-50 rounded-lg p-4 space-y-4">
-                  <h4 className="font-medium text-gray-900">Chemin de base</h4>
+                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 space-y-4">
+                  <h4 className="font-medium text-gray-900 dark:text-gray-100">Chemin de base</h4>
                   <input type="text" value={s3Config.basePath || ''} onChange={(e) => setS3Config(prev => ({ ...prev, basePath: e.target.value }))} className="input" placeholder="GED-Courrier" />
                   <div className="space-y-2">
                     <label className="flex items-center gap-2">
@@ -1281,7 +1281,7 @@ function StorageSettings() {
       {activeStorage === 'nextcloud' && (
         <div className="border rounded-lg overflow-hidden">
           <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 p-4 flex items-center gap-3">
-            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-2xl">☁️</div>
+            <div className="w-10 h-10 bg-white dark:bg-gray-700 rounded-lg flex items-center justify-center text-2xl">☁️</div>
             <div className="flex-1">
               <h3 className="text-white font-semibold">NextCloud / ownCloud</h3>
               <p className="text-indigo-100 text-sm">Stockage cloud auto-hébergé via WebDAV</p>
@@ -1298,8 +1298,8 @@ function StorageSettings() {
           <div className="p-4 space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <input type="checkbox" id="nextcloudEnabled" checked={nextCloudConfig.enabled} onChange={(e) => setNextCloudConfig(prev => ({ ...prev, enabled: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 text-primary-600" />
-                <label htmlFor="nextcloudEnabled" className="text-gray-700 font-medium">Activer NextCloud</label>
+                <input type="checkbox" id="nextcloudEnabled" checked={nextCloudConfig.enabled} onChange={(e) => setNextCloudConfig(prev => ({ ...prev, enabled: e.target.checked }))} className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600" />
+                <label htmlFor="nextcloudEnabled" className="text-gray-700 dark:text-gray-300 font-medium">Activer NextCloud</label>
               </div>
               <button onClick={() => saveNextCloudMutation.mutate(nextCloudConfig)} disabled={saveNextCloudMutation.isLoading} className="px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700">
                 {saveNextCloudMutation.isLoading ? 'Enregistrement...' : 'Enregistrer'}
@@ -1308,13 +1308,13 @@ function StorageSettings() {
 
             {nextCloudConfig.enabled && (
               <>
-                <div className="bg-gray-50 rounded-lg p-4 space-y-4">
-                  <h4 className="font-medium text-gray-900">Configuration NextCloud</h4>
+                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 space-y-4">
+                  <h4 className="font-medium text-gray-900 dark:text-gray-100">Configuration NextCloud</h4>
 
                   <div>
                     <label className="label">URL du serveur</label>
                     <input type="text" value={nextCloudConfig.serverUrl || ''} onChange={(e) => setNextCloudConfig(prev => ({ ...prev, serverUrl: e.target.value }))} className="input" placeholder="https://cloud.example.com" />
-                    <p className="text-xs text-gray-500 mt-1">L'URL de votre instance NextCloud (sans /remote.php/...)</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">L'URL de votre instance NextCloud (sans /remote.php/...)</p>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
@@ -1327,10 +1327,10 @@ function StorageSettings() {
                       <div className="relative">
                         <input type={showPasswords.nextcloudPassword ? 'text' : 'password'} value={nextCloudConfig.password || ''} onChange={(e) => setNextCloudConfig(prev => ({ ...prev, password: e.target.value }))} className="input pr-10" />
                         <button type="button" onClick={() => setShowPasswords(prev => ({ ...prev, nextcloudPassword: !prev.nextcloudPassword }))} className="absolute right-3 top-1/2 -translate-y-1/2">
-                          {showPasswords.nextcloudPassword ? <EyeSlashIcon className="w-5 h-5 text-gray-400" /> : <EyeIcon className="w-5 h-5 text-gray-400" />}
+                          {showPasswords.nextcloudPassword ? <EyeSlashIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" /> : <EyeIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />}
                         </button>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">Utilisez un mot de passe d'application pour plus de sécurité</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Utilisez un mot de passe d'application pour plus de sécurité</p>
                     </div>
                   </div>
 
@@ -1346,8 +1346,8 @@ function StorageSettings() {
                   </div>
                 </div>
 
-                <div className="bg-gray-50 rounded-lg p-4 space-y-4">
-                  <h4 className="font-medium text-gray-900">Options de synchronisation</h4>
+                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 space-y-4">
+                  <h4 className="font-medium text-gray-900 dark:text-gray-100">Options de synchronisation</h4>
                   <div className="space-y-2">
                     <label className="flex items-center gap-2">
                       <input type="checkbox" checked={nextCloudConfig.syncArchivedMails} onChange={(e) => setNextCloudConfig(prev => ({ ...prev, syncArchivedMails: e.target.checked }))} className="w-4 h-4 rounded" />
@@ -1361,14 +1361,14 @@ function StorageSettings() {
                       <input type="checkbox" checked={nextCloudConfig.deleteLocalAfterSync} onChange={(e) => setNextCloudConfig(prev => ({ ...prev, deleteLocalAfterSync: e.target.checked }))} className="w-4 h-4 rounded" />
                       <span className="flex items-center gap-2">
                         Supprimer les fichiers locaux après synchronisation
-                        <span className="text-xs text-amber-600 bg-amber-50 px-2 py-0.5 rounded">⚠️ Stockage externe uniquement</span>
+                        <span className="text-xs text-amber-600 bg-amber-50 dark:bg-amber-900/40 px-2 py-0.5 rounded">⚠️ Stockage externe uniquement</span>
                       </span>
                     </label>
                   </div>
                 </div>
 
-                <div className="bg-gray-50 rounded-lg p-4 space-y-4">
-                  <h4 className="font-medium text-gray-900">Dossier de destination</h4>
+                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 space-y-4">
+                  <h4 className="font-medium text-gray-900 dark:text-gray-100">Dossier de destination</h4>
                   <input type="text" value={nextCloudConfig.basePath || ''} onChange={(e) => setNextCloudConfig(prev => ({ ...prev, basePath: e.target.value }))} className="input" placeholder="GED-Courrier" />
                   <div className="space-y-2">
                     <label className="flex items-center gap-2">
@@ -1394,10 +1394,10 @@ function StorageSettings() {
       {/* Folder Browser Modal (OneDrive) */}
       {folderBrowserOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4">
-            <div className="p-4 border-b flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Sélectionner un dossier</h3>
-              <button onClick={() => setFolderBrowserOpen(false)} className="text-gray-400 hover:text-gray-600">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-lg mx-4">
+            <div className="p-4 border-b dark:border-gray-700 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Sélectionner un dossier</h3>
+              <button onClick={() => setFolderBrowserOpen(false)} className="text-gray-400 dark:text-gray-500 hover:text-gray-600">
                 <XMarkIcon className="w-6 h-6" />
               </button>
             </div>
@@ -1407,7 +1407,7 @@ function StorageSettings() {
                 <button onClick={() => navigateToFolder('/')} className="text-primary-600 hover:underline">OneDrive</button>
                 {currentFolderPath !== '/' && currentFolderPath.split('/').filter(p => p).map((part, index, arr) => (
                   <span key={index} className="flex items-center gap-2">
-                    <span className="text-gray-400">/</span>
+                    <span className="text-gray-400 dark:text-gray-500">/</span>
                     <button onClick={() => navigateToFolder('/' + arr.slice(0, index + 1).join('/'))} className="text-primary-600 hover:underline">{part}</button>
                   </span>
                 ))}
@@ -1415,12 +1415,12 @@ function StorageSettings() {
               
               <div className="border rounded-lg max-h-64 overflow-auto">
                 {listOneDriveFolders.isLoading ? (
-                  <div className="p-4 text-center text-gray-500">Chargement...</div>
+                  <div className="p-4 text-center text-gray-500 dark:text-gray-400">Chargement...</div>
                 ) : folders.length === 0 ? (
-                  <div className="p-4 text-center text-gray-500">Aucun dossier</div>
+                  <div className="p-4 text-center text-gray-500 dark:text-gray-400">Aucun dossier</div>
                 ) : (
                   folders.map((folder) => (
-                    <div key={folder.id} className="flex items-center gap-3 p-3 hover:bg-gray-50 cursor-pointer border-b last:border-b-0" onClick={() => navigateToFolder(folder.path)}>
+                    <div key={folder.id} className="flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer border-b last:border-b-0" onClick={() => navigateToFolder(folder.path)}>
                       <FolderIcon className="w-5 h-5 text-yellow-500" />
                       <span className="flex-1">{folder.name}</span>
                       <button onClick={(e) => { e.stopPropagation(); selectFolder(folder.path); }} className="text-xs px-2 py-1 bg-primary-100 text-primary-700 rounded hover:bg-primary-200">Sélectionner</button>
@@ -1432,7 +1432,7 @@ function StorageSettings() {
             
             <div className="p-4 border-t flex justify-between">
               <button onClick={() => selectFolder(currentFolderPath)} className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">Sélectionner ce dossier</button>
-              <button onClick={() => setFolderBrowserOpen(false)} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Annuler</button>
+              <button onClick={() => setFolderBrowserOpen(false)} className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50">Annuler</button>
             </div>
           </div>
         </div>
@@ -1591,7 +1591,7 @@ function ChatBotSettings() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
           <ChatBubbleLeftRightIcon className="w-5 h-5" />
           Configuration du ChatBot n8n
         </h2>
@@ -1627,15 +1627,15 @@ function ChatBotSettings() {
         {/* Formulaire */}
         <div className="space-y-6">
           {/* Section Activation */}
-          <div className="bg-white border rounded-lg p-4 space-y-4">
-            <h3 className="font-medium text-gray-900 flex items-center gap-2">
+          <div className="bg-white dark:bg-gray-800 dark:border-gray-700 border rounded-lg p-4 space-y-4">
+            <h3 className="font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2">
               <BoltIcon className="w-4 h-4" />
               Activation
             </h3>
             <div className="flex items-center justify-between">
               <div>
-                <label className="text-gray-700 font-medium">Activer le chatbot</label>
-                <p className="text-sm text-gray-500">Affiche le widget chatbot sur l'application</p>
+                <label className="text-gray-700 dark:text-gray-300 font-medium">Activer le chatbot</label>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Affiche le widget chatbot sur l'application</p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
@@ -1644,7 +1644,7 @@ function ChatBotSettings() {
                   onChange={(e) => setConfig({ ...config, enabled: e.target.checked })}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 dark:border-gray-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
               </label>
             </div>
           </div>
@@ -1652,54 +1652,54 @@ function ChatBotSettings() {
           {config.enabled && (
             <>
               {/* Section Comportement */}
-              <div className="bg-white border rounded-lg p-4 space-y-4">
-                <h3 className="font-medium text-gray-900">Comportement du widget</h3>
+              <div className="bg-white dark:bg-gray-800 dark:border-gray-700 border rounded-lg p-4 space-y-4">
+                <h3 className="font-medium text-gray-900 dark:text-gray-100">Comportement du widget</h3>
                 
                 <div className="space-y-3">
                   <label className="flex items-center justify-between">
                     <div>
-                      <span className="text-gray-700">Mode agrandi</span>
-                      <p className="text-sm text-gray-500">Affiche le bouton d'agrandissement</p>
+                      <span className="text-gray-700 dark:text-gray-300">Mode agrandi</span>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Affiche le bouton d'agrandissement</p>
                     </div>
                     <input
                       type="checkbox"
                       checked={config.featureFullscreen}
                       onChange={(e) => setConfig({ ...config, featureFullscreen: e.target.checked })}
-                      className="w-4 h-4 rounded border-gray-300 text-primary-600"
+                      className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600"
                     />
                   </label>
                   
                   <label className="flex items-center justify-between">
                     <div>
-                      <span className="text-gray-700">Fermer en cliquant dehors</span>
-                      <p className="text-sm text-gray-500">Ferme le widget si on clique à l'extérieur</p>
+                      <span className="text-gray-700 dark:text-gray-300">Fermer en cliquant dehors</span>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Ferme le widget si on clique à l'extérieur</p>
                     </div>
                     <input
                       type="checkbox"
                       checked={config.featureCloseOutside}
                       onChange={(e) => setConfig({ ...config, featureCloseOutside: e.target.checked })}
-                      className="w-4 h-4 rounded border-gray-300 text-primary-600"
+                      className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600"
                     />
                   </label>
                   
                   <label className="flex items-center justify-between">
                     <div>
-                      <span className="text-gray-700">Bouton fermer</span>
-                      <p className="text-sm text-gray-500">Affiche le bouton de fermeture</p>
+                      <span className="text-gray-700 dark:text-gray-300">Bouton fermer</span>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Affiche le bouton de fermeture</p>
                     </div>
                     <input
                       type="checkbox"
                       checked={config.featureCloseButton}
                       onChange={(e) => setConfig({ ...config, featureCloseButton: e.target.checked })}
-                      className="w-4 h-4 rounded border-gray-300 text-primary-600"
+                      className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600"
                     />
                   </label>
                 </div>
               </div>
 
               {/* Section Webhook n8n */}
-              <div className="bg-white border rounded-lg p-4 space-y-4">
-                <h3 className="font-medium text-gray-900 flex items-center gap-2">
+              <div className="bg-white dark:bg-gray-800 dark:border-gray-700 border rounded-lg p-4 space-y-4">
+                <h3 className="font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2">
                   <LinkIcon className="w-4 h-4" />
                   Webhook n8n
                 </h3>
@@ -1763,7 +1763,7 @@ function ChatBotSettings() {
                           onClick={() => setShowPasswords({ ...showPasswords, webhook: !showPasswords.webhook })}
                           className="absolute right-3 top-1/2 -translate-y-1/2"
                         >
-                          {showPasswords.webhook ? <EyeSlashIcon className="w-5 h-5 text-gray-400" /> : <EyeIcon className="w-5 h-5 text-gray-400" />}
+                          {showPasswords.webhook ? <EyeSlashIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" /> : <EyeIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />}
                         </button>
                       </div>
                     </div>
@@ -1772,8 +1772,8 @@ function ChatBotSettings() {
               </div>
 
               {/* Section Branding et Textes */}
-              <div className="bg-white border rounded-lg p-4 space-y-4">
-                <h3 className="font-medium text-gray-900 flex items-center gap-2">
+              <div className="bg-white dark:bg-gray-800 dark:border-gray-700 border rounded-lg p-4 space-y-4">
+                <h3 className="font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2">
                   <PaintBrushIcon className="w-4 h-4" />
                   Branding et textes
                 </h3>
@@ -1781,12 +1781,12 @@ function ChatBotSettings() {
                 {/* Logo */}
                 <div className="border rounded-lg p-3 space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-gray-700 font-medium">Logo</label>
+                    <label className="text-gray-700 dark:text-gray-300 font-medium">Logo</label>
                     <input
                       type="checkbox"
                       checked={config.toggleBrandLogo}
                       onChange={(e) => setConfig({ ...config, toggleBrandLogo: e.target.checked })}
-                      className="w-4 h-4 rounded border-gray-300 text-primary-600"
+                      className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600"
                     />
                   </div>
                   {config.toggleBrandLogo && (
@@ -1803,12 +1803,12 @@ function ChatBotSettings() {
                 {/* Avatar Bot */}
                 <div className="border rounded-lg p-3 space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-gray-700 font-medium">Avatar du bot</label>
+                    <label className="text-gray-700 dark:text-gray-300 font-medium">Avatar du bot</label>
                     <input
                       type="checkbox"
                       checked={config.toggleBrandBotAvatar}
                       onChange={(e) => setConfig({ ...config, toggleBrandBotAvatar: e.target.checked })}
-                      className="w-4 h-4 rounded border-gray-300 text-primary-600"
+                      className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600"
                     />
                   </div>
                   {config.toggleBrandBotAvatar && (
@@ -1826,12 +1826,12 @@ function ChatBotSettings() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="border rounded-lg p-3 space-y-2">
                     <div className="flex items-center justify-between">
-                      <label className="text-gray-700 font-medium text-sm">Nom du bot</label>
+                      <label className="text-gray-700 dark:text-gray-300 font-medium text-sm">Nom du bot</label>
                       <input
                         type="checkbox"
                         checked={config.toggleBrandName}
                         onChange={(e) => setConfig({ ...config, toggleBrandName: e.target.checked })}
-                        className="w-4 h-4 rounded border-gray-300 text-primary-600"
+                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600"
                       />
                     </div>
                     {config.toggleBrandName && (
@@ -1846,12 +1846,12 @@ function ChatBotSettings() {
                   
                   <div className="border rounded-lg p-3 space-y-2">
                     <div className="flex items-center justify-between">
-                      <label className="text-gray-700 font-medium text-sm">Texte de bienvenue</label>
+                      <label className="text-gray-700 dark:text-gray-300 font-medium text-sm">Texte de bienvenue</label>
                       <input
                         type="checkbox"
                         checked={config.toggleBrandWelcomeText}
                         onChange={(e) => setConfig({ ...config, toggleBrandWelcomeText: e.target.checked })}
-                        className="w-4 h-4 rounded border-gray-300 text-primary-600"
+                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600"
                       />
                     </div>
                     {config.toggleBrandWelcomeText && (
@@ -1869,12 +1869,12 @@ function ChatBotSettings() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="border rounded-lg p-3 space-y-2">
                     <div className="flex items-center justify-between">
-                      <label className="text-gray-700 font-medium text-sm">Texte de réponse</label>
+                      <label className="text-gray-700 dark:text-gray-300 font-medium text-sm">Texte de réponse</label>
                       <input
                         type="checkbox"
                         checked={config.toggleBrandResponseText}
                         onChange={(e) => setConfig({ ...config, toggleBrandResponseText: e.target.checked })}
-                        className="w-4 h-4 rounded border-gray-300 text-primary-600"
+                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600"
                       />
                     </div>
                     {config.toggleBrandResponseText && (
@@ -1889,12 +1889,12 @@ function ChatBotSettings() {
                   
                   <div className="border rounded-lg p-3 space-y-2">
                     <div className="flex items-center justify-between">
-                      <label className="text-gray-700 font-medium text-sm">Bouton CTA</label>
+                      <label className="text-gray-700 dark:text-gray-300 font-medium text-sm">Bouton CTA</label>
                       <input
                         type="checkbox"
                         checked={config.toggleCtaButtonLabel}
                         onChange={(e) => setConfig({ ...config, toggleCtaButtonLabel: e.target.checked })}
-                        className="w-4 h-4 rounded border-gray-300 text-primary-600"
+                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600"
                       />
                     </div>
                     {config.toggleCtaButtonLabel && (
@@ -1912,12 +1912,12 @@ function ChatBotSettings() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="border rounded-lg p-3 space-y-2">
                     <div className="flex items-center justify-between">
-                      <label className="text-gray-700 font-medium text-sm">Message d'accueil</label>
+                      <label className="text-gray-700 dark:text-gray-300 font-medium text-sm">Message d'accueil</label>
                       <input
                         type="checkbox"
                         checked={config.toggleBrandGreetingMessage}
                         onChange={(e) => setConfig({ ...config, toggleBrandGreetingMessage: e.target.checked })}
-                        className="w-4 h-4 rounded border-gray-300 text-primary-600"
+                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600"
                       />
                     </div>
                     {config.toggleBrandGreetingMessage && (
@@ -1928,8 +1928,8 @@ function ChatBotSettings() {
                           className="input"
                           rows={2}
                         />
-                        <p className="text-xs text-gray-500">
-                          Variables : <code className="bg-gray-100 px-1 rounded">{'{{firstName}}'}</code>, <code className="bg-gray-100 px-1 rounded">{'{{lastName}}'}</code>, <code className="bg-gray-100 px-1 rounded">{'{{fullName}}'}</code>, <code className="bg-gray-100 px-1 rounded">{'{{email}}'}</code>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          Variables : <code className="bg-gray-100 dark:bg-gray-700 px-1 rounded">{'{{firstName}}'}</code>, <code className="bg-gray-100 dark:bg-gray-700 px-1 rounded">{'{{lastName}}'}</code>, <code className="bg-gray-100 dark:bg-gray-700 px-1 rounded">{'{{fullName}}'}</code>, <code className="bg-gray-100 dark:bg-gray-700 px-1 rounded">{'{{email}}'}</code>
                         </p>
                       </>
                     )}
@@ -1937,12 +1937,12 @@ function ChatBotSettings() {
                   
                   <div className="border rounded-lg p-3 space-y-2">
                     <div className="flex items-center justify-between">
-                      <label className="text-gray-700 font-medium text-sm">Message de prompt</label>
+                      <label className="text-gray-700 dark:text-gray-300 font-medium text-sm">Message de prompt</label>
                       <input
                         type="checkbox"
                         checked={config.toggleBrandPromptMessage}
                         onChange={(e) => setConfig({ ...config, toggleBrandPromptMessage: e.target.checked })}
-                        className="w-4 h-4 rounded border-gray-300 text-primary-600"
+                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600"
                       />
                     </div>
                     {config.toggleBrandPromptMessage && (
@@ -1960,12 +1960,12 @@ function ChatBotSettings() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="border rounded-lg p-3 space-y-2">
                     <div className="flex items-center justify-between">
-                      <label className="text-gray-700 font-medium text-sm">Placeholder</label>
+                      <label className="text-gray-700 dark:text-gray-300 font-medium text-sm">Placeholder</label>
                       <input
                         type="checkbox"
                         checked={config.toggleChatPlaceholder}
                         onChange={(e) => setConfig({ ...config, toggleChatPlaceholder: e.target.checked })}
-                        className="w-4 h-4 rounded border-gray-300 text-primary-600"
+                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600"
                       />
                     </div>
                     {config.toggleChatPlaceholder && (
@@ -1980,12 +1980,12 @@ function ChatBotSettings() {
                   
                   <div className="border rounded-lg p-3 space-y-2">
                     <div className="flex items-center justify-between">
-                      <label className="text-gray-700 font-medium text-sm">Bouton envoyer</label>
+                      <label className="text-gray-700 dark:text-gray-300 font-medium text-sm">Bouton envoyer</label>
                       <input
                         type="checkbox"
                         checked={config.toggleChatButtonLabel}
                         onChange={(e) => setConfig({ ...config, toggleChatButtonLabel: e.target.checked })}
-                        className="w-4 h-4 rounded border-gray-300 text-primary-600"
+                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600"
                       />
                     </div>
                     {config.toggleChatButtonLabel && (
@@ -2002,12 +2002,12 @@ function ChatBotSettings() {
                 {/* Info et Powered by */}
                 <div className="border rounded-lg p-3 space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-gray-700 font-medium">Texte d'information</label>
+                    <label className="text-gray-700 dark:text-gray-300 font-medium">Texte d'information</label>
                     <input
                       type="checkbox"
                       checked={config.toggleInfoText}
                       onChange={(e) => setConfig({ ...config, toggleInfoText: e.target.checked })}
-                      className="w-4 h-4 rounded border-gray-300 text-primary-600"
+                      className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600"
                     />
                   </div>
                   {config.toggleInfoText && (
@@ -2022,12 +2022,12 @@ function ChatBotSettings() {
 
                 <div className="border rounded-lg p-3 space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-gray-700 font-medium">Powered by</label>
+                    <label className="text-gray-700 dark:text-gray-300 font-medium">Powered by</label>
                     <input
                       type="checkbox"
                       checked={config.toggleBrandPowered}
                       onChange={(e) => setConfig({ ...config, toggleBrandPowered: e.target.checked })}
-                      className="w-4 h-4 rounded border-gray-300 text-primary-600"
+                      className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600"
                     />
                   </div>
                   {config.toggleBrandPowered && (
@@ -2052,8 +2052,8 @@ function ChatBotSettings() {
               </div>
 
               {/* Section Couleurs */}
-              <div className="bg-white border rounded-lg p-4 space-y-4">
-                <h3 className="font-medium text-gray-900 flex items-center gap-2">
+              <div className="bg-white dark:bg-gray-800 dark:border-gray-700 border rounded-lg p-4 space-y-4">
+                <h3 className="font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2">
                   <SwatchIcon className="w-4 h-4" />
                   Couleurs
                 </h3>
@@ -2068,8 +2068,8 @@ function ChatBotSettings() {
                         className="w-8 h-8 rounded cursor-pointer border-0"
                       />
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-gray-700 truncate">{label}</p>
-                        <p className="text-xs text-gray-500 font-mono">{config[key]}</p>
+                        <p className="text-xs font-medium text-gray-700 dark:text-gray-300 truncate">{label}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 font-mono">{config[key]}</p>
                       </div>
                     </div>
                   ))}
@@ -2077,9 +2077,9 @@ function ChatBotSettings() {
               </div>
 
               {/* Section Style du bouton */}
-              <div className="bg-white border rounded-lg p-4 space-y-4">
-                <h3 className="font-medium text-gray-900">Style du bouton</h3>
-                <p className="text-sm text-gray-500">Le bouton ChatBot sera affiché en bas à droite de l'écran</p>
+              <div className="bg-white dark:bg-gray-800 dark:border-gray-700 border rounded-lg p-4 space-y-4">
+                <h3 className="font-medium text-gray-900 dark:text-gray-100">Style du bouton</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Le bouton ChatBot sera affiché en bas à droite de l'écran</p>
                 
                 <div>
                   <label className="label">Forme du bouton</label>
@@ -2103,19 +2103,19 @@ function ChatBotSettings() {
                     className="input"
                     placeholder="https://exemple.com/icon.png"
                   />
-                  <p className="text-xs text-gray-500 mt-1">PNG ou SVG carré (60x60 recommandé)</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">PNG ou SVG carré (60x60 recommandé)</p>
                 </div>
               </div>
             </>
           )}
 
           {/* Info */}
-          <div className="p-4 bg-blue-50 rounded-lg">
+          <div className="p-4 bg-blue-50 dark:bg-blue-900/40 rounded-lg">
             <h4 className="font-medium text-blue-900 flex items-center gap-2">
               <ExclamationTriangleIcon className="w-5 h-5" />
               Information
             </h4>
-            <p className="text-sm text-blue-700 mt-1">
+            <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
               Ce widget ChatBot utilise n8n comme backend pour traiter les messages. 
               Assurez-vous d'avoir configuré votre workflow n8n avec un webhook pour recevoir les messages.
             </p>
@@ -2131,11 +2131,11 @@ function ChatBotSettings() {
                 <p className="text-primary-100 text-sm">Prévisualisation en temps réel</p>
               </div>
               
-              <div className="p-4 bg-gray-100 min-h-[600px] relative">
+              <div className="p-4 bg-gray-100 dark:bg-gray-700 min-h-[600px] relative">
                 {/* Indicateur d'état */}
                 <div className="absolute top-2 left-2 flex items-center gap-2">
                   <span className={`w-2 h-2 rounded-full ${config.enabled ? 'bg-green-500' : 'bg-red-500'}`}></span>
-                  <span className="text-xs text-gray-500">{config.enabled ? 'Activé' : 'Désactivé'}</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">{config.enabled ? 'Activé' : 'Désactivé'}</span>
                 </div>
 
                 {/* Bouton flottant en bas à droite */}
@@ -2252,7 +2252,7 @@ function ChatBotSettings() {
                   {/* Input */}
                   <div className="p-3 border-t" style={{ borderColor: config.styleBotMessageBg }}>
                     {config.toggleInfoText && config.infoText && (
-                      <p className="text-xs text-gray-500 mb-2 text-center">{config.infoText}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 text-center">{config.infoText}</p>
                     )}
                     <div className="flex gap-2">
                       <input
@@ -2273,8 +2273,8 @@ function ChatBotSettings() {
 
                   {/* Footer */}
                   {config.toggleBrandPowered && config.brandPoweredText && (
-                    <div className="px-3 py-2 bg-gray-50 text-center">
-                      <p className="text-xs text-gray-500">
+                    <div className="px-3 py-2 bg-gray-50 dark:bg-gray-900 text-center">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
                         {config.brandPoweredLink ? (
                           <a href={config.brandPoweredLink} target="_blank" rel="noopener noreferrer" className="hover:underline">
                             {config.brandPoweredText}
@@ -2428,7 +2428,7 @@ function OCRSettings() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
           <DocumentMagnifyingGlassIcon className="w-5 h-5" />
           Configuration OCR (Reconnaissance de texte)
         </h2>
@@ -2452,11 +2452,11 @@ function OCRSettings() {
       </div>
 
       {/* Activation */}
-      <div className="p-4 bg-gray-50 rounded-lg">
+      <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-medium text-gray-900">Activer l'OCR</h3>
-            <p className="text-sm text-gray-500 mt-1">
+            <h3 className="font-medium text-gray-900 dark:text-gray-100">Activer l'OCR</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               L'OCR permet d'extraire le texte des documents PDF et images scannés pour la recherche
             </p>
           </div>
@@ -2467,7 +2467,7 @@ function OCRSettings() {
               onChange={(e) => setConfig(prev => ({ ...prev, enabled: e.target.checked }))}
               className="sr-only peer"
             />
-            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+            <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 dark:border-gray-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
           </label>
         </div>
       </div>
@@ -2489,7 +2489,7 @@ function OCRSettings() {
                   </option>
                 ))}
               </select>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 Sélectionnez la langue principale de vos documents
               </p>
             </div>
@@ -2504,7 +2504,7 @@ function OCRSettings() {
                 min="0"
                 max="100"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 Niveau minimum de confiance pour accepter le texte reconnu (60% recommandé)
               </p>
             </div>
@@ -2519,15 +2519,15 @@ function OCRSettings() {
                 min="1"
                 max="500"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 Limite de pages à traiter par document (performance)
               </p>
             </div>
           </div>
 
           {/* Options avancées */}
-          <div className="p-4 bg-gray-50 rounded-lg space-y-4">
-            <h3 className="font-medium text-gray-900">Options avancées</h3>
+          <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg space-y-4">
+            <h3 className="font-medium text-gray-900 dark:text-gray-100">Options avancées</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <label className="flex items-center gap-3 cursor-pointer">
@@ -2535,11 +2535,11 @@ function OCRSettings() {
                   type="checkbox"
                   checked={config.autoProcess}
                   onChange={(e) => setConfig(prev => ({ ...prev, autoProcess: e.target.checked }))}
-                  className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                  className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
                 />
                 <div>
-                  <span className="text-gray-700">Traitement automatique</span>
-                  <p className="text-xs text-gray-500">Extraire le texte automatiquement à l'import</p>
+                  <span className="text-gray-700 dark:text-gray-300">Traitement automatique</span>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Extraire le texte automatiquement à l'import</p>
                 </div>
               </label>
 
@@ -2548,11 +2548,11 @@ function OCRSettings() {
                   type="checkbox"
                   checked={config.deskew}
                   onChange={(e) => setConfig(prev => ({ ...prev, deskew: e.target.checked }))}
-                  className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                  className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
                 />
                 <div>
-                  <span className="text-gray-700">Redresser les documents</span>
-                  <p className="text-xs text-gray-500">Corriger l'inclinaison des scans</p>
+                  <span className="text-gray-700 dark:text-gray-300">Redresser les documents</span>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Corriger l'inclinaison des scans</p>
                 </div>
               </label>
 
@@ -2561,11 +2561,11 @@ function OCRSettings() {
                   type="checkbox"
                   checked={config.cleanText}
                   onChange={(e) => setConfig(prev => ({ ...prev, cleanText: e.target.checked }))}
-                  className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                  className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
                 />
                 <div>
-                  <span className="text-gray-700">Nettoyer le texte</span>
-                  <p className="text-xs text-gray-500">Supprimer les caractères parasites</p>
+                  <span className="text-gray-700 dark:text-gray-300">Nettoyer le texte</span>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Supprimer les caractères parasites</p>
                 </div>
               </label>
 
@@ -2574,19 +2574,19 @@ function OCRSettings() {
                   type="checkbox"
                   checked={config.preserveLayout}
                   onChange={(e) => setConfig(prev => ({ ...prev, preserveLayout: e.target.checked }))}
-                  className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                  className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
                 />
                 <div>
-                  <span className="text-gray-700">Préserver la mise en page</span>
-                  <p className="text-xs text-gray-500">Conserver les sauts de ligne et espaces</p>
+                  <span className="text-gray-700 dark:text-gray-300">Préserver la mise en page</span>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Conserver les sauts de ligne et espaces</p>
                 </div>
               </label>
             </div>
           </div>
 
           {/* Test OCR */}
-          <div className="p-4 border border-gray-200 rounded-lg space-y-4">
-            <h3 className="font-medium text-gray-900 flex items-center gap-2">
+          <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg space-y-4">
+            <h3 className="font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2">
               <PlayIcon className="w-5 h-5" />
               Tester l'OCR
             </h3>
@@ -2602,18 +2602,18 @@ function OCRSettings() {
                 />
                 <div 
                   onClick={() => fileInputRef.current?.click()}
-                  className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-primary-500 transition-colors"
+                  className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center cursor-pointer hover:border-primary-500 transition-colors"
                 >
                   {testFile ? (
                     <div className="flex items-center justify-center gap-2">
                       <DocumentTextIcon className="w-5 h-5 text-primary-600" />
-                      <span className="text-gray-700">{testFile.name}</span>
-                      <span className="text-gray-400 text-sm">({(testFile.size / 1024).toFixed(1)} KB)</span>
+                      <span className="text-gray-700 dark:text-gray-300">{testFile.name}</span>
+                      <span className="text-gray-400 dark:text-gray-500 text-sm">({(testFile.size / 1024).toFixed(1)} KB)</span>
                     </div>
                   ) : (
                     <div>
-                      <DocumentTextIcon className="w-8 h-8 mx-auto text-gray-400" />
-                      <p className="text-gray-500 mt-2">Cliquez pour sélectionner un fichier PDF ou image</p>
+                      <DocumentTextIcon className="w-8 h-8 mx-auto text-gray-400 dark:text-gray-500" />
+                      <p className="text-gray-500 dark:text-gray-400 mt-2">Cliquez pour sélectionner un fichier PDF ou image</p>
                     </div>
                   )}
                 </div>
@@ -2646,23 +2646,23 @@ function OCRSettings() {
                 className="mt-4 space-y-3"
               >
                 <div className="flex items-center gap-4 text-sm">
-                  <span className="px-2 py-1 bg-green-100 text-green-700 rounded">
+                  <span className="px-2 py-1 bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 rounded">
                     ✓ {testResult.method}
                   </span>
-                  <span className="text-gray-500">
+                  <span className="text-gray-500 dark:text-gray-400">
                     Temps: {testResult.processingTime}
                   </span>
-                  <span className="text-gray-500">
+                  <span className="text-gray-500 dark:text-gray-400">
                     {testResult.wordCount} mots
                   </span>
-                  <span className="text-gray-500">
+                  <span className="text-gray-500 dark:text-gray-400">
                     {testResult.charCount} caractères
                   </span>
                 </div>
 
-                <div className="bg-gray-50 rounded-lg p-4 max-h-64 overflow-y-auto">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Texte extrait :</h4>
-                  <pre className="text-sm text-gray-600 whitespace-pre-wrap font-mono">
+                <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 max-h-64 overflow-y-auto">
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Texte extrait :</h4>
+                  <pre className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap font-mono">
                     {testResult.text || '(Aucun texte extrait)'}
                   </pre>
                   {testResult.truncated && (
@@ -2676,12 +2676,12 @@ function OCRSettings() {
           </div>
 
           {/* Info */}
-          <div className="p-4 bg-blue-50 rounded-lg">
+          <div className="p-4 bg-blue-50 dark:bg-blue-900/40 rounded-lg">
             <h4 className="font-medium text-blue-900 flex items-center gap-2">
               <ExclamationTriangleIcon className="w-5 h-5" />
               Information
             </h4>
-            <p className="text-sm text-blue-700 mt-1">
+            <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
               L'OCR utilise Tesseract.js pour la reconnaissance de texte. Pour de meilleures performances 
               sur les PDF scannés, il est recommandé d'utiliser des documents de bonne qualité (300 DPI minimum).
             </p>
@@ -3335,8 +3335,8 @@ export default function SettingsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Paramètres</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Paramètres</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
             Configuration de l'application
           </p>
         </div>
@@ -3364,7 +3364,7 @@ export default function SettingsPage() {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-2 p-4 bg-success-50 text-success-700 rounded-lg"
+          className="flex items-center gap-2 p-4 bg-success-50 dark:bg-success-900/40 text-success-700 dark:text-success-300 rounded-lg"
         >
           <CheckCircleIcon className="w-5 h-5" />
           Paramètres enregistrés avec succès
@@ -3375,7 +3375,7 @@ export default function SettingsPage() {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-2 p-4 bg-danger-50 text-danger-700 rounded-lg"
+          className="flex items-center gap-2 p-4 bg-danger-50 dark:bg-danger-900/40 text-danger-700 dark:text-danger-300 rounded-lg"
         >
           <ExclamationTriangleIcon className="w-5 h-5" />
           Erreur lors de l'enregistrement des paramètres
@@ -3393,7 +3393,7 @@ export default function SettingsPage() {
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                   activeTab === tab.id
                     ? 'bg-primary-50 text-primary-700'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'
                 }`}
               >
                 <tab.icon className="w-5 h-5" />
@@ -3409,7 +3409,7 @@ export default function SettingsPage() {
             {/* General Settings */}
             {activeTab === 'general' && (
               <div className="space-y-6">
-                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                   <Cog6ToothIcon className="w-5 h-5" />
                   Paramètres généraux
                 </h2>
@@ -3444,7 +3444,7 @@ export default function SettingsPage() {
                     onChange={(e) => handleChange('general', 'referenceFormat', e.target.value)}
                     className="input"
                   />
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                     Variables disponibles: {'{YEAR}'}, {'{MONTH}'}, {'{DAY}'}, {'{SERVICE}'}, {'{NUMBER}'}
                   </p>
                 </div>
@@ -3478,7 +3478,7 @@ export default function SettingsPage() {
             {activeTab === 'appearance' && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                     <PaintBrushIcon className="w-5 h-5" />
                     Personnalisation de l'apparence
                   </h2>
@@ -3505,7 +3505,7 @@ export default function SettingsPage() {
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="flex items-center gap-2 p-4 bg-success-50 text-success-700 rounded-lg"
+                    className="flex items-center gap-2 p-4 bg-success-50 dark:bg-success-900/40 text-success-700 dark:text-success-300 rounded-lg"
                   >
                     <CheckCircleIcon className="w-5 h-5" />
                     Paramètres d'apparence enregistrés avec succès
@@ -3513,10 +3513,10 @@ export default function SettingsPage() {
                 )}
 
                 {/* Logo */}
-                <div className="p-4 bg-gray-50 rounded-lg">
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                   <label className="label mb-3">Logo de l'application</label>
                   <div className="flex items-center gap-6">
-                    <div className="w-20 h-20 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center overflow-hidden bg-white">
+                    <div className="w-20 h-20 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center overflow-hidden bg-white dark:bg-gray-800">
                       {logoPreview ? (
                         <img 
                           src={logoPreview} 
@@ -3524,7 +3524,7 @@ export default function SettingsPage() {
                           className="w-full h-full object-contain p-2"
                         />
                       ) : (
-                        <PhotoIcon className="w-10 h-10 text-gray-400" />
+                        <PhotoIcon className="w-10 h-10 text-gray-400 dark:text-gray-500" />
                       )}
                     </div>
                     <div className="flex-1">
@@ -3555,7 +3555,7 @@ export default function SettingsPage() {
                           </button>
                         )}
                       </div>
-                      <p className="text-xs text-gray-500 mt-2">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                         Formats acceptés : PNG, JPG, SVG, WebP. Max 2 Mo.
                       </p>
                     </div>
@@ -3573,7 +3573,7 @@ export default function SettingsPage() {
                       className="input"
                       placeholder="GED Courrier"
                     />
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                       Affiché dans la sidebar et sur la page de connexion
                     </p>
                   </div>
@@ -3586,14 +3586,14 @@ export default function SettingsPage() {
                       className="input"
                       placeholder="v1.0.0"
                     />
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                       Affiché sous le nom de l'application
                     </p>
                   </div>
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 bg-gray-50 rounded-lg space-y-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg space-y-4">
                   <div className="flex items-center justify-between">
                     <label className="label mb-0">Pied de page</label>
                     <div className="flex items-center gap-2">
@@ -3602,9 +3602,9 @@ export default function SettingsPage() {
                         id="footerVisible"
                         checked={brandingForm.footerVisible}
                         onChange={(e) => handleBrandingChange('footerVisible', e.target.checked)}
-                        className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
                       />
-                      <label htmlFor="footerVisible" className="text-sm text-gray-700">
+                      <label htmlFor="footerVisible" className="text-sm text-gray-700 dark:text-gray-300">
                         Afficher le pied de page
                       </label>
                     </div>
@@ -3618,16 +3618,16 @@ export default function SettingsPage() {
                       placeholder="Fait avec ❤️ par le Service Informatique de Pavilly"
                       disabled={!brandingForm.footerVisible}
                     />
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                       Texte affiché en bas de page. Vous pouvez utiliser des emojis.
                     </p>
                   </div>
                 </div>
 
                 {/* Aperçu */}
-                <div className="p-4 border rounded-lg">
+                <div className="p-4 border dark:border-gray-700 rounded-lg">
                   <label className="label mb-3">Aperçu</label>
-                  <div className="flex items-center gap-3 p-3 bg-white border rounded-lg">
+                  <div className="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg">
                     {logoPreview ? (
                       <img 
                         src={logoPreview} 
@@ -3642,12 +3642,12 @@ export default function SettingsPage() {
                       </div>
                     )}
                     <div>
-                      <h3 className="font-bold text-gray-900">{brandingForm.appName || 'GED Courrier'}</h3>
-                      <p className="text-xs text-gray-500">{brandingForm.appVersion || 'v1.0.0'}</p>
+                      <h3 className="font-bold text-gray-900 dark:text-gray-100">{brandingForm.appName || 'GED Courrier'}</h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{brandingForm.appVersion || 'v1.0.0'}</p>
                     </div>
                   </div>
                   {brandingForm.footerVisible && (
-                    <div className="mt-3 pt-3 border-t text-center text-sm text-gray-500">
+                    <div className="mt-3 pt-3 border-t text-center text-sm text-gray-500 dark:text-gray-400">
                       {brandingForm.footerText || 'Fait avec ❤️ par le Service Informatique de Pavilly'}
                     </div>
                   )}
@@ -3678,7 +3678,7 @@ export default function SettingsPage() {
             {activeTab === 'email-templates' && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                     <EnvelopeIcon className="w-5 h-5" />
                     Modèles de mail
                   </h2>
@@ -3696,9 +3696,9 @@ export default function SettingsPage() {
 
                 {Object.keys(groupedTemplates).length === 0 ? (
                   <div className="text-center py-12">
-                    <EnvelopeIcon className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun modèle</h3>
-                    <p className="text-gray-500 mb-4">Créez votre premier modèle de mail</p>
+                    <EnvelopeIcon className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Aucun modèle</h3>
+                    <p className="text-gray-500 dark:text-gray-400 mb-4">Créez votre premier modèle de mail</p>
                     <button
                       onClick={() => {
                         setEditingTemplate(null);
@@ -3714,8 +3714,8 @@ export default function SettingsPage() {
                   <div className="space-y-4">
                     {Object.entries(groupedTemplates).map(([action, templates]) => (
                       <div key={action} className="border rounded-lg overflow-hidden">
-                        <div className="p-3 bg-gray-50 border-b">
-                          <h3 className="font-medium text-gray-900">
+                        <div className="p-3 bg-gray-50 dark:bg-gray-900 border-b">
+                          <h3 className="font-medium text-gray-900 dark:text-gray-100">
                             {getActionLabel(action)}
                           </h3>
                         </div>
@@ -3723,17 +3723,17 @@ export default function SettingsPage() {
                           {templates.map((template) => (
                             <div
                               key={template._id}
-                              className="p-4 flex items-center justify-between hover:bg-gray-50"
+                              className="p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50"
                             >
                               <div className="flex items-center gap-3">
                                 <div
                                   className={`w-2.5 h-2.5 rounded-full ${
-                                    template.isActive ? 'bg-success-500' : 'bg-gray-300'
+                                    template.isActive ? 'bg-success-500' : 'bg-gray-300 dark:bg-gray-600'
                                   }`}
                                 />
                                 <div>
-                                  <h4 className="font-medium text-gray-900">{template.name}</h4>
-                                  <p className="text-sm text-gray-500">{template.subject}</p>
+                                  <h4 className="font-medium text-gray-900 dark:text-gray-100">{template.name}</h4>
+                                  <p className="text-sm text-gray-500 dark:text-gray-400">{template.subject}</p>
                                 </div>
                               </div>
                               <div className="flex items-center gap-2">
@@ -3741,15 +3741,15 @@ export default function SettingsPage() {
                                   onClick={() => toggleTemplateMutation.mutate(template._id)}
                                   className={`px-2 py-1 text-xs rounded-full ${
                                     template.isActive
-                                      ? 'bg-success-100 text-success-700'
-                                      : 'bg-gray-100 text-gray-600'
+                                      ? 'bg-success-100 dark:bg-success-900/40 text-success-700 dark:text-success-300'
+                                      : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
                                   }`}
                                 >
                                   {template.isActive ? 'Actif' : 'Inactif'}
                                 </button>
                                 <button
                                   onClick={() => handleTemplatePreview(template)}
-                                  className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded"
+                                  className="p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
                                   title="Prévisualiser"
                                 >
                                   <EyeIcon className="w-4 h-4" />
@@ -3759,7 +3759,7 @@ export default function SettingsPage() {
                                     setEditingTemplate(template);
                                     setShowTemplateModal(true);
                                   }}
-                                  className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded"
+                                  className="p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
                                   title="Modifier"
                                 >
                                   <PencilIcon className="w-4 h-4" />
@@ -3789,17 +3789,17 @@ export default function SettingsPage() {
                   <div className="fixed inset-0 z-50 overflow-y-auto">
                     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setTemplatePreview(null)} />
                     <div className="flex min-h-full items-center justify-center p-4">
-                      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
-                        <div className="p-4 border-b flex items-center justify-between bg-gray-50">
+                      <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden">
+                        <div className="p-4 border-b dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-900">
                           <div>
-                            <h3 className="font-semibold text-gray-900">Aperçu: {templatePreview.template.name}</h3>
-                            <p className="text-sm text-gray-500">Sujet: {templatePreview.content.subject}</p>
+                            <h3 className="font-semibold text-gray-900 dark:text-gray-100">Aperçu: {templatePreview.template.name}</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">Sujet: {templatePreview.content.subject}</p>
                           </div>
                           <button onClick={() => setTemplatePreview(null)} className="btn-icon">
                             <XMarkIcon className="w-6 h-6" />
                           </button>
                         </div>
-                        <div className="overflow-auto max-h-[70vh] bg-gray-100 p-4">
+                        <div className="overflow-auto max-h-[70vh] bg-gray-100 dark:bg-gray-700 p-4">
                           <div className="bg-white rounded-lg shadow-sm mx-auto max-w-2xl">
                             <iframe
                               srcDoc={templatePreview.content.html}
@@ -3836,7 +3836,7 @@ export default function SettingsPage() {
             {activeTab === 'webhooks' && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                     <BoltIcon className="w-5 h-5" />
                     Webhooks
                   </h2>
@@ -3852,7 +3852,7 @@ export default function SettingsPage() {
                   </button>
                 </div>
 
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
                   Les webhooks permettent d'envoyer des notifications HTTP vers des URL externes lorsque certains événements se produisent dans l'application.
                 </p>
 
@@ -3860,9 +3860,9 @@ export default function SettingsPage() {
                   <LoadingSpinner />
                 ) : !webhooks || webhooks.length === 0 ? (
                   <div className="text-center py-12">
-                    <BoltIcon className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun webhook</h3>
-                    <p className="text-gray-500 mb-4">Créez votre premier webhook pour recevoir des notifications</p>
+                    <BoltIcon className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Aucun webhook</h3>
+                    <p className="text-gray-500 dark:text-gray-400 mb-4">Créez votre premier webhook pour recevoir des notifications</p>
                     <button
                       onClick={() => {
                         resetWebhookForm();
@@ -3880,7 +3880,7 @@ export default function SettingsPage() {
                       <div
                         key={webhook._id}
                         className={`border rounded-lg overflow-hidden ${
-                          webhook.isActive ? 'border-gray-200' : 'border-gray-200 bg-gray-50'
+                          webhook.isActive ? 'border-gray-200 dark:border-gray-700' : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900'
                         }`}
                       >
                         <div className="p-4">
@@ -3894,14 +3894,14 @@ export default function SettingsPage() {
                                       : webhook.lastStatus === 'failed'
                                       ? 'bg-danger-500'
                                       : 'bg-primary-500'
-                                    : 'bg-gray-300'
+                                    : 'bg-gray-300 dark:bg-gray-600'
                                 }`}
                               />
                               <div>
-                                <h4 className="font-medium text-gray-900">{webhook.name}</h4>
-                                <p className="text-sm text-gray-500 font-mono break-all">{webhook.url}</p>
+                                <h4 className="font-medium text-gray-900 dark:text-gray-100">{webhook.name}</h4>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 font-mono break-all">{webhook.url}</p>
                                 {webhook.description && (
-                                  <p className="text-sm text-gray-500 mt-1">{webhook.description}</p>
+                                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{webhook.description}</p>
                                 )}
                               </div>
                             </div>
@@ -3911,8 +3911,8 @@ export default function SettingsPage() {
                                 disabled={toggleWebhookMutation.isLoading}
                                 className={`px-2 py-1 text-xs rounded-full ${
                                   webhook.isActive
-                                    ? 'bg-success-100 text-success-700'
-                                    : 'bg-gray-100 text-gray-600'
+                                    ? 'bg-success-100 dark:bg-success-900/40 text-success-700 dark:text-success-300'
+                                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
                                 }`}
                               >
                                 {webhook.isActive ? 'Actif' : 'Inactif'}
@@ -3920,14 +3920,14 @@ export default function SettingsPage() {
                               <button
                                 onClick={() => testWebhookMutation.mutate(webhook._id)}
                                 disabled={testWebhookMutation.isLoading}
-                                className="p-1.5 text-gray-500 hover:text-primary-600 hover:bg-primary-50 rounded"
+                                className="p-1.5 text-gray-500 dark:text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded"
                                 title="Tester"
                               >
                                 <PlayIcon className="w-4 h-4" />
                               </button>
                               <button
                                 onClick={() => handleEditWebhook(webhook)}
-                                className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded"
+                                className="p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
                                 title="Modifier"
                               >
                                 <PencilIcon className="w-4 h-4" />
@@ -3951,7 +3951,7 @@ export default function SettingsPage() {
                             {webhook.events.map((event) => (
                               <span
                                 key={event}
-                                className="px-2 py-0.5 text-xs bg-gray-100 text-gray-600 rounded"
+                                className="px-2 py-0.5 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded"
                               >
                                 {event}
                               </span>
@@ -3959,7 +3959,7 @@ export default function SettingsPage() {
                           </div>
 
                           {/* Statistiques */}
-                          <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
+                          <div className="mt-3 flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
                             <span className="flex items-center gap-1">
                               <SignalIcon className="w-3 h-3" />
                               {webhook.totalCalls} appels
@@ -3974,7 +3974,7 @@ export default function SettingsPage() {
                             {webhook.totalCalls > 0 && (
                               <button
                                 onClick={() => resetWebhookStatsMutation.mutate(webhook._id)}
-                                className="text-gray-400 hover:text-gray-600"
+                                className="text-gray-400 dark:text-gray-500 hover:text-gray-600"
                                 title="Réinitialiser les statistiques"
                               >
                                 <ArrowPathIcon className="w-3 h-3" />
@@ -3984,7 +3984,7 @@ export default function SettingsPage() {
 
                           {/* Dernière erreur */}
                           {webhook.lastStatus === 'failed' && webhook.lastError && (
-                            <div className="mt-2 p-2 bg-danger-50 rounded text-xs text-danger-700">
+                            <div className="mt-2 p-2 bg-danger-50 dark:bg-danger-900/40 rounded text-xs text-danger-700 dark:text-danger-300">
                               <span className="font-medium">Dernière erreur:</span> {webhook.lastError}
                             </div>
                           )}
@@ -3999,9 +3999,9 @@ export default function SettingsPage() {
                   <div className="fixed inset-0 z-50 overflow-y-auto">
                     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowWebhookModal(false)} />
                     <div className="flex min-h-full items-center justify-center p-4">
-                      <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
-                        <div className="p-4 border-b flex items-center justify-between bg-gray-50">
-                          <h3 className="font-semibold text-gray-900">
+                      <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+                        <div className="p-4 border-b dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-900">
+                          <h3 className="font-semibold text-gray-900 dark:text-gray-100">
                             {editingWebhook ? 'Modifier le webhook' : 'Nouveau webhook'}
                           </h3>
                           <button onClick={() => setShowWebhookModal(false)} className="btn-icon">
@@ -4066,7 +4066,7 @@ export default function SettingsPage() {
                                 className="input font-mono text-sm"
                                 placeholder="Secret pour signer les requêtes"
                               />
-                              <p className="text-xs text-gray-500 mt-1">
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                                 Un header X-Webhook-Signature sera ajouté aux requêtes
                               </p>
                             </div>
@@ -4094,7 +4094,7 @@ export default function SettingsPage() {
                                   placeholder="Mot de passe"
                                 />
                               </div>
-                              <p className="col-span-2 text-xs text-gray-500">
+                              <p className="col-span-2 text-xs text-gray-500 dark:text-gray-400">
                                 Un header Authorization: Basic sera ajouté aux requêtes
                               </p>
                             </div>
@@ -4105,7 +4105,7 @@ export default function SettingsPage() {
                             <div className="border rounded-lg divide-y max-h-60 overflow-auto">
                               {webhookEvents?.grouped && Object.entries(webhookEvents.grouped).map(([category, events]) => (
                                 <div key={category} className="p-3">
-                                  <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
+                                  <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2 flex items-center gap-2">
                                     {getEventCategoryLabel(category)}
                                     <button
                                       type="button"
@@ -4138,9 +4138,9 @@ export default function SettingsPage() {
                                           type="checkbox"
                                           checked={webhookForm.events.includes(event.value)}
                                           onChange={() => handleWebhookEventToggle(event.value)}
-                                          className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                                          className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
                                         />
-                                        <span className="text-sm text-gray-700">{event.action}</span>
+                                        <span className="text-sm text-gray-700 dark:text-gray-300">{event.action}</span>
                                       </label>
                                     ))}
                                   </div>
@@ -4180,23 +4180,23 @@ export default function SettingsPage() {
                                 type="checkbox"
                                 checked={webhookForm.isActive}
                                 onChange={(e) => setWebhookForm(prev => ({ ...prev, isActive: e.target.checked }))}
-                                className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                                className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
                               />
-                              <span className="text-sm text-gray-700">Actif</span>
+                              <span className="text-sm text-gray-700 dark:text-gray-300">Actif</span>
                             </label>
                             <label className="flex items-center gap-2 cursor-pointer">
                               <input
                                 type="checkbox"
                                 checked={webhookForm.retryOnFailure}
                                 onChange={(e) => setWebhookForm(prev => ({ ...prev, retryOnFailure: e.target.checked }))}
-                                className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                                className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
                               />
-                              <span className="text-sm text-gray-700">Réessayer en cas d'échec</span>
+                              <span className="text-sm text-gray-700 dark:text-gray-300">Réessayer en cas d'échec</span>
                             </label>
                           </div>
                         </div>
 
-                        <div className="p-4 border-t bg-gray-50 flex justify-end gap-3">
+                        <div className="p-4 border-t bg-gray-50 dark:bg-gray-900 flex justify-end gap-3">
                           <button
                             onClick={() => setShowWebhookModal(false)}
                             className="btn-secondary"
@@ -4229,7 +4229,7 @@ export default function SettingsPage() {
             {activeTab === 'ldap' && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                     <ShieldCheckIcon className="w-5 h-5" />
                     Configuration LDAP
                   </h2>
@@ -4248,9 +4248,9 @@ export default function SettingsPage() {
                     id="ldapEnabled"
                     checked={formData.ldap?.enabled || false}
                     onChange={(e) => handleChange('ldap', 'enabled', e.target.checked)}
-                    className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
                   />
-                  <label htmlFor="ldapEnabled" className="text-gray-700">
+                  <label htmlFor="ldapEnabled" className="text-gray-700 dark:text-gray-300">
                     Activer l'authentification LDAP
                   </label>
                 </div>
@@ -4262,13 +4262,13 @@ export default function SettingsPage() {
                       id="ldapAllowLocalFallback"
                       checked={formData.ldap?.allowLocalFallback ?? true}
                       onChange={(e) => handleChange('ldap', 'allowLocalFallback', e.target.checked)}
-                      className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                      className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
                     />
-                    <label htmlFor="ldapAllowLocalFallback" className="text-gray-700">
+                    <label htmlFor="ldapAllowLocalFallback" className="text-gray-700 dark:text-gray-300">
                       Autoriser aussi la connexion avec un compte local
                     </label>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1 ml-6">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 ml-6">
                     Si activé (recommandé), un utilisateur non trouvé ou refusé par LDAP peut quand même se connecter avec un compte local classique. Désactivez pour un mode LDAP strict (aucun compte local ne pourra se connecter).
                   </p>
                 </div>
@@ -4332,9 +4332,9 @@ export default function SettingsPage() {
                         className="absolute right-3 top-1/2 -translate-y-1/2"
                       >
                         {showPasswords.ldapPassword ? (
-                          <EyeSlashIcon className="w-5 h-5 text-gray-400" />
+                          <EyeSlashIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                         ) : (
-                          <EyeIcon className="w-5 h-5 text-gray-400" />
+                          <EyeIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                         )}
                       </button>
                     </div>
@@ -4357,9 +4357,9 @@ export default function SettingsPage() {
                     id="ldapTLS"
                     checked={formData.ldap?.useTLS || false}
                     onChange={(e) => handleChange('ldap', 'useTLS', e.target.checked)}
-                    className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
                   />
-                  <label htmlFor="ldapTLS" className="text-gray-700">
+                  <label htmlFor="ldapTLS" className="text-gray-700 dark:text-gray-300">
                     Utiliser TLS/SSL
                   </label>
                 </div>
@@ -4373,16 +4373,16 @@ export default function SettingsPage() {
                     className="input"
                     placeholder="Ex: CN=GED,OU=groups,DC=pavilly,DC=int"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     Si renseigné, seuls les utilisateurs membres de ce groupe AD pourront se connecter via LDAP. Laissez vide pour autoriser tous les utilisateurs.
                   </p>
                 </div>
 
-                <div className="border-t border-gray-200 pt-4">
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                   <div className="flex items-center justify-between mb-3">
                     <div>
-                      <h3 className="text-sm font-semibold text-gray-900">Groupes AD/LDAP</h3>
-                      <p className="text-sm text-gray-500">
+                      <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Groupes AD/LDAP</h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
                         Récupérez la liste des groupes de l'annuaire pour configurer les{' '}
                         <a href="/admin/correspondances-ldap" className="text-primary-600 hover:underline">
                           correspondances groupe AD → rôle GED
@@ -4399,17 +4399,17 @@ export default function SettingsPage() {
                   </div>
 
                   {ldapGroups.length > 0 && (
-                    <div className="border border-gray-200 rounded-lg divide-y divide-gray-100 max-h-64 overflow-y-auto">
+                    <div className="border border-gray-200 dark:border-gray-700 rounded-lg divide-y divide-gray-100 dark:divide-gray-700 max-h-64 overflow-y-auto">
                       {ldapGroups.map((group) => (
                         <div key={group.dn} className="flex items-center justify-between px-3 py-2 text-sm">
                           <div className="min-w-0 flex-1 mr-2">
-                            <p className="font-medium text-gray-900 truncate">{group.name || group.dn}</p>
-                            <p className="text-gray-500 truncate">{group.dn}</p>
+                            <p className="font-medium text-gray-900 dark:text-gray-100 truncate">{group.name || group.dn}</p>
+                            <p className="text-gray-500 dark:text-gray-400 truncate">{group.dn}</p>
                           </div>
                           <button
                             type="button"
                             onClick={() => copyLdapGroupDN(group.dn)}
-                            className="flex items-center gap-1 text-gray-500 hover:text-primary-600 shrink-0"
+                            className="flex items-center gap-1 text-gray-500 dark:text-gray-400 hover:text-primary-600 shrink-0"
                             title="Copier le DN"
                           >
                             <ClipboardDocumentIcon className="w-4 h-4" />
@@ -4421,14 +4421,14 @@ export default function SettingsPage() {
                   )}
                 </div>
 
-                <div className="border-t border-gray-200 pt-4">
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-sm font-semibold text-gray-900">Configuration LDAP de secours (failover)</h3>
-                      <p className="text-sm text-gray-500">
+                      <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Configuration LDAP de secours (failover)</h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
                         Utilisée automatiquement à chaque connexion si le serveur principal est inaccessible.
-                        La configuration effective se fait via les variables <code className="text-xs bg-gray-100 px-1 rounded">LDAP_*_BACKUP</code> du
-                        fichier <code className="text-xs bg-gray-100 px-1 rounded">.env</code> ; cette section permet
+                        La configuration effective se fait via les variables <code className="text-xs bg-gray-100 dark:bg-gray-700 px-1 rounded">LDAP_*_BACKUP</code> du
+                        fichier <code className="text-xs bg-gray-100 dark:bg-gray-700 px-1 rounded">.env</code> ; cette section permet
                         seulement de tester la connexion et lister les groupes du serveur de secours.
                       </p>
                     </div>
@@ -4500,9 +4500,9 @@ export default function SettingsPage() {
                           className="absolute right-3 top-1/2 -translate-y-1/2"
                         >
                           {showPasswords.ldapBackupPassword ? (
-                            <EyeSlashIcon className="w-5 h-5 text-gray-400" />
+                            <EyeSlashIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                           ) : (
-                            <EyeIcon className="w-5 h-5 text-gray-400" />
+                            <EyeIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                           )}
                         </button>
                       </div>
@@ -4515,15 +4515,15 @@ export default function SettingsPage() {
                       id="ldapBackupTLS"
                       checked={formData.ldapBackup?.useTLS || false}
                       onChange={(e) => handleChange('ldapBackup', 'useTLS', e.target.checked)}
-                      className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                      className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
                     />
-                    <label htmlFor="ldapBackupTLS" className="text-gray-700">
+                    <label htmlFor="ldapBackupTLS" className="text-gray-700 dark:text-gray-300">
                       Utiliser TLS/SSL
                     </label>
                   </div>
 
                   <div className="flex items-center justify-between mt-4 mb-3">
-                    <p className="text-sm text-gray-500">Récupérer la liste des groupes de l'annuaire de secours</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Récupérer la liste des groupes de l'annuaire de secours</p>
                     <button
                       onClick={() => loadLdapGroupsMutation.mutate('ldapBackup')}
                       disabled={loadLdapGroupsMutation.isLoading}
@@ -4534,17 +4534,17 @@ export default function SettingsPage() {
                   </div>
 
                   {ldapBackupGroups.length > 0 && (
-                    <div className="border border-gray-200 rounded-lg divide-y divide-gray-100 max-h-64 overflow-y-auto">
+                    <div className="border border-gray-200 dark:border-gray-700 rounded-lg divide-y divide-gray-100 dark:divide-gray-700 max-h-64 overflow-y-auto">
                       {ldapBackupGroups.map((group) => (
                         <div key={group.dn} className="flex items-center justify-between px-3 py-2 text-sm">
                           <div className="min-w-0 flex-1 mr-2">
-                            <p className="font-medium text-gray-900 truncate">{group.name || group.dn}</p>
-                            <p className="text-gray-500 truncate">{group.dn}</p>
+                            <p className="font-medium text-gray-900 dark:text-gray-100 truncate">{group.name || group.dn}</p>
+                            <p className="text-gray-500 dark:text-gray-400 truncate">{group.dn}</p>
                           </div>
                           <button
                             type="button"
                             onClick={() => copyLdapGroupDN(group.dn)}
-                            className="flex items-center gap-1 text-gray-500 hover:text-primary-600 shrink-0"
+                            className="flex items-center gap-1 text-gray-500 dark:text-gray-400 hover:text-primary-600 shrink-0"
                             title="Copier le DN"
                           >
                             <ClipboardDocumentIcon className="w-4 h-4" />
@@ -4561,7 +4561,7 @@ export default function SettingsPage() {
             {/* Kerberos Settings */}
             {activeTab === 'kerberos' && (
               <div className="space-y-6">
-                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                   <KeyIcon className="w-5 h-5" />
                   Configuration Kerberos
                 </h2>
@@ -4572,9 +4572,9 @@ export default function SettingsPage() {
                     id="kerberosEnabled"
                     checked={formData.kerberos?.enabled || false}
                     onChange={(e) => handleChange('kerberos', 'enabled', e.target.checked)}
-                    className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
                   />
-                  <label htmlFor="kerberosEnabled" className="text-gray-700">
+                  <label htmlFor="kerberosEnabled" className="text-gray-700 dark:text-gray-300">
                     Activer l'authentification Kerberos
                   </label>
                 </div>
@@ -4618,7 +4618,7 @@ export default function SettingsPage() {
             {activeTab === 'imap' && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                     <EnvelopeIcon className="w-5 h-5" />
                     Configuration IMAP
                   </h2>
@@ -4637,9 +4637,9 @@ export default function SettingsPage() {
                     id="imapEnabled"
                     checked={formData.imap?.enabled || false}
                     onChange={(e) => handleChange('imap', 'enabled', e.target.checked)}
-                    className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
                   />
-                  <label htmlFor="imapEnabled" className="text-gray-700">
+                  <label htmlFor="imapEnabled" className="text-gray-700 dark:text-gray-300">
                     Activer l'import IMAP
                   </label>
                 </div>
@@ -4691,9 +4691,9 @@ export default function SettingsPage() {
                         className="absolute right-3 top-1/2 -translate-y-1/2"
                       >
                         {showPasswords.imapPassword ? (
-                          <EyeSlashIcon className="w-5 h-5 text-gray-400" />
+                          <EyeSlashIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                         ) : (
-                          <EyeIcon className="w-5 h-5 text-gray-400" />
+                          <EyeIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                         )}
                       </button>
                     </div>
@@ -4731,7 +4731,7 @@ export default function SettingsPage() {
                       type="button"
                       onClick={() => loadImapFoldersMutation.mutate()}
                       disabled={loadingImapFolders || !formData.imap?.host || !formData.imap?.user || !formData.imap?.password}
-                      className="px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                      className="px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                       title="Charger les dossiers disponibles"
                     >
                       {loadingImapFolders ? (
@@ -4742,7 +4742,7 @@ export default function SettingsPage() {
                       <span className="text-sm">Charger</span>
                     </button>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                     {imapFolders.length > 0 
                       ? `${imapFolders.length} dossier(s) disponible(s)` 
                       : 'Cliquez sur "Charger" pour afficher les dossiers disponibles'}
@@ -4755,9 +4755,9 @@ export default function SettingsPage() {
                     id="imapTLS"
                     checked={formData.imap?.tls ?? true}
                     onChange={(e) => handleChange('imap', 'tls', e.target.checked)}
-                    className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
                   />
-                  <label htmlFor="imapTLS" className="text-gray-700">
+                  <label htmlFor="imapTLS" className="text-gray-700 dark:text-gray-300">
                     Utiliser TLS/SSL
                   </label>
                 </div>
@@ -4775,7 +4775,7 @@ export default function SettingsPage() {
 
                 {/* Section Filtrage des emails */}
                 <div className="border-t pt-6 mt-6">
-                  <h3 className="text-md font-semibold text-gray-900 mb-4">Filtrage des emails</h3>
+                  <h3 className="text-md font-semibold text-gray-900 dark:text-gray-100 mb-4">Filtrage des emails</h3>
                   
                   <div className="space-y-4">
                     <div className="flex items-center gap-2">
@@ -4784,16 +4784,16 @@ export default function SettingsPage() {
                         id="imapAutoImport"
                         checked={formData.imap?.autoImport ?? true}
                         onChange={(e) => handleChange('imap', 'autoImport', e.target.checked)}
-                        className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
                       />
-                      <label htmlFor="imapAutoImport" className="text-gray-700">
+                      <label htmlFor="imapAutoImport" className="text-gray-700 dark:text-gray-300">
                         Importer automatiquement tous les emails (sans filtrage)
                       </label>
                     </div>
 
                     {!formData.imap?.autoImport && (
-                      <div className="bg-gray-50 rounded-lg p-4 space-y-4">
-                        <p className="text-sm text-gray-600 mb-4">
+                      <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 space-y-4">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                           Les filtres ci-dessous sont combinés avec un opérateur <strong>OU</strong>. 
                           Un email sera importé s'il correspond à au moins un critère.
                         </p>
@@ -4807,7 +4807,7 @@ export default function SettingsPage() {
                             className="input"
                             placeholder="@pavilly.fr, @villepavilly.fr, @exemple.com"
                           />
-                          <p className="text-xs text-gray-500 mt-1">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                             Domaines séparés par des virgules. Ex: @pavilly.fr, @villepavilly.fr
                           </p>
                         </div>
@@ -4821,7 +4821,7 @@ export default function SettingsPage() {
                             className="input"
                             placeholder="contact@fournisseur.com, support@partenaire.fr"
                           />
-                          <p className="text-xs text-gray-500 mt-1">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                             Adresses exactes séparées par des virgules
                           </p>
                         </div>
@@ -4835,7 +4835,7 @@ export default function SettingsPage() {
                             className="input"
                             placeholder="Facture, Devis, Urgent, Toshiba"
                           />
-                          <p className="text-xs text-gray-500 mt-1">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                             Mots-clés séparés par des virgules (insensible à la casse)
                           </p>
                         </div>
@@ -4849,7 +4849,7 @@ export default function SettingsPage() {
                             className="input"
                             placeholder="Imprimante, Contrat, Commande"
                           />
-                          <p className="text-xs text-gray-500 mt-1">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                             Mots-clés séparés par des virgules (insensible à la casse)
                           </p>
                         </div>
@@ -4860,7 +4860,7 @@ export default function SettingsPage() {
 
                 {/* Section Dossier de destination après traitement */}
                 <div className="border-t pt-6 mt-6">
-                  <h3 className="text-md font-semibold text-gray-900 mb-4">Action après traitement</h3>
+                  <h3 className="text-md font-semibold text-gray-900 dark:text-gray-100 mb-4">Action après traitement</h3>
                   
                   <div className="space-y-4">
                     <div>
@@ -4903,7 +4903,7 @@ export default function SettingsPage() {
                           <button
                             type="button"
                             onClick={() => setManualProcessedFolder(false)}
-                            className="px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors text-sm"
+                            className="px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-200 transition-colors text-sm"
                             title="Revenir à la liste"
                           >
                             Liste
@@ -4914,7 +4914,7 @@ export default function SettingsPage() {
                             type="button"
                             onClick={() => loadImapFoldersMutation.mutate()}
                             disabled={loadingImapFolders || !formData.imap?.host || !formData.imap?.user || !formData.imap?.password}
-                            className="px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            className="px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                             title="Charger les dossiers disponibles"
                           >
                             {loadingImapFolders ? (
@@ -4927,7 +4927,7 @@ export default function SettingsPage() {
                         )}
                       </div>
                       
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         {imapFolders.length > 0 
                           ? (manualProcessedFolder 
                               ? 'Saisissez le nom du nouveau dossier (il sera créé automatiquement)'
@@ -4942,9 +4942,9 @@ export default function SettingsPage() {
                         id="imapMarkAsRead"
                         checked={formData.imap?.markAsRead ?? true}
                         onChange={(e) => handleChange('imap', 'markAsRead', e.target.checked)}
-                        className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
                       />
-                      <label htmlFor="imapMarkAsRead" className="text-gray-700">
+                      <label htmlFor="imapMarkAsRead" className="text-gray-700 dark:text-gray-300">
                         Marquer les emails comme lus après traitement
                       </label>
                     </div>
@@ -4955,16 +4955,16 @@ export default function SettingsPage() {
                         id="imapProcessAllMails"
                         checked={formData.imap?.processAllMails || false}
                         onChange={(e) => handleChange('imap', 'processAllMails', e.target.checked)}
-                        className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
                       />
-                      <label htmlFor="imapProcessAllMails" className="text-gray-700">
+                      <label htmlFor="imapProcessAllMails" className="text-gray-700 dark:text-gray-300">
                         Traiter tous les emails (y compris les emails déjà lus)
                       </label>
                     </div>
 
                     {formData.imap?.processAllMails && (
-                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                        <p className="text-sm text-amber-700">
+                      <div className="bg-amber-50 dark:bg-amber-900/40 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+                        <p className="text-sm text-amber-700 dark:text-amber-300">
                           ⚠️ <strong>Note :</strong> Cette option traitera tous les emails du dossier, 
                           pas seulement les nouveaux. Utile pour récupérer des emails déjà lus.
                         </p>
@@ -4977,16 +4977,16 @@ export default function SettingsPage() {
                         id="imapDeleteAfterProcess"
                         checked={formData.imap?.deleteAfterProcess || false}
                         onChange={(e) => handleChange('imap', 'deleteAfterProcess', e.target.checked)}
-                        className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
                       />
-                      <label htmlFor="imapDeleteAfterProcess" className="text-gray-700 text-red-600">
+                      <label htmlFor="imapDeleteAfterProcess" className="text-gray-700 dark:text-gray-300 text-red-600">
                         Supprimer les emails après traitement (au lieu de les déplacer)
                       </label>
                     </div>
 
                     {formData.imap?.deleteAfterProcess && (
-                      <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                        <p className="text-sm text-red-700">
+                      <div className="bg-red-50 dark:bg-red-900/40 border border-red-200 dark:border-red-800 rounded-lg p-3">
+                        <p className="text-sm text-red-700 dark:text-red-300">
                           ⚠️ <strong>Attention :</strong> Les emails seront définitivement supprimés après traitement. 
                           Cette action est irréversible.
                         </p>
@@ -5006,7 +5006,7 @@ export default function SettingsPage() {
             {activeTab === 'smtp' && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                     <EnvelopeIcon className="w-5 h-5" />
                     Configuration SMTP
                   </h2>
@@ -5066,9 +5066,9 @@ export default function SettingsPage() {
                         className="absolute right-3 top-1/2 -translate-y-1/2"
                       >
                         {showPasswords.smtpPassword ? (
-                          <EyeSlashIcon className="w-5 h-5 text-gray-400" />
+                          <EyeSlashIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                         ) : (
-                          <EyeIcon className="w-5 h-5 text-gray-400" />
+                          <EyeIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                         )}
                       </button>
                     </div>
@@ -5104,16 +5104,16 @@ export default function SettingsPage() {
                     id="smtpSecure"
                     checked={formData.smtp?.secure ?? true}
                     onChange={(e) => handleChange('smtp', 'secure', e.target.checked)}
-                    className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
                   />
-                  <label htmlFor="smtpSecure" className="text-gray-700">
+                  <label htmlFor="smtpSecure" className="text-gray-700 dark:text-gray-300">
                     Utiliser TLS/SSL
                   </label>
                 </div>
 
                 {/* Section Test SMTP */}
                 <div className="border-t pt-6 mt-6">
-                  <h3 className="text-md font-semibold text-gray-900 flex items-center gap-2 mb-4">
+                  <h3 className="text-md font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2 mb-4">
                     <PaperAirplaneIcon className="w-5 h-5" />
                     Envoyer un email de test
                   </h3>
@@ -5166,7 +5166,7 @@ export default function SettingsPage() {
                     </button>
                   </div>
 
-                  <p className="text-sm text-gray-500 mt-2">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
                     Assurez-vous d'avoir enregistré la configuration SMTP avant de tester.
                   </p>
                 </div>
@@ -5181,12 +5181,12 @@ export default function SettingsPage() {
             {/* Database Settings */}
             {activeTab === 'database' && (
               <div className="space-y-6">
-                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                   <ServerIcon className="w-5 h-5" />
                   Configuration Base de données
                 </h2>
 
-                <div className="p-4 bg-warning-50 text-warning-700 rounded-lg">
+                <div className="p-4 bg-warning-50 dark:bg-warning-900/40 text-warning-700 dark:text-warning-300 rounded-lg">
                   <p className="text-sm">
                     <strong>Attention :</strong> Modifier ces paramètres peut rendre l'application inaccessible.
                     Assurez-vous de sauvegarder vos données avant toute modification.
@@ -5303,22 +5303,22 @@ function TemplateEditModal({ template, actions, onClose, onSuccess }) {
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div className="flex min-h-full items-center justify-center p-4">
         <div
-          className="relative bg-white rounded-2xl shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col"
+          className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="p-4 border-b flex items-center justify-between bg-gray-50">
-            <h2 className="text-xl font-bold text-gray-900">
+          <div className="p-4 border-b dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-900">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
               {template ? 'Modifier le modèle' : 'Nouveau modèle'}
             </h2>
-            <button onClick={onClose} className="p-2 hover:bg-gray-200 rounded-lg">
+            <button onClick={onClose} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg">
               <XMarkIcon className="w-6 h-6" />
             </button>
           </div>
 
           <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
             {/* Infos générales */}
-            <div className="p-4 border-b bg-gray-50 space-y-4">
+            <div className="p-4 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-900 space-y-4">
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="label">Nom du modèle *</label>
@@ -5372,9 +5372,9 @@ function TemplateEditModal({ template, actions, onClose, onSuccess }) {
                     id="isActiveTemplate"
                     checked={formData.isActive}
                     onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                    className="w-4 h-4 rounded border-gray-300 text-primary-600"
+                    className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600"
                   />
-                  <label htmlFor="isActiveTemplate" className="text-sm text-gray-700">Activer ce modèle</label>
+                  <label htmlFor="isActiveTemplate" className="text-sm text-gray-700 dark:text-gray-300">Activer ce modèle</label>
                 </div>
               </div>
             </div>
@@ -5382,9 +5382,9 @@ function TemplateEditModal({ template, actions, onClose, onSuccess }) {
             {/* Contenu principal */}
             <div className="flex-1 flex overflow-hidden">
               {/* Variables disponibles */}
-              <div className="w-64 border-r bg-gray-50 p-4 overflow-y-auto">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">Variables disponibles</h3>
-                <p className="text-xs text-gray-500 mb-3">Cliquez pour insérer</p>
+              <div className="w-64 border-r dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-4 overflow-y-auto">
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Variables disponibles</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Cliquez pour insérer</p>
                 <div className="space-y-1">
                   {availableVariables.map((variable) => (
                     <button
@@ -5392,10 +5392,10 @@ function TemplateEditModal({ template, actions, onClose, onSuccess }) {
                       type="button"
                       onClick={() => insertVariable(variable)}
                       onDoubleClick={() => copyVariable(variable)}
-                      className="w-full text-left px-2 py-1.5 text-xs font-mono bg-white border rounded hover:bg-primary-50 hover:border-primary-300 transition-colors flex items-center justify-between group"
+                      className="w-full text-left px-2 py-1.5 text-xs font-mono bg-white dark:bg-gray-800 dark:border-gray-600 border rounded hover:bg-primary-50 dark:hover:bg-primary-900/30 hover:border-primary-300 transition-colors flex items-center justify-between group"
                     >
-                      <span className="truncate">{variable}</span>
-                      <ClipboardDocumentIcon className="w-3 h-3 text-gray-400 opacity-0 group-hover:opacity-100" />
+                      <span className="truncate dark:text-gray-200">{variable}</span>
+                      <ClipboardDocumentIcon className="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-0 group-hover:opacity-100" />
                     </button>
                   ))}
                 </div>
@@ -5404,14 +5404,14 @@ function TemplateEditModal({ template, actions, onClose, onSuccess }) {
               {/* Éditeur et aperçu */}
               <div className="flex-1 flex flex-col overflow-hidden">
                 {/* Tabs */}
-                <div className="flex border-b bg-white">
+                <div className="flex border-b dark:border-gray-700 bg-white dark:bg-gray-800">
                   <button
                     type="button"
                     onClick={() => setActiveTab('editor')}
                     className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
                       activeTab === 'editor'
                         ? 'border-primary-500 text-primary-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                        : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
                     }`}
                   >
                     <CodeBracketIcon className="w-4 h-4" />
@@ -5423,7 +5423,7 @@ function TemplateEditModal({ template, actions, onClose, onSuccess }) {
                     className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
                       activeTab === 'preview'
                         ? 'border-primary-500 text-primary-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                        : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
                     }`}
                   >
                     <EyeIcon className="w-4 h-4" />
@@ -5438,11 +5438,11 @@ function TemplateEditModal({ template, actions, onClose, onSuccess }) {
                       id="html-editor-modal"
                       value={formData.htmlContent}
                       onChange={(e) => setFormData({ ...formData, htmlContent: e.target.value })}
-                      className="w-full h-full p-4 font-mono text-sm resize-none focus:outline-none"
+                      className="w-full h-full p-4 font-mono text-sm resize-none focus:outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                       placeholder="Saisissez votre code HTML ici..."
                     />
                   ) : (
-                    <div className="h-full overflow-auto bg-gray-100 p-4">
+                    <div className="h-full overflow-auto bg-gray-100 dark:bg-gray-700 p-4">
                       <div className="bg-white rounded-lg shadow-sm mx-auto max-w-2xl">
                         <iframe
                           srcDoc={formData.htmlContent}
@@ -5457,7 +5457,7 @@ function TemplateEditModal({ template, actions, onClose, onSuccess }) {
             </div>
 
             {/* Footer */}
-            <div className="p-4 border-t bg-gray-50 flex justify-end gap-3">
+            <div className="p-4 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end gap-3">
               <button type="button" onClick={onClose} className="btn-secondary">
                 Annuler
               </button>

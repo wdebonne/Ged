@@ -113,10 +113,10 @@ export default function NotificationsTab() {
   return (
     <div className="space-y-6">
       <div className="flex items-start gap-3">
-        <BellIcon className="w-6 h-6 text-primary-600 mt-0.5 shrink-0" />
+        <BellIcon className="w-6 h-6 text-primary-600 dark:text-primary-400 mt-0.5 shrink-0" />
         <div>
-          <h3 className="font-semibold text-gray-900">Notifications par email</h3>
-          <p className="text-sm text-gray-500 mt-1">
+          <h3 className="font-semibold text-gray-900 dark:text-gray-100">Notifications par email</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             Choisissez les notifications email que vous souhaitez recevoir.
             Par défaut, les paramètres globaux définis par l'administrateur s'appliquent.
           </p>
@@ -124,17 +124,17 @@ export default function NotificationsTab() {
       </div>
 
       {/* Toggle personnalisation */}
-      <div className="p-4 bg-gray-50 rounded-lg border">
+      <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border dark:border-gray-700">
         <label className="flex items-center gap-3 cursor-pointer">
           <input
             type="checkbox"
             checked={useCustom}
             onChange={(e) => handleToggleCustom(e.target.checked)}
-            className="w-4 h-4 rounded border-gray-300 text-primary-600"
+            className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600"
           />
           <div>
-            <span className="font-medium text-gray-900">Personnaliser mes notifications</span>
-            <p className="text-xs text-gray-500">
+            <span className="font-medium text-gray-900 dark:text-gray-100">Personnaliser mes notifications</span>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               {useCustom
                 ? 'Vos préférences personnelles sont actives'
                 : 'Les paramètres par défaut de l\'application s\'appliquent'}
@@ -145,7 +145,7 @@ export default function NotificationsTab() {
 
       {/* Info si defaults */}
       {!useCustom && (
-        <div className="flex items-start gap-2 p-3 bg-blue-50 text-blue-700 rounded-lg text-sm">
+        <div className="flex items-start gap-2 p-3 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 rounded-lg text-sm">
           <InformationCircleIcon className="w-5 h-5 shrink-0 mt-0.5" />
           <p>
             Les cases ci-dessous indiquent la configuration par défaut.
@@ -155,14 +155,14 @@ export default function NotificationsTab() {
       )}
 
       {/* Liste des options */}
-      <div className="divide-y rounded-lg border overflow-hidden">
+      <div className="divide-y dark:divide-gray-700 rounded-lg border dark:border-gray-700 overflow-hidden">
         {NOTIFICATION_OPTIONS.map((opt) => {
           const checked = getEffectiveValue(opt.key);
           return (
             <label
               key={opt.key}
               className={`flex items-center gap-4 p-4 transition-colors ${
-                useCustom ? 'hover:bg-gray-50 cursor-pointer' : 'opacity-75 cursor-default'
+                useCustom ? 'hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer' : 'opacity-75 cursor-default'
               }`}
             >
               <input
@@ -170,15 +170,15 @@ export default function NotificationsTab() {
                 checked={checked}
                 disabled={!useCustom}
                 onChange={(e) => setPrefs({ ...prefs, [opt.key]: e.target.checked })}
-                className="w-4 h-4 rounded border-gray-300 text-primary-600 disabled:opacity-50"
+                className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 disabled:opacity-50"
               />
               <div className="flex-1 min-w-0">
-                <span className="text-sm font-medium text-gray-900">{opt.label}</span>
-                <p className="text-xs text-gray-500">{opt.description}</p>
+                <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{opt.label}</span>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{opt.description}</p>
               </div>
               {!useCustom && (
                 <span className={`text-xs px-2 py-0.5 rounded-full ${
-                  checked ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+                  checked ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
                 }`}>
                   {checked ? 'Activé' : 'Désactivé'} par défaut
                 </span>

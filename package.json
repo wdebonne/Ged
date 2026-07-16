@@ -1,6 +1,6 @@
 {
   "name": "ged-courrier",
-  "version": "3.19.0",
+  "version": "3.20.1",
   "description": "Application de Gestion Électronique de Courrier",
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
@@ -9,7 +9,12 @@
     "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
     "build": "cd frontend && npm run build"
   },
-  "keywords": ["ged", "courrier", "gestion", "documents"],
+  "keywords": [
+    "ged",
+    "courrier",
+    "gestion",
+    "documents"
+  ],
   "author": "Service Informatique de Pavilly",
   "license": "AGPL-3.0-only",
   "devDependencies": {

@@ -6,7 +6,7 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { statsAPI, mailsAPI } from '../../services/api';
 import { useAuthStore } from '../../stores/authStore';
-import LoadingSpinner from '../../components/LoadingSpinner';
+import { Skeleton, SkeletonStatCards } from '../../components/Skeleton';
 import {
   InboxIcon,
   CheckCircleIcon,
@@ -55,7 +55,7 @@ export default function DashboardPage() {
     }
   });
 
-  const { data: urgentMails, isError: urgentError } = useQuery({
+  const { data: urgentMails, isLoading: urgentLoading, isError: urgentError } = useQuery({
     queryKey: ['urgent-mails'],
     queryFn: async () => {
       const response = await mailsAPI.getAll({ limit: 5, priority: 'high,urgent', status: 'pending' });
@@ -86,12 +86,11 @@ export default function DashboardPage() {
     enabled: canImport
   });
 
-  if (statsLoading) return <LoadingSpinner />;
   if (statsError) return (
     <div className="flex items-center justify-center h-64">
       <div className="text-center">
         <ExclamationTriangleIcon className="w-12 h-12 text-danger-500 mx-auto mb-3" />
-        <p className="text-gray-600">Impossible de charger le tableau de bord. Veuillez rafraîchir la page.</p>
+        <p className="text-gray-600 dark:text-gray-400">Impossible de charger le tableau de bord. Veuillez rafraîchir la page.</p>
       </div>
     </div>
   );
@@ -242,12 +241,12 @@ export default function DashboardPage() {
     };
 
     const bgColors = {
-      warning: 'bg-amber-50 hover:bg-amber-100',
-      success: 'bg-emerald-50 hover:bg-emerald-100',
-      gray: 'bg-slate-50 hover:bg-slate-100',
-      primary: 'bg-indigo-50 hover:bg-indigo-100',
-      danger: 'bg-red-50 hover:bg-red-100',
-      info: 'bg-blue-50 hover:bg-blue-100'
+      warning: 'bg-amber-50 hover:bg-amber-100 dark:bg-amber-900/20 dark:hover:bg-amber-900/30',
+      success: 'bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-900/20 dark:hover:bg-emerald-900/30',
+      gray: 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/60 dark:hover:bg-slate-800',
+      primary: 'bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-900/20 dark:hover:bg-indigo-900/30',
+      danger: 'bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30',
+      info: 'bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/30'
     };
 
     // Déterminer si l'animation doit être active
@@ -271,8 +270,8 @@ export default function DashboardPage() {
         
         <div className="relative flex items-start justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-600 mb-1">{card.title}</p>
-            <p className={`text-4xl font-bold bg-gradient-to-br from-gray-900 to-gray-600 bg-clip-text text-transparent ${shouldAnimate ? 'animate-pulse-number' : ''}`}>
+            <p className="text-sm font-medium text-gray-600 mb-1 dark:text-gray-400">{card.title}</p>
+            <p className={`text-4xl font-bold bg-gradient-to-br from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400 bg-clip-text text-transparent ${shouldAnimate ? 'animate-pulse-number' : ''}`}>
               {card.value}
             </p>
           </div>
@@ -280,9 +279,9 @@ export default function DashboardPage() {
             <card.icon className={`w-6 h-6 text-white ${shouldAnimate ? 'animate-wiggle' : ''}`} />
           </div>
         </div>
-        
+
         {card.link ? (
-          <div className="mt-4 flex items-center text-sm font-medium text-gray-500 group-hover:text-gray-700 transition-colors">
+          <div className="mt-4 flex items-center text-sm font-medium text-gray-500 group-hover:text-gray-700 transition-colors dark:text-gray-400 dark:group-hover:text-gray-200">
             <span>Voir détails</span>
             <ArrowRightIcon className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
           </div>
@@ -312,34 +311,34 @@ export default function DashboardPage() {
             onClick={onToggle}
             className="flex items-center gap-3 hover:text-primary-600 transition-colors group"
           >
-            <div className="p-2 rounded-xl bg-gray-100 group-hover:bg-primary-100 transition-colors">
+            <div className="p-2 rounded-xl bg-gray-100 group-hover:bg-primary-100 transition-colors dark:bg-gray-700 dark:group-hover:bg-primary-900/40">
               {isOpen ? (
-                <ChevronDownIcon className="w-5 h-5 text-gray-500 group-hover:text-primary-600" />
+                <ChevronDownIcon className="w-5 h-5 text-gray-500 group-hover:text-primary-600 dark:text-gray-400 dark:group-hover:text-primary-400" />
               ) : (
-                <ChevronRightIcon className="w-5 h-5 text-gray-500 group-hover:text-primary-600" />
+                <ChevronRightIcon className="w-5 h-5 text-gray-500 group-hover:text-primary-600 dark:text-gray-400 dark:group-hover:text-primary-400" />
               )}
             </div>
-            <div className="p-2 rounded-xl bg-primary-100">
-              <Icon className="w-5 h-5 text-primary-600" />
+            <div className="p-2 rounded-xl bg-primary-100 dark:bg-primary-900/40">
+              <Icon className="w-5 h-5 text-primary-600 dark:text-primary-300" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-gray-800">{title}</h2>
-              {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
+              <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">{title}</h2>
+              {subtitle && <p className="text-sm text-gray-500 dark:text-gray-400">{subtitle}</p>}
             </div>
           </button>
         ) : (
           <>
-            <div className="p-2 rounded-xl bg-primary-100">
-              <Icon className="w-5 h-5 text-primary-600" />
+            <div className="p-2 rounded-xl bg-primary-100 dark:bg-primary-900/40">
+              <Icon className="w-5 h-5 text-primary-600 dark:text-primary-300" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-gray-800">{title}</h2>
-              {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
+              <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">{title}</h2>
+              {subtitle && <p className="text-sm text-gray-500 dark:text-gray-400">{subtitle}</p>}
             </div>
           </>
         )}
         {badge && (
-          <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-primary-100 text-primary-700">
+          <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300">
             {badge}
           </span>
         )}
@@ -447,9 +446,13 @@ export default function DashboardPage() {
                 transition={{ duration: 0.3 }}
                 className="overflow-hidden"
               >
-                <div className="grid grid-cols-1 gap-6">
-                  <StatCard card={importCard} index={0} />
-                </div>
+                {pendingLoading ? (
+                  <SkeletonStatCards count={1} />
+                ) : (
+                  <div className="grid grid-cols-1 gap-6">
+                    <StatCard card={importCard} index={0} />
+                  </div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
@@ -473,11 +476,15 @@ export default function DashboardPage() {
               transition={{ duration: 0.3 }}
               className="overflow-hidden"
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {myMailsCards.map((card, index) => (
-                  <StatCard key={card.title} card={card} index={index} />
-                ))}
-              </div>
+              {statsLoading ? (
+                <SkeletonStatCards count={4} />
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {myMailsCards.map((card, index) => (
+                    <StatCard key={card.title} card={card} index={index} />
+                  ))}
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
@@ -530,11 +537,15 @@ export default function DashboardPage() {
                 transition={{ duration: 0.3 }}
                 className="overflow-hidden"
               >
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {serviceMailsCards.map((card, index) => (
-                    <StatCard key={card.title + '-service'} card={card} index={index} />
-                  ))}
-                </div>
+                {statsLoading ? (
+                  <SkeletonStatCards count={3} />
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    {serviceMailsCards.map((card, index) => (
+                      <StatCard key={card.title + '-service'} card={card} index={index} />
+                    ))}
+                  </div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
@@ -559,11 +570,15 @@ export default function DashboardPage() {
                 transition={{ duration: 0.3 }}
                 className="overflow-hidden"
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {allMailsCards.map((card, index) => (
-                    <StatCard key={card.title + '-all'} card={card} index={index} />
-                  ))}
-                </div>
+                {statsLoading ? (
+                  <SkeletonStatCards count={4} />
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {allMailsCards.map((card, index) => (
+                      <StatCard key={card.title + '-all'} card={card} index={index} />
+                    ))}
+                  </div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
@@ -573,31 +588,31 @@ export default function DashboardPage() {
       {/* Content Grid - Listes détaillées */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Pending Mails */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden dark:bg-gray-800 dark:border-gray-700">
           <button
             onClick={() => setRecentMailsOpen(!recentMailsOpen)}
-            className={`w-full p-5 flex items-center justify-between bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 transition-colors ${recentMailsOpen ? 'border-b border-gray-100' : ''}`}
+            className={`w-full p-5 flex items-center justify-between bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 transition-colors dark:from-amber-900/20 dark:to-orange-900/20 dark:hover:from-amber-900/30 dark:hover:to-orange-900/30 ${recentMailsOpen ? 'border-b border-gray-100 dark:border-gray-700' : ''}`}
           >
-            <h2 className="font-bold text-gray-900 flex items-center gap-3">
+            <h2 className="font-bold text-gray-900 flex items-center gap-3 dark:text-gray-100">
               <div className="p-2 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 shadow-lg shadow-amber-200">
                 <InboxIcon className="w-5 h-5 text-white" />
               </div>
               Derniers courriers à traiter
             </h2>
             <div className="flex items-center gap-3">
-              <Link 
-                to="/courriers/a-traiter" 
+              <Link
+                to="/courriers/a-traiter"
                 onClick={(e) => e.stopPropagation()}
-                className="flex items-center gap-1 text-sm font-medium text-amber-600 hover:text-amber-700 transition-colors"
+                className="flex items-center gap-1 text-sm font-medium text-amber-600 hover:text-amber-700 transition-colors dark:text-amber-400 dark:hover:text-amber-300"
               >
                 Voir tout
                 <ArrowRightIcon className="w-4 h-4" />
               </Link>
-              <div className="p-1 rounded-lg bg-amber-100">
+              <div className="p-1 rounded-lg bg-amber-100 dark:bg-amber-900/40">
                 {recentMailsOpen ? (
-                  <ChevronDownIcon className="w-5 h-5 text-amber-600" />
+                  <ChevronDownIcon className="w-5 h-5 text-amber-600 dark:text-amber-300" />
                 ) : (
-                  <ChevronRightIcon className="w-5 h-5 text-amber-600" />
+                  <ChevronRightIcon className="w-5 h-5 text-amber-600 dark:text-amber-300" />
                 )}
               </div>
             </div>
@@ -611,46 +626,54 @@ export default function DashboardPage() {
                 transition={{ duration: 0.3 }}
                 className="overflow-hidden"
               >
-                <div className="divide-y divide-gray-50">
+                <div className="divide-y divide-gray-50 dark:divide-gray-700">
                   {recentLoading ? (
-                    <div className="p-8 text-center">
-                      <LoadingSpinner />
-                    </div>
+                    Array.from({ length: 5 }).map((_, i) => (
+                      <div key={i} className="p-4">
+                        <div className="flex items-start gap-4">
+                          <Skeleton className="flex-shrink-0 w-10 h-10 rounded-xl" />
+                          <div className="min-w-0 flex-1 space-y-2">
+                            <Skeleton className="h-4 w-2/3" />
+                            <Skeleton className="h-3 w-1/3" />
+                          </div>
+                        </div>
+                      </div>
+                    ))
                   ) : recentMails?.length === 0 ? (
                     <div className="p-12 text-center">
-                      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
-                        <CheckCircleIcon className="w-8 h-8 text-green-500" />
+                      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center dark:bg-green-900/40">
+                        <CheckCircleIcon className="w-8 h-8 text-green-500 dark:text-green-400" />
                       </div>
-                      <p className="text-gray-500 font-medium">Aucun courrier en attente</p>
-                      <p className="text-sm text-gray-400 mt-1">Vous êtes à jour !</p>
+                      <p className="text-gray-500 font-medium dark:text-gray-400">Aucun courrier en attente</p>
+                      <p className="text-sm text-gray-400 mt-1 dark:text-gray-500">Vous êtes à jour !</p>
                     </div>
                   ) : (
                     recentMails?.map((mail, index) => (
                       <Link
                         key={mail._id}
                         to={`/courriers/${mail._id}`}
-                        className="block p-4 hover:bg-gray-50 transition-all duration-200 group"
+                        className="block p-4 hover:bg-gray-50 transition-all duration-200 group dark:hover:bg-gray-700/50"
                       >
                         <div className="flex items-start gap-4">
-                          <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-500 font-bold text-sm">
+                          <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-500 font-bold text-sm dark:from-gray-700 dark:to-gray-600 dark:text-gray-300">
                             {index + 1}
                           </div>
                           <div className="min-w-0 flex-1">
-                            <p className="font-semibold text-gray-900 truncate group-hover:text-primary-600 transition-colors">
+                            <p className="font-semibold text-gray-900 truncate group-hover:text-primary-600 transition-colors dark:text-gray-100 dark:group-hover:text-primary-400">
                               {mail.subject}
                             </p>
                             <div className="flex items-center gap-2 mt-1">
-                              <UserCircleIcon className="w-4 h-4 text-gray-400" />
-                              <p className="text-sm text-gray-500 truncate">
+                              <UserCircleIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                              <p className="text-sm text-gray-500 truncate dark:text-gray-400">
                                 {mail.sender?.name || mail.senderName}
                               </p>
                             </div>
                           </div>
                           <div className="flex-shrink-0 text-right">
-                            <span className="text-xs font-medium text-gray-400">
+                            <span className="text-xs font-medium text-gray-400 dark:text-gray-500">
                               {format(new Date(mail.receivedDate), 'dd MMM', { locale: fr })}
                             </span>
-                            <p className="text-xs text-gray-400 mt-1">
+                            <p className="text-xs text-gray-400 mt-1 dark:text-gray-500">
                               {formatDistanceToNow(new Date(mail.receivedDate), { addSuffix: true, locale: fr })}
                             </p>
                           </div>
@@ -665,27 +688,27 @@ export default function DashboardPage() {
         </div>
 
         {/* Urgent Mails */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden dark:bg-gray-800 dark:border-gray-700">
           <button
             onClick={() => setUrgentMailsOpen(!urgentMailsOpen)}
-            className={`w-full p-5 flex items-center justify-between bg-gradient-to-r from-red-50 to-rose-50 hover:from-red-100 hover:to-rose-100 transition-colors ${urgentMailsOpen ? 'border-b border-gray-100' : ''}`}
+            className={`w-full p-5 flex items-center justify-between bg-gradient-to-r from-red-50 to-rose-50 hover:from-red-100 hover:to-rose-100 transition-colors dark:from-red-900/20 dark:to-rose-900/20 dark:hover:from-red-900/30 dark:hover:to-rose-900/30 ${urgentMailsOpen ? 'border-b border-gray-100 dark:border-gray-700' : ''}`}
           >
-            <h2 className="font-bold text-gray-900 flex items-center gap-3">
+            <h2 className="font-bold text-gray-900 flex items-center gap-3 dark:text-gray-100">
               <div className="p-2 rounded-xl bg-gradient-to-br from-red-500 to-rose-500 shadow-lg shadow-red-200">
                 <ExclamationTriangleIcon className="w-5 h-5 text-white" />
               </div>
               Courriers urgents
               {urgentMails?.length > 0 && (
-                <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-red-100 text-red-700 animate-pulse">
+                <span className="px-2 py-0.5 text-xs font-bold rounded-full bg-red-100 text-red-700 animate-pulse dark:bg-red-900/40 dark:text-red-300">
                   {urgentMails.length}
                 </span>
               )}
             </h2>
-            <div className="p-1 rounded-lg bg-red-100">
+            <div className="p-1 rounded-lg bg-red-100 dark:bg-red-900/40">
               {urgentMailsOpen ? (
-                <ChevronDownIcon className="w-5 h-5 text-red-600" />
+                <ChevronDownIcon className="w-5 h-5 text-red-600 dark:text-red-300" />
               ) : (
-                <ChevronRightIcon className="w-5 h-5 text-red-600" />
+                <ChevronRightIcon className="w-5 h-5 text-red-600 dark:text-red-300" />
               )}
             </div>
           </button>
@@ -698,21 +721,33 @@ export default function DashboardPage() {
                 transition={{ duration: 0.3 }}
                 className="overflow-hidden"
               >
-                <div className="divide-y divide-gray-50">
-                  {urgentMails?.length === 0 ? (
-                    <div className="p-12 text-center">
-                      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
-                        <CheckCircleIcon className="w-8 h-8 text-green-500" />
+                <div className="divide-y divide-gray-50 dark:divide-gray-700">
+                  {urgentLoading ? (
+                    Array.from({ length: 3 }).map((_, i) => (
+                      <div key={i} className="p-4">
+                        <div className="flex items-start gap-4">
+                          <Skeleton className="flex-shrink-0 w-10 h-10 rounded-xl" />
+                          <div className="min-w-0 flex-1 space-y-2">
+                            <Skeleton className="h-4 w-2/3" />
+                            <Skeleton className="h-3 w-1/3" />
+                          </div>
+                        </div>
                       </div>
-                      <p className="text-gray-500 font-medium">Aucun courrier urgent</p>
-                      <p className="text-sm text-gray-400 mt-1">Tout va bien !</p>
+                    ))
+                  ) : urgentMails?.length === 0 ? (
+                    <div className="p-12 text-center">
+                      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center dark:bg-green-900/40">
+                        <CheckCircleIcon className="w-8 h-8 text-green-500 dark:text-green-400" />
+                      </div>
+                      <p className="text-gray-500 font-medium dark:text-gray-400">Aucun courrier urgent</p>
+                      <p className="text-sm text-gray-400 mt-1 dark:text-gray-500">Tout va bien !</p>
                     </div>
                   ) : (
                     urgentMails?.map((mail) => (
                       <Link
                         key={mail._id}
                         to={`/courriers/${mail._id}`}
-                        className="block p-4 hover:bg-red-50 transition-all duration-200 group"
+                        className="block p-4 hover:bg-red-50 transition-all duration-200 group dark:hover:bg-red-900/10"
                       >
                         <div className="flex items-start gap-4">
                           <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-rose-500 flex items-center justify-center shadow-lg shadow-red-200">
@@ -720,21 +755,21 @@ export default function DashboardPage() {
                           </div>
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2 mb-1">
-                              <span className="px-2 py-0.5 text-xs font-bold rounded bg-red-100 text-red-700">
+                              <span className="px-2 py-0.5 text-xs font-bold rounded bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300">
                                 URGENT
                               </span>
                             </div>
-                            <p className="font-semibold text-gray-900 truncate group-hover:text-red-600 transition-colors">
+                            <p className="font-semibold text-gray-900 truncate group-hover:text-red-600 transition-colors dark:text-gray-100 dark:group-hover:text-red-400">
                               {mail.subject}
                             </p>
                             <div className="flex items-center gap-2 mt-1">
-                              <UserCircleIcon className="w-4 h-4 text-gray-400" />
-                              <p className="text-sm text-gray-500 truncate">
+                              <UserCircleIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+                              <p className="text-sm text-gray-500 truncate dark:text-gray-400">
                                 {mail.sender?.name || mail.senderName}
                               </p>
                             </div>
                           </div>
-                          <span className="flex-shrink-0 text-xs font-medium text-gray-400">
+                          <span className="flex-shrink-0 text-xs font-medium text-gray-400 dark:text-gray-500">
                             {format(new Date(mail.receivedDate), 'dd MMM', { locale: fr })}
                           </span>
                         </div>
@@ -748,35 +783,37 @@ export default function DashboardPage() {
         </div>
 
         {/* Courriers Entrants - Liste détaillée pour Admin et Archivistes */}
-        {canImport && pendingFiles?.length > 0 && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        {canImport && (pendingLoading || pendingFiles?.length > 0) && (
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden dark:bg-gray-800 dark:border-gray-700">
             <button
               onClick={() => setPendingFilesOpen(!pendingFilesOpen)}
-              className={`w-full p-5 flex items-center justify-between bg-gradient-to-r from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100 transition-colors ${pendingFilesOpen ? 'border-b border-gray-100' : ''}`}
+              className={`w-full p-5 flex items-center justify-between bg-gradient-to-r from-indigo-50 to-purple-50 hover:from-indigo-100 hover:to-purple-100 transition-colors dark:from-indigo-900/20 dark:to-purple-900/20 dark:hover:from-indigo-900/30 dark:hover:to-purple-900/30 ${pendingFilesOpen ? 'border-b border-gray-100 dark:border-gray-700' : ''}`}
             >
-              <h2 className="font-bold text-gray-900 flex items-center gap-3">
+              <h2 className="font-bold text-gray-900 flex items-center gap-3 dark:text-gray-100">
                 <div className="p-2 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 shadow-lg shadow-indigo-200">
                   <ArrowDownTrayIcon className="w-5 h-5 text-white" />
                 </div>
                 Fichiers en attente d'import
-                <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-indigo-100 text-indigo-700">
-                  {pendingFiles.length}
-                </span>
+                {!pendingLoading && (
+                  <span className="px-2.5 py-0.5 text-xs font-bold rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">
+                    {pendingFiles.length}
+                  </span>
+                )}
               </h2>
               <div className="flex items-center gap-3">
-                <Link 
-                  to="/courriers/entrants" 
+                <Link
+                  to="/courriers/entrants"
                   onClick={(e) => e.stopPropagation()}
-                  className="flex items-center gap-1 text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
+                  className="flex items-center gap-1 text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors dark:text-indigo-400 dark:hover:text-indigo-300"
                 >
                   Gérer
                   <ArrowRightIcon className="w-4 h-4" />
                 </Link>
-                <div className="p-1 rounded-lg bg-indigo-100">
+                <div className="p-1 rounded-lg bg-indigo-100 dark:bg-indigo-900/40">
                   {pendingFilesOpen ? (
-                    <ChevronDownIcon className="w-5 h-5 text-indigo-600" />
+                    <ChevronDownIcon className="w-5 h-5 text-indigo-600 dark:text-indigo-300" />
                   ) : (
-                    <ChevronRightIcon className="w-5 h-5 text-indigo-600" />
+                    <ChevronRightIcon className="w-5 h-5 text-indigo-600 dark:text-indigo-300" />
                   )}
                 </div>
               </div>
@@ -790,31 +827,39 @@ export default function DashboardPage() {
                   transition={{ duration: 0.3 }}
                   className="overflow-hidden"
                 >
-                  <div className="divide-y divide-gray-50 max-h-80 overflow-y-auto">
+                  <div className="divide-y divide-gray-50 max-h-80 overflow-y-auto dark:divide-gray-700">
                     {pendingLoading ? (
-                      <div className="p-8 text-center">
-                        <LoadingSpinner />
-                      </div>
+                      Array.from({ length: 4 }).map((_, i) => (
+                        <div key={i} className="p-4">
+                          <div className="flex items-center gap-4">
+                            <Skeleton className="flex-shrink-0 w-12 h-12 rounded-xl" />
+                            <div className="min-w-0 flex-1 space-y-2">
+                              <Skeleton className="h-4 w-2/3" />
+                              <Skeleton className="h-3 w-1/3" />
+                            </div>
+                          </div>
+                        </div>
+                      ))
                     ) : (
                       pendingFiles?.slice(0, 5).map((file, index) => (
                         <Link
                           key={file._id}
                           to={`/courriers/entrants?file=${file._id}`}
-                          className="block p-4 hover:bg-indigo-50 transition-all duration-200 group"
+                          className="block p-4 hover:bg-indigo-50 transition-all duration-200 group dark:hover:bg-indigo-900/10"
                         >
                           <div className="flex items-center gap-4">
-                            <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-red-100 to-orange-100 flex items-center justify-center">
-                              <DocumentTextIcon className="w-6 h-6 text-red-500" />
+                            <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-red-100 to-orange-100 flex items-center justify-center dark:from-red-900/30 dark:to-orange-900/30">
+                              <DocumentTextIcon className="w-6 h-6 text-red-500 dark:text-red-400" />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p className="font-semibold text-gray-900 truncate group-hover:text-indigo-600 transition-colors">
+                              <p className="font-semibold text-gray-900 truncate group-hover:text-indigo-600 transition-colors dark:text-gray-100 dark:group-hover:text-indigo-400">
                                 {file.originalName || file.fileName}
                               </p>
-                              <p className="text-xs text-gray-500 mt-1">
+                              <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">
                                 {file.createdAt && format(new Date(file.createdAt), 'dd MMM yyyy à HH:mm', { locale: fr })}
                               </p>
                             </div>
-                            <span className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-amber-100 text-amber-700">
+                            <span className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
                               En attente
                             </span>
                           </div>
@@ -823,10 +868,10 @@ export default function DashboardPage() {
                     )}
                   </div>
                   {pendingFiles?.length > 5 && (
-                    <div className="p-4 border-t border-gray-100 bg-gray-50 text-center">
-                      <Link 
-                        to="/courriers/entrants" 
-                        className="text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
+                    <div className="p-4 border-t border-gray-100 bg-gray-50 text-center dark:border-gray-700 dark:bg-gray-900">
+                      <Link
+                        to="/courriers/entrants"
+                        className="text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors dark:text-indigo-400 dark:hover:text-indigo-300"
                       >
                         Voir les {pendingFiles.length - 5} autres fichiers →
                       </Link>
@@ -840,22 +885,22 @@ export default function DashboardPage() {
 
         {/* Statistics Chart - Pour admin/superviseurs */}
         {isAdminOrSupervisor && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden dark:bg-gray-800 dark:border-gray-700">
             <button
               onClick={() => setMonthStatsOpen(!monthStatsOpen)}
-              className={`w-full p-5 flex items-center justify-between bg-gradient-to-r from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100 transition-colors ${monthStatsOpen ? 'border-b border-gray-100' : ''}`}
+              className={`w-full p-5 flex items-center justify-between bg-gradient-to-r from-emerald-50 to-teal-50 hover:from-emerald-100 hover:to-teal-100 transition-colors dark:from-emerald-900/20 dark:to-teal-900/20 dark:hover:from-emerald-900/30 dark:hover:to-teal-900/30 ${monthStatsOpen ? 'border-b border-gray-100 dark:border-gray-700' : ''}`}
             >
-              <h2 className="font-bold text-gray-900 flex items-center gap-3">
+              <h2 className="font-bold text-gray-900 flex items-center gap-3 dark:text-gray-100">
                 <div className="p-2 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-200">
                   <ArrowTrendingUpIcon className="w-5 h-5 text-white" />
                 </div>
                 Statistiques du mois
               </h2>
-              <div className="p-1 rounded-lg bg-emerald-100">
+              <div className="p-1 rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
                 {monthStatsOpen ? (
-                  <ChevronDownIcon className="w-5 h-5 text-emerald-600" />
+                  <ChevronDownIcon className="w-5 h-5 text-emerald-600 dark:text-emerald-300" />
                 ) : (
-                  <ChevronRightIcon className="w-5 h-5 text-emerald-600" />
+                  <ChevronRightIcon className="w-5 h-5 text-emerald-600 dark:text-emerald-300" />
                 )}
               </div>
             </button>
@@ -869,40 +914,52 @@ export default function DashboardPage() {
                   className="overflow-hidden"
                 >
                   <div className="p-6">
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="text-center p-5 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100">
-                        <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-200">
-                          <InboxIcon className="w-6 h-6 text-white" />
-                        </div>
-                        <p className="text-3xl font-bold text-gray-900">
-                          {stats?.thisMonthCount || 0}
-                        </p>
-                        <p className="text-sm font-medium text-gray-500 mt-1">Reçus</p>
+                    {statsLoading ? (
+                      <div className="grid grid-cols-3 gap-4">
+                        {Array.from({ length: 3 }).map((_, i) => (
+                          <div key={i} className="text-center p-5 rounded-2xl bg-gray-50 border border-gray-100 dark:bg-gray-900 dark:border-gray-700">
+                            <Skeleton className="w-12 h-12 mx-auto mb-3 rounded-xl" />
+                            <Skeleton className="h-7 w-12 mx-auto mb-2" />
+                            <Skeleton className="h-4 w-16 mx-auto" />
+                          </div>
+                        ))}
                       </div>
-                      <div className="text-center p-5 rounded-2xl bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-100">
-                        <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center shadow-lg shadow-emerald-200">
-                          <CheckCircleIcon className="w-6 h-6 text-white" />
+                    ) : (
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="text-center p-5 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 dark:from-blue-900/20 dark:to-indigo-900/20 dark:border-blue-900/40">
+                          <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-200">
+                            <InboxIcon className="w-6 h-6 text-white" />
+                          </div>
+                          <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                            {stats?.thisMonthCount || 0}
+                          </p>
+                          <p className="text-sm font-medium text-gray-500 mt-1 dark:text-gray-400">Reçus</p>
                         </div>
-                        <p className="text-3xl font-bold text-gray-900">
-                          {stats?.processedThisMonth || 0}
-                        </p>
-                        <p className="text-sm font-medium text-gray-500 mt-1">Traités</p>
-                      </div>
-                      <div className="text-center p-5 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100">
-                        <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-200">
-                          <ClockIcon className="w-6 h-6 text-white" />
+                        <div className="text-center p-5 rounded-2xl bg-gradient-to-br from-emerald-50 to-green-50 border border-emerald-100 dark:from-emerald-900/20 dark:to-green-900/20 dark:border-emerald-900/40">
+                          <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br from-emerald-500 to-green-500 flex items-center justify-center shadow-lg shadow-emerald-200">
+                            <CheckCircleIcon className="w-6 h-6 text-white" />
+                          </div>
+                          <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                            {stats?.processedThisMonth || 0}
+                          </p>
+                          <p className="text-sm font-medium text-gray-500 mt-1 dark:text-gray-400">Traités</p>
                         </div>
-                        <p className="text-3xl font-bold text-gray-900">
-                          {stats?.pendingOverdue || 0}
-                        </p>
-                        <p className="text-sm font-medium text-gray-500 mt-1">En retard</p>
+                        <div className="text-center p-5 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100 dark:from-amber-900/20 dark:to-orange-900/20 dark:border-amber-900/40">
+                          <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-200">
+                            <ClockIcon className="w-6 h-6 text-white" />
+                          </div>
+                          <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                            {stats?.pendingOverdue || 0}
+                          </p>
+                          <p className="text-sm font-medium text-gray-500 mt-1 dark:text-gray-400">En retard</p>
+                        </div>
                       </div>
-                    </div>
+                    )}
 
                     {/* Per Service Stats */}
-                    {stats?.perService && stats.perService.length > 0 && (
-                      <div className="mt-6 pt-6 border-t border-gray-100">
-                        <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2">
+                    {!statsLoading && stats?.perService && stats.perService.length > 0 && (
+                      <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
+                        <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2 dark:text-gray-300">
                           <BuildingOfficeIcon className="w-4 h-4" />
                           Par service
                         </h3>
@@ -914,18 +971,18 @@ export default function DashboardPage() {
                               <div key={service._id} className="group">
                                 <div className="flex items-center justify-between mb-1">
                                   <div className="flex items-center gap-2">
-                                    <div 
+                                    <div
                                       className="w-3 h-3 rounded-full flex-shrink-0"
                                       style={{ backgroundColor: service.color || '#6B7280' }}
                                     />
-                                    <span className="text-sm font-medium text-gray-700 truncate">{service.name}</span>
+                                    <span className="text-sm font-medium text-gray-700 truncate dark:text-gray-300">{service.name}</span>
                                   </div>
-                                  <span className="text-sm font-bold text-gray-900">{service.count}</span>
+                                  <span className="text-sm font-bold text-gray-900 dark:text-gray-100">{service.count}</span>
                                 </div>
-                                <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                                  <div 
+                                <div className="h-2 bg-gray-100 rounded-full overflow-hidden dark:bg-gray-700">
+                                  <div
                                     className="h-full rounded-full transition-all duration-500"
-                                    style={{ 
+                                    style={{
                                       width: `${percentage}%`,
                                       backgroundColor: service.color || '#6B7280'
                                     }}

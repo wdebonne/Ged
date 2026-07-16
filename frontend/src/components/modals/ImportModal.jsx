@@ -242,12 +242,12 @@ export default function ImportModal({ isOpen, onClose }) {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="relative bg-white rounded-2xl shadow-xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+            className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
           {/* Header */}
-          <div className="p-6 border-b flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-900">
+          <div className="p-6 border-b dark:border-gray-700 flex items-center justify-between">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
               Importer un nouveau courrier
             </h2>
             <button type="button" onClick={handleClose} className="btn-icon">
@@ -260,22 +260,22 @@ export default function ImportModal({ isOpen, onClose }) {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Left - PDF Preview */}
               <div className="space-y-4">
-                <h3 className="font-semibold text-gray-900">Document PDF</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100">Document PDF</h3>
                 
                 {!file ? (
                   <div
                     onClick={() => fileInputRef.current?.click()}
                     className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors ${
-                      errors.file 
-                        ? 'border-danger-300 bg-danger-50' 
-                        : 'border-gray-300 hover:border-primary-400 hover:bg-primary-50'
+                      errors.file
+                        ? 'border-danger-300 bg-danger-50 dark:border-danger-800 dark:bg-danger-900/20'
+                        : 'border-gray-300 hover:border-primary-400 hover:bg-primary-50 dark:border-gray-600 dark:hover:border-primary-500 dark:hover:bg-primary-900/20'
                     }`}
                   >
-                    <DocumentArrowUpIcon className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-                    <p className="text-gray-600 mb-2">
+                    <DocumentArrowUpIcon className="w-12 h-12 mx-auto text-gray-400 dark:text-gray-500 mb-4" />
+                    <p className="text-gray-600 dark:text-gray-400 mb-2">
                       Cliquez pour sélectionner un fichier PDF
                     </p>
-                    <p className="text-sm text-gray-400">
+                    <p className="text-sm text-gray-400 dark:text-gray-500">
                       ou glissez-déposez votre fichier ici
                     </p>
                     {errors.file && (
@@ -284,14 +284,14 @@ export default function ImportModal({ isOpen, onClose }) {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-primary-50 rounded-lg border border-primary-200">
+                    <div className="flex items-center justify-between p-4 bg-primary-50 rounded-lg border border-primary-200 dark:bg-primary-900/20 dark:border-primary-900/40">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
-                          <DocumentTextIcon className="w-8 h-8 text-primary-600" />
+                        <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/40 rounded-lg flex items-center justify-center">
+                          <DocumentTextIcon className="w-8 h-8 text-primary-600 dark:text-primary-400" />
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900">{file.name}</p>
-                          <p className="text-sm text-gray-500">
+                          <p className="font-medium text-gray-900 dark:text-gray-100">{file.name}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
                             {(file.size / 1024 / 1024).toFixed(2)} MB
                           </p>
                         </div>
@@ -310,14 +310,14 @@ export default function ImportModal({ isOpen, onClose }) {
                           setNumPages(null);
                           setPageNumber(1);
                         }}
-                        className="btn-icon text-danger-600 hover:bg-danger-50"
+                        className="btn-icon text-danger-600 hover:bg-danger-50 dark:hover:bg-danger-900/20"
                       >
                         <XMarkIcon className="w-5 h-5" />
                       </button>
                     </div>
-                    
+
                     {/* Aperçu PDF avec react-pdf */}
-                    <div className="bg-gray-100 rounded-lg p-4 flex flex-col items-center overflow-hidden">
+                    <div className="bg-gray-100 dark:bg-gray-900 rounded-lg p-4 flex flex-col items-center overflow-hidden">
                       {pdfUrl && (
                         <>
                           <Document
@@ -356,7 +356,7 @@ export default function ImportModal({ isOpen, onClose }) {
                               >
                                 ← Précédent
                               </button>
-                              <span className="text-sm text-gray-600">
+                              <span className="text-sm text-gray-600 dark:text-gray-400">
                                 Page {pageNumber} / {numPages}
                               </span>
                               <button
@@ -374,7 +374,7 @@ export default function ImportModal({ isOpen, onClose }) {
                             </div>
                           )}
                           {numPages && (
-                            <p className="text-xs text-gray-500 mt-2">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                               {numPages} page{numPages > 1 ? 's' : ''} au total
                             </p>
                           )}
@@ -397,7 +397,7 @@ export default function ImportModal({ isOpen, onClose }) {
 
               {/* Right - Form */}
               <div className="space-y-4">
-                <h3 className="font-semibold text-gray-900">Informations du courrier</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-gray-100">Informations du courrier</h3>
                 
                 <form onSubmit={handleSubmit} className="space-y-4">
                   {/* Expéditeur */}
@@ -422,13 +422,13 @@ export default function ImportModal({ isOpen, onClose }) {
                     
                     {/* Sender Dropdown */}
                     {showSenderDropdown && senders?.length > 0 && (
-                      <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-48 overflow-auto">
+                      <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-48 overflow-auto dark:bg-gray-800 dark:border-gray-700">
                         {senders.map((sender) => (
                           <button
                             key={sender._id}
                             type="button"
                             onClick={() => selectSender(sender)}
-                            className="w-full px-4 py-2 text-left hover:bg-gray-50 transition-colors"
+                            className="w-full px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-200 transition-colors"
                           >
                             {sender.name}
                           </button>
@@ -459,13 +459,13 @@ export default function ImportModal({ isOpen, onClose }) {
                     
                     {/* Subject Dropdown */}
                     {showSubjectDropdown && subjects?.length > 0 && (
-                      <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-48 overflow-auto">
+                      <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-48 overflow-auto dark:bg-gray-800 dark:border-gray-700">
                         {subjects.map((subject) => (
                           <button
                             key={subject._id}
                             type="button"
                             onClick={() => selectSubject(subject)}
-                            className="w-full px-4 py-2 text-left hover:bg-gray-50 transition-colors"
+                            className="w-full px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-200 transition-colors"
                           >
                             {subject.name}
                           </button>
@@ -541,7 +541,7 @@ export default function ImportModal({ isOpen, onClose }) {
                       onChange={(e) => setFormData(prev => ({ ...prev, dueDate: e.target.value }))}
                       className="input"
                     />
-                    <p className="text-xs text-gray-400 mt-1">
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                       Laissez vide pour appliquer le délai réglementaire par défaut
                     </p>
                   </div>
@@ -568,7 +568,7 @@ export default function ImportModal({ isOpen, onClose }) {
 
                   {/* Error message */}
                   {errors.submit && (
-                    <div className="flex items-center gap-2 p-3 bg-danger-50 text-danger-700 rounded-lg">
+                    <div className="flex items-center gap-2 p-3 bg-danger-50 text-danger-700 dark:bg-danger-900/20 dark:text-danger-400 rounded-lg">
                       <ExclamationTriangleIcon className="w-5 h-5" />
                       {errors.submit}
                     </div>
@@ -579,7 +579,7 @@ export default function ImportModal({ isOpen, onClose }) {
           </div>
 
           {/* Footer */}
-          <div className="p-6 border-t flex items-center justify-end gap-3">
+          <div className="p-6 border-t dark:border-gray-700 flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={(e) => {

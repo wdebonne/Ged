@@ -28,8 +28,8 @@ export default function LoginPage() {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold text-gray-900 mb-2">Connexion</h2>
-      <p className="text-gray-600 mb-6">Accédez à votre espace de gestion de courrier</p>
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Connexion</h2>
+      <p className="text-gray-600 dark:text-gray-400 mb-6">Accédez à votre espace de gestion de courrier</p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -67,7 +67,7 @@ export default function LoginPage() {
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-3 bg-danger-50 border border-danger-200 rounded-lg text-danger-700 text-sm"
+            className="p-3 bg-danger-50 border border-danger-200 rounded-lg text-danger-700 text-sm dark:bg-danger-900/20 dark:border-danger-800 dark:text-danger-400"
           >
             {error}
           </motion.div>

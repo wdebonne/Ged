@@ -21,22 +21,22 @@ import {
 const STATUS_CONFIG = {
   active: {
     label: 'Active',
-    color: 'bg-success-100 text-success-700',
+    color: 'bg-success-100 text-success-700 dark:bg-success-900/40 dark:text-success-400',
     icon: CheckCircleIcon
   },
   pending: {
     label: 'Programmée',
-    color: 'bg-warning-100 text-warning-700',
+    color: 'bg-warning-100 text-warning-700 dark:bg-warning-900/40 dark:text-warning-400',
     icon: ClockIcon
   },
   expired: {
     label: 'Expirée',
-    color: 'bg-gray-100 text-gray-600',
+    color: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400',
     icon: ClockIcon
   },
   revoked: {
     label: 'Révoquée',
-    color: 'bg-danger-100 text-danger-700',
+    color: 'bg-danger-100 text-danger-700 dark:bg-danger-900/40 dark:text-danger-400',
     icon: NoSymbolIcon
   }
 };
@@ -113,7 +113,7 @@ export default function DelegationsTab() {
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white border rounded-lg p-4 hover:shadow-md transition-shadow"
+        className="bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow"
       >
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
@@ -124,15 +124,15 @@ export default function DelegationsTab() {
                 className="w-10 h-10 rounded-full object-cover"
               />
             ) : (
-              <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
-                <UserGroupIcon className="w-5 h-5 text-primary-600" />
+              <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/40 flex items-center justify-center">
+                <UserGroupIcon className="w-5 h-5 text-primary-600 dark:text-primary-400" />
               </div>
             )}
             <div>
-              <p className="font-medium text-gray-900">
+              <p className="font-medium text-gray-900 dark:text-gray-100">
                 {otherUser?.firstName} {otherUser?.lastName}
               </p>
-              <p className="text-sm text-gray-500">{otherUser?.email}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{otherUser?.email}</p>
             </div>
           </div>
           <span className={`px-2 py-1 text-xs font-medium rounded-full flex items-center gap-1 ${statusConfig.color}`}>
@@ -143,23 +143,23 @@ export default function DelegationsTab() {
 
         <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
           <div>
-            <span className="text-gray-500">Début</span>
-            <p className="font-medium text-gray-900">{formatDate(delegation.startDate)}</p>
+            <span className="text-gray-500 dark:text-gray-400">Début</span>
+            <p className="font-medium text-gray-900 dark:text-gray-100">{formatDate(delegation.startDate)}</p>
           </div>
           <div>
-            <span className="text-gray-500">Fin</span>
-            <p className="font-medium text-gray-900">{formatDate(delegation.endDate)}</p>
+            <span className="text-gray-500 dark:text-gray-400">Fin</span>
+            <p className="font-medium text-gray-900 dark:text-gray-100">{formatDate(delegation.endDate)}</p>
           </div>
         </div>
 
         {delegation.reason && (
-          <div className="mt-3 p-2 bg-gray-50 rounded text-sm text-gray-600">
+          <div className="mt-3 p-2 bg-gray-50 dark:bg-gray-900 rounded text-sm text-gray-600 dark:text-gray-400">
             <span className="font-medium">Motif :</span> {delegation.reason}
           </div>
         )}
 
         {delegation.status === 'revoked' && (
-          <div className="mt-3 p-2 bg-danger-50 rounded text-sm text-danger-700">
+          <div className="mt-3 p-2 bg-danger-50 dark:bg-danger-900/20 rounded text-sm text-danger-700 dark:text-danger-400">
             <span className="font-medium">Révoquée le :</span> {formatDate(delegation.revokedAt)}
             {delegation.revocationNote && (
               <p className="mt-1">Note : {delegation.revocationNote}</p>
@@ -172,7 +172,7 @@ export default function DelegationsTab() {
             {canRevoke && (
               <button
                 onClick={() => setShowRevokeModal(delegation)}
-                className="btn-secondary text-sm py-1.5 px-3 text-danger-600 hover:bg-danger-50"
+                className="btn-secondary text-sm py-1.5 px-3 text-danger-600 hover:bg-danger-50 dark:text-danger-400 dark:hover:bg-danger-900/20"
               >
                 <NoSymbolIcon className="w-4 h-4 mr-1" />
                 Révoquer
@@ -185,7 +185,7 @@ export default function DelegationsTab() {
                     deleteMutation.mutate(delegation._id);
                   }
                 }}
-                className="btn-secondary text-sm py-1.5 px-3 text-gray-600 hover:bg-gray-100"
+                className="btn-secondary text-sm py-1.5 px-3 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
               >
                 <TrashIcon className="w-4 h-4" />
               </button>
@@ -209,8 +209,8 @@ export default function DelegationsTab() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">Délégations de courriers</h3>
-          <p className="text-sm text-gray-500">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Délégations de courriers</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
             Déléguez vos courriers à un collègue pendant votre absence
           </p>
         </div>
@@ -224,19 +224,19 @@ export default function DelegationsTab() {
       </div>
 
       {/* Section Tabs */}
-      <div className="flex gap-4 border-b">
+      <div className="flex gap-4 border-b dark:border-gray-700">
         <button
           onClick={() => setActiveSection('given')}
           className={`pb-3 px-1 border-b-2 font-medium transition-colors flex items-center gap-2 ${
             activeSection === 'given'
               ? 'border-primary-600 text-primary-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
+              : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
           }`}
         >
           <ArrowRightIcon className="w-4 h-4" />
           Délégations données
           {delegations.given?.length > 0 && (
-            <span className="bg-primary-100 text-primary-700 text-xs px-2 py-0.5 rounded-full">
+            <span className="bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300 text-xs px-2 py-0.5 rounded-full">
               {delegations.given.filter(d => ['active', 'pending'].includes(d.status)).length}
             </span>
           )}
@@ -246,13 +246,13 @@ export default function DelegationsTab() {
           className={`pb-3 px-1 border-b-2 font-medium transition-colors flex items-center gap-2 ${
             activeSection === 'received'
               ? 'border-primary-600 text-primary-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
+              : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
           }`}
         >
           <ArrowLeftIcon className="w-4 h-4" />
           Délégations reçues
           {delegations.received?.length > 0 && (
-            <span className="bg-orange-100 text-orange-700 text-xs px-2 py-0.5 rounded-full">
+            <span className="bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300 text-xs px-2 py-0.5 rounded-full">
               {delegations.received.filter(d => d.status === 'active').length}
             </span>
           )}
@@ -280,10 +280,10 @@ export default function DelegationsTab() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12 bg-gray-50 rounded-lg">
-                <UserGroupIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <h4 className="text-gray-900 font-medium">Aucune délégation donnée</h4>
-                <p className="text-gray-500 text-sm mt-1">
+              <div className="text-center py-12 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                <UserGroupIcon className="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
+                <h4 className="text-gray-900 dark:text-gray-100 font-medium">Aucune délégation donnée</h4>
+                <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
                   Créez une délégation pour qu'un collègue puisse gérer vos courriers
                 </p>
               </div>
@@ -310,10 +310,10 @@ export default function DelegationsTab() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12 bg-gray-50 rounded-lg">
-                <UserGroupIcon className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <h4 className="text-gray-900 font-medium">Aucune délégation reçue</h4>
-                <p className="text-gray-500 text-sm mt-1">
+              <div className="text-center py-12 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                <UserGroupIcon className="w-12 h-12 text-gray-400 dark:text-gray-600 mx-auto mb-4" />
+                <h4 className="text-gray-900 dark:text-gray-100 font-medium">Aucune délégation reçue</h4>
+                <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
                   Personne ne vous a délégué ses courriers pour le moment
                 </p>
               </div>
@@ -395,11 +395,11 @@ function CreateDelegationModal({ isOpen, onClose, onSubmit, isLoading }) {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4"
+        className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md mx-4"
       >
-        <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
           <h3 className="text-lg font-semibold">Nouvelle délégation</h3>
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded">
+          <button onClick={onClose} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
             <XMarkIcon className="w-5 h-5" />
           </button>
         </div>
@@ -409,7 +409,7 @@ function CreateDelegationModal({ isOpen, onClose, onSubmit, isLoading }) {
           <div>
             <label className="label">Déléguer à *</label>
             {selectedUser ? (
-              <div className="flex items-center justify-between p-3 bg-primary-50 rounded-lg">
+              <div className="flex items-center justify-between p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
                 <div className="flex items-center gap-3">
                   {selectedUser.avatar ? (
                     <img
@@ -418,15 +418,15 @@ function CreateDelegationModal({ isOpen, onClose, onSubmit, isLoading }) {
                       className="w-8 h-8 rounded-full"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-primary-200 flex items-center justify-center text-primary-700 text-sm font-medium">
+                    <div className="w-8 h-8 rounded-full bg-primary-200 dark:bg-primary-900/50 flex items-center justify-center text-primary-700 dark:text-primary-300 text-sm font-medium">
                       {selectedUser.firstName?.[0]}{selectedUser.lastName?.[0]}
                     </div>
                   )}
                   <div>
-                    <p className="font-medium text-gray-900">
+                    <p className="font-medium text-gray-900 dark:text-gray-100">
                       {selectedUser.firstName} {selectedUser.lastName}
                     </p>
-                    <p className="text-xs text-gray-500">{selectedUser.email}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{selectedUser.email}</p>
                   </div>
                 </div>
                 <button
@@ -435,7 +435,7 @@ function CreateDelegationModal({ isOpen, onClose, onSubmit, isLoading }) {
                     setSelectedUser(null);
                     setFormData(prev => ({ ...prev, delegateId: '' }));
                   }}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                 >
                   <XMarkIcon className="w-5 h-5" />
                 </button>
@@ -451,13 +451,13 @@ function CreateDelegationModal({ isOpen, onClose, onSubmit, isLoading }) {
                   className="input pl-10"
                 />
                 {searchQuery.length > 1 && users.length > 0 && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-48 overflow-auto">
+                  <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border dark:border-gray-700 rounded-lg shadow-lg max-h-48 overflow-auto">
                     {users.map((user) => (
                       <button
                         key={user._id || user.id}
                         type="button"
                         onClick={() => handleSelectUser(user)}
-                        className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 text-left"
+                        className="w-full flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-700 text-left"
                       >
                         {user.avatar ? (
                           <img
@@ -466,15 +466,15 @@ function CreateDelegationModal({ isOpen, onClose, onSubmit, isLoading }) {
                             className="w-8 h-8 rounded-full"
                           />
                         ) : (
-                          <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 text-sm font-medium">
+                          <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 text-sm font-medium">
                             {user.firstName?.[0]}{user.lastName?.[0]}
                           </div>
                         )}
                         <div>
-                          <p className="font-medium text-gray-900">
+                          <p className="font-medium text-gray-900 dark:text-gray-100">
                             {user.firstName} {user.lastName}
                           </p>
-                          <p className="text-xs text-gray-500">{user.email}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
                         </div>
                       </button>
                     ))}
@@ -486,7 +486,7 @@ function CreateDelegationModal({ isOpen, onClose, onSubmit, isLoading }) {
 
           {/* Avertissement chevauchement */}
           {overlapData?.data?.data?.overlap?.total > 0 && (
-            <div className="p-3 bg-warning-50 text-warning-700 rounded-lg text-sm flex items-start gap-2">
+            <div className="p-3 bg-warning-50 text-warning-700 dark:bg-warning-900/20 dark:text-warning-400 rounded-lg text-sm flex items-start gap-2">
               <ExclamationTriangleIcon className="w-5 h-5 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="font-medium">Attention</p>
@@ -519,7 +519,7 @@ function CreateDelegationModal({ isOpen, onClose, onSubmit, isLoading }) {
                 className="input"
                 min={formData.startDate}
               />
-              <p className="text-xs text-gray-500 mt-1">Laissez vide pour une durée indéterminée</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Laissez vide pour une durée indéterminée</p>
             </div>
           </div>
 
@@ -577,17 +577,17 @@ function RevokeModal({ delegation, onClose, onConfirm, isLoading }) {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4"
+        className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md mx-4"
       >
-        <div className="flex items-center justify-between p-4 border-b">
-          <h3 className="text-lg font-semibold text-danger-600">Révoquer la délégation</h3>
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded">
+        <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
+          <h3 className="text-lg font-semibold text-danger-600 dark:text-danger-400">Révoquer la délégation</h3>
+          <button onClick={onClose} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
             <XMarkIcon className="w-5 h-5" />
           </button>
         </div>
 
         <div className="p-4 space-y-4">
-          <div className="p-3 bg-danger-50 text-danger-700 rounded-lg text-sm flex items-start gap-2">
+          <div className="p-3 bg-danger-50 text-danger-700 dark:bg-danger-900/20 dark:text-danger-400 rounded-lg text-sm flex items-start gap-2">
             <ExclamationTriangleIcon className="w-5 h-5 flex-shrink-0 mt-0.5" />
             <div>
               <p className="font-medium">Attention</p>

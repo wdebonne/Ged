@@ -300,7 +300,7 @@ export default function ChatBotButton() {
             {/* Input */}
             <div className="p-3 border-t flex-shrink-0" style={{ borderColor: botMsgBg }}>
               {chatbotConfig?.toggleInfoText && chatbotConfig?.infoText && (
-                <p className="text-xs text-gray-500 mb-2 text-center">{chatbotConfig.infoText}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2 text-center">{chatbotConfig.infoText}</p>
               )}
               <div className="flex gap-2">
                 <input
@@ -331,8 +331,8 @@ export default function ChatBotButton() {
 
             {/* Footer */}
             {chatbotConfig?.toggleBrandPowered && chatbotConfig?.brandPoweredText && (
-              <div className="px-3 py-2 bg-gray-50 text-center flex-shrink-0">
-                <p className="text-xs text-gray-500">
+              <div className="px-3 py-2 bg-gray-50 dark:bg-gray-900 text-center flex-shrink-0">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   {chatbotConfig.brandPoweredLink ? (
                     <a href={chatbotConfig.brandPoweredLink} target="_blank" rel="noopener noreferrer" className="hover:underline">
                       {chatbotConfig.brandPoweredText}

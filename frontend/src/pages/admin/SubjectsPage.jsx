@@ -59,8 +59,8 @@ export default function SubjectsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Gestion des objets</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Gestion des objets</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
             {pagination?.total || 0} objet(s) au total
           </p>
         </div>
@@ -73,7 +73,7 @@ export default function SubjectsPage() {
       {/* Search */}
       <div className="card p-4">
         <div className="relative">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
           <input
             type="text"
             placeholder="Rechercher un objet..."
@@ -88,35 +88,35 @@ export default function SubjectsPage() {
       <div className="card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b">
+            <thead className="bg-gray-50 dark:bg-gray-800 border-b dark:border-gray-700">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                   Objet
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                   Description
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                   Catégorie
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                   Statut
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {subjects.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan="5" className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                     Aucun objet trouvé
                   </td>
                 </tr>
               ) : (
                 subjects.map((subject) => (
-                  <tr key={subject._id} className="hover:bg-gray-50">
+                  <tr key={subject._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-3">
                         <div 
@@ -129,15 +129,15 @@ export default function SubjectsPage() {
                           />
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900">{subject.name}</p>
+                          <p className="font-medium text-gray-900 dark:text-gray-100">{subject.name}</p>
                           {subject.code && (
-                            <p className="text-sm text-gray-500">{subject.code}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">{subject.code}</p>
                           )}
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="text-gray-600 text-sm truncate max-w-xs">
+                      <p className="text-gray-600 dark:text-gray-400 text-sm truncate max-w-xs">
                         {subject.description || '-'}
                       </p>
                     </td>
@@ -145,7 +145,7 @@ export default function SubjectsPage() {
                       {subject.category ? (
                         <span className="badge badge-primary">{subject.category}</span>
                       ) : (
-                        <span className="text-gray-400">-</span>
+                        <span className="text-gray-400 dark:text-gray-500">-</span>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -157,13 +157,13 @@ export default function SubjectsPage() {
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => openEditModal(subject)}
-                          className="btn-icon text-gray-500 hover:text-primary-600"
+                          className="btn-icon text-gray-500 dark:text-gray-400 hover:text-primary-600"
                         >
                           <PencilSquareIcon className="w-5 h-5" />
                         </button>
                         <button
                           onClick={() => setDeleteConfirm(subject)}
-                          className="btn-icon text-gray-500 hover:text-danger-600"
+                          className="btn-icon text-gray-500 dark:text-gray-400 hover:text-danger-600"
                         >
                           <TrashIcon className="w-5 h-5" />
                         </button>
@@ -206,17 +206,17 @@ export default function SubjectsPage() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="relative bg-white rounded-2xl shadow-xl max-w-md w-full"
+                className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="p-6 text-center">
-                  <div className="w-12 h-12 rounded-full bg-danger-100 mx-auto mb-4 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-danger-100 dark:bg-danger-900/40 mx-auto mb-4 flex items-center justify-center">
                     <ExclamationTriangleIcon className="w-6 h-6 text-danger-600" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                     Supprimer l'objet ?
                   </h3>
-                  <p className="text-gray-600 mb-6">
+                  <p className="text-gray-600 dark:text-gray-400 mb-6">
                     Êtes-vous sûr de vouloir supprimer <strong>{deleteConfirm.name}</strong> ?
                     Cette action est irréversible.
                   </p>
@@ -319,11 +319,11 @@ function SubjectModal({ subject, onClose }) {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="relative bg-white rounded-2xl shadow-xl max-w-lg w-full"
+          className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-lg w-full"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="p-6 border-b flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-900">
+          <div className="p-6 border-b dark:border-gray-700 flex items-center justify-between">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
               {subject ? 'Modifier l\'objet' : 'Nouvel objet'}
             </h2>
             <button onClick={onClose} className="btn-icon">
@@ -413,19 +413,19 @@ function SubjectModal({ subject, onClose }) {
                 id="isActive"
                 checked={formData.isActive}
                 onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
-                className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
               />
-              <label htmlFor="isActive" className="text-gray-700">Objet actif</label>
+              <label htmlFor="isActive" className="text-gray-700 dark:text-gray-300">Objet actif</label>
             </div>
 
             {errors.submit && (
-              <div className="flex items-center gap-2 p-3 bg-danger-50 text-danger-700 rounded-lg">
+              <div className="flex items-center gap-2 p-3 bg-danger-50 dark:bg-danger-900/40 text-danger-700 dark:text-danger-300 rounded-lg">
                 <ExclamationTriangleIcon className="w-5 h-5" />
                 {errors.submit}
               </div>
             )}
 
-            <div className="flex justify-end gap-3 pt-4 border-t">
+            <div className="flex justify-end gap-3 pt-4 border-t dark:border-gray-700">
               <button type="button" onClick={onClose} className="btn-secondary">
                 Annuler
               </button>

@@ -72,9 +72,9 @@ export default function NotificationBell() {
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors"
+        className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
       >
-        <BellIcon className="w-6 h-6 text-gray-600" />
+        <BellIcon className="w-6 h-6 text-gray-600 dark:text-gray-300" />
         {unreadCount > 0 && (
           <span className="absolute top-0.5 right-0.5 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-white text-[10px] font-semibold">
             {unreadCount > 99 ? '99+' : unreadCount}
@@ -88,14 +88,14 @@ export default function NotificationBell() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border py-2 z-50"
+            className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border py-2 z-50 dark:bg-gray-800 dark:border-gray-700"
           >
-            <div className="flex items-center justify-between px-4 py-2 border-b">
-              <p className="text-sm font-medium text-gray-900">Notifications</p>
+            <div className="flex items-center justify-between px-4 py-2 border-b dark:border-gray-700">
+              <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Notifications</p>
               {unreadCount > 0 && (
                 <button
                   onClick={() => markAllReadMutation.mutate()}
-                  className="text-xs text-primary-600 hover:underline"
+                  className="text-xs text-primary-600 dark:text-primary-400 hover:underline"
                 >
                   Tout marquer comme lu
                 </button>
@@ -104,25 +104,25 @@ export default function NotificationBell() {
 
             <div className="max-h-96 overflow-y-auto">
               {isLoading ? (
-                <p className="px-4 py-6 text-center text-sm text-gray-400">Chargement…</p>
+                <p className="px-4 py-6 text-center text-sm text-gray-400 dark:text-gray-500">Chargement…</p>
               ) : notifications.length === 0 ? (
-                <p className="px-4 py-6 text-center text-sm text-gray-400">Aucune notification</p>
+                <p className="px-4 py-6 text-center text-sm text-gray-400 dark:text-gray-500">Aucune notification</p>
               ) : (
                 notifications.map((notification) => (
                   <button
                     key={notification._id}
                     onClick={() => handleNotificationClick(notification)}
-                    className={`w-full text-left px-4 py-3 border-b last:border-b-0 hover:bg-gray-50 transition-colors ${
-                      !notification.isRead ? 'bg-primary-50/50' : ''
+                    className={`w-full text-left px-4 py-3 border-b last:border-b-0 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700 transition-colors ${
+                      !notification.isRead ? 'bg-primary-50/50 dark:bg-primary-900/20' : ''
                     }`}
                   >
-                    <p className={`text-sm ${!notification.isRead ? 'font-semibold text-gray-900' : 'text-gray-700'}`}>
+                    <p className={`text-sm ${!notification.isRead ? 'font-semibold text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'}`}>
                       {notification.title}
                     </p>
                     {notification.message && (
-                      <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{notification.message}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2">{notification.message}</p>
                     )}
-                    <p className="text-[11px] text-gray-400 mt-1">
+                    <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
                       {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true, locale: fr })}
                     </p>
                   </button>

@@ -7,7 +7,7 @@ import { fr } from 'date-fns/locale';
 import { mailsAPI } from '../../services/api';
 import Pagination from '../../components/Pagination';
 import MailFilters from '../../components/MailFilters';
-import LoadingSpinner from '../../components/LoadingSpinner';
+import { SkeletonMailList } from '../../components/Skeleton';
 import EmptyState from '../../components/EmptyState';
 import TagChips from '../../components/TagChips';
 import BulkActionsBar, { SelectCheckbox, SelectAllRow } from '../../components/BulkActionsBar';
@@ -70,12 +70,12 @@ export default function MailsPendingPage() {
     return new Date(mail.dueDate) <= threeDays;
   };
 
-  if (isLoading) return <LoadingSpinner />;
+  if (isLoading) return <SkeletonMailList />;
 
   if (error) {
     return (
       <div className="text-center py-12">
-        <p className="text-danger-600">Erreur lors du chargement des courriers</p>
+        <p className="text-danger-600 dark:text-danger-400">Erreur lors du chargement des courriers</p>
       </div>
     );
   }
@@ -99,7 +99,7 @@ export default function MailsPendingPage() {
   return (
     <div className="space-y-6">
       {/* Titre */}
-      <h1 className="text-2xl font-bold text-gray-900">{pageTitle}</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{pageTitle}</h1>
       
       {/* Filtres */}
       <MailFilters filters={filters} onChange={handleFilterChange} />
@@ -131,7 +131,7 @@ export default function MailsPendingPage() {
                 transition={{ delay: index * 0.05 }}
               >
                 <Link to={`/courriers/${mail._id}`}>
-                  <div className={`card-hover p-4 border-l-4 ${mail.isRead ? 'border-gray-200' : 'border-warning-500 bg-warning-50'}`}>
+                  <div className={`card-hover p-4 border-l-4 ${mail.isRead ? 'border-gray-200 dark:border-gray-700' : 'border-warning-500 bg-warning-50 dark:bg-warning-900/10'}`}>
                     <div className="flex items-start justify-between gap-4">
                       <div className="pt-1">
                         <SelectCheckbox
@@ -144,7 +144,7 @@ export default function MailsPendingPage() {
                           {!mail.isRead && (
                             <span className="w-2 h-2 bg-warning-500 rounded-full" />
                           )}
-                          <span className="text-xs font-mono text-gray-500">
+                          <span className="text-xs font-mono text-gray-500 dark:text-gray-400">
                             {mail.chronoNumber || mail.reference}
                           </span>
                           <span className="badge-warning">À traiter</span>
@@ -159,10 +159,10 @@ export default function MailsPendingPage() {
                             </span>
                           )}
                         </div>
-                        <h3 className="text-lg font-semibold text-gray-900 truncate">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">
                           {mail.subject}
                         </h3>
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm text-gray-600">
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm text-gray-600 dark:text-gray-400">
                           <span className="flex items-center gap-1">
                             <DocumentTextIcon className="w-4 h-4" />
                             {mail.sender?.name || mail.senderName}
@@ -206,8 +206,8 @@ export default function MailsPendingPage() {
                                 className="w-8 h-8 rounded-full object-cover"
                               />
                             ) : (
-                              <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
-                                <span className="text-xs font-medium text-primary-700">
+                              <div className="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900/40 flex items-center justify-center">
+                                <span className="text-xs font-medium text-primary-700 dark:text-primary-300">
                                   {mail.recipient.firstName?.[0]}{mail.recipient.lastName?.[0]}
                                 </span>
                               </div>
@@ -215,7 +215,7 @@ export default function MailsPendingPage() {
                           </div>
                         )}
                         <button className="btn-icon">
-                          <EyeIcon className="w-5 h-5 text-gray-500" />
+                          <EyeIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                         </button>
                       </div>
                     </div>

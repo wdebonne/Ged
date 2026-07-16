@@ -118,8 +118,8 @@ export default function GroupsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Gestion des groupes</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Gestion des groupes</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
             Gérez les rôles et permissions des utilisateurs
           </p>
         </div>
@@ -152,8 +152,8 @@ export default function GroupsPage() {
                     />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">{group.name}</h3>
-                    <p className="text-sm text-gray-500">
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100">{group.name}</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
                       {group.usersCount || 0} utilisateur(s)
                     </p>
                   </div>
@@ -161,14 +161,14 @@ export default function GroupsPage() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => openEditModal(group)}
-                    className="btn-icon text-gray-500 hover:text-primary-600"
+                    className="btn-icon text-gray-500 dark:text-gray-400 hover:text-primary-600"
                   >
                     <PencilSquareIcon className="w-5 h-5" />
                   </button>
                   {!group.isDefault && (
                     <button
                       onClick={() => setDeleteConfirm(group)}
-                      className="btn-icon text-gray-500 hover:text-danger-600"
+                      className="btn-icon text-gray-500 dark:text-gray-400 hover:text-danger-600"
                     >
                       <TrashIcon className="w-5 h-5" />
                     </button>
@@ -177,11 +177,11 @@ export default function GroupsPage() {
               </div>
 
               {group.description && (
-                <p className="text-sm text-gray-600 mb-4">{group.description}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{group.description}</p>
               )}
 
               <div className="border-t pt-4">
-                <h4 className="text-xs font-semibold text-gray-500 uppercase mb-3">
+                <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-3">
                   Permissions
                 </h4>
                 <div className="flex flex-wrap gap-2">
@@ -190,7 +190,7 @@ export default function GroupsPage() {
                     .map(([key]) => (
                       <span
                         key={key}
-                        className="text-xs px-2 py-1 rounded-full bg-success-50 text-success-700"
+                        className="text-xs px-2 py-1 rounded-full bg-success-50 dark:bg-success-900/40 text-success-700 dark:text-success-300"
                       >
                         {PERMISSIONS[key] || key}
                       </span>
@@ -223,17 +223,17 @@ export default function GroupsPage() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="relative bg-white rounded-2xl shadow-xl max-w-md w-full"
+                className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full"
                 onClick={(e) => e.stopPropagation()}
               >
               <div className="p-6 text-center">
-                <div className="w-12 h-12 rounded-full bg-danger-100 mx-auto mb-4 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-full bg-danger-100 dark:bg-danger-900/40 mx-auto mb-4 flex items-center justify-center">
                   <ExclamationTriangleIcon className="w-6 h-6 text-danger-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                   Supprimer le groupe ?
                 </h3>
-                <p className="text-gray-600 mb-6">
+                <p className="text-gray-600 dark:text-gray-400 mb-6">
                   Êtes-vous sûr de vouloir supprimer le groupe <strong>{deleteConfirm.name}</strong> ?
                   Les utilisateurs de ce groupe seront déplacés vers le groupe par défaut.
                 </p>
@@ -334,11 +334,11 @@ function GroupModal({ group, onClose }) {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="relative bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-auto"
+          className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-auto"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="p-6 border-b flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-900">
+          <div className="p-6 border-b dark:border-gray-700 flex items-center justify-between">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
             {group ? 'Modifier le groupe' : 'Nouveau groupe'}
           </h2>
           <button onClick={onClose} className="btn-icon">
@@ -390,7 +390,7 @@ function GroupModal({ group, onClose }) {
 
           <div>
             <label className="label">Permissions</label>
-            <div className="grid grid-cols-2 gap-3 p-4 bg-gray-50 rounded-lg">
+            <div className="grid grid-cols-2 gap-3 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
               {Object.entries(PERMISSIONS).map(([key, label]) => (
                 <label
                   key={key}
@@ -400,22 +400,22 @@ function GroupModal({ group, onClose }) {
                     type="checkbox"
                     checked={formData.permissions[key] || false}
                     onChange={() => togglePermission(key)}
-                    className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                    className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
                   />
-                  <span className="text-sm text-gray-700">{label}</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">{label}</span>
                 </label>
               ))}
             </div>
           </div>
 
           {errors.submit && (
-            <div className="flex items-center gap-2 p-3 bg-danger-50 text-danger-700 rounded-lg">
+            <div className="flex items-center gap-2 p-3 bg-danger-50 dark:bg-danger-900/40 text-danger-700 dark:text-danger-300 rounded-lg">
               <ExclamationTriangleIcon className="w-5 h-5" />
               {errors.submit}
             </div>
           )}
 
-          <div className="flex justify-end gap-3 pt-4 border-t">
+          <div className="flex justify-end gap-3 pt-4 border-t dark:border-gray-700">
             <button type="button" onClick={onClose} className="btn-secondary">
               Annuler
             </button>

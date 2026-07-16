@@ -19,9 +19,9 @@ import {
 } from '@heroicons/react/24/outline';
 
 const STATUS_LABELS = {
-  draft: { label: 'Brouillon', class: 'bg-yellow-100 text-yellow-800' },
-  sent: { label: 'Envoyé', class: 'bg-blue-100 text-blue-800' },
-  archived: { label: 'Archivé', class: 'bg-green-100 text-green-800' }
+  draft: { label: 'Brouillon', class: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300' },
+  sent: { label: 'Envoyé', class: 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300' },
+  archived: { label: 'Archivé', class: 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300' }
 };
 
 const METHOD_LABELS = {
@@ -33,10 +33,10 @@ const METHOD_LABELS = {
 };
 
 const PRIORITY_LABELS = {
-  low: { label: 'Basse', class: 'bg-gray-100 text-gray-700' },
-  normal: { label: 'Normale', class: 'bg-blue-100 text-blue-700' },
-  high: { label: 'Haute', class: 'bg-orange-100 text-orange-700' },
-  urgent: { label: 'Urgente', class: 'bg-red-100 text-red-700' }
+  low: { label: 'Basse', class: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300' },
+  normal: { label: 'Normale', class: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' },
+  high: { label: 'Haute', class: 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300' },
+  urgent: { label: 'Urgente', class: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' }
 };
 
 export default function OutgoingMailDetailPage() {
@@ -91,7 +91,7 @@ export default function OutgoingMailDetailPage() {
   if (error || !data) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">Courrier départ non trouvé</p>
+        <p className="text-gray-500 dark:text-gray-400">Courrier départ non trouvé</p>
         <button onClick={() => navigate(-1)} className="btn-primary mt-4">Retour</button>
       </div>
     );
@@ -113,7 +113,7 @@ export default function OutgoingMailDetailPage() {
           </button>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-gray-900">{mail.subject}</h1>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{mail.subject}</h1>
               <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusInfo.class}`}>
                 {statusInfo.label}
               </span>
@@ -121,11 +121,11 @@ export default function OutgoingMailDetailPage() {
                 {priorityInfo.label}
               </span>
             </div>
-            <p className="text-gray-500 mt-1 font-mono text-sm">
+            <p className="text-gray-500 mt-1 font-mono text-sm dark:text-gray-400">
               {mail.chronoNumber ? (
                 <>
-                  <span className="font-semibold text-gray-700">N° {mail.chronoNumber}</span>
-                  <span className="mx-1.5 text-gray-300">·</span>
+                  <span className="font-semibold text-gray-700 dark:text-gray-300">N° {mail.chronoNumber}</span>
+                  <span className="mx-1.5 text-gray-300 dark:text-gray-600">·</span>
                   {mail.reference}
                 </>
               ) : mail.reference}
@@ -182,60 +182,60 @@ export default function OutgoingMailDetailPage() {
         {/* Metadata */}
         <div className="space-y-4">
           <div className="card p-5 space-y-4">
-            <h3 className="font-semibold text-gray-900">Informations</h3>
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100">Informations</h3>
 
             <div className="space-y-3">
               <div className="flex items-start gap-3">
-                <BuildingOfficeIcon className="w-5 h-5 text-gray-400 mt-0.5" />
+                <BuildingOfficeIcon className="w-5 h-5 text-gray-400 mt-0.5 dark:text-gray-500" />
                 <div>
-                  <p className="text-sm text-gray-500">Destinataire</p>
-                  <p className="font-medium text-gray-900">{mail.destination?.name || mail.destinationName}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Destinataire</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{mail.destination?.name || mail.destinationName}</p>
                   {mail.destination?.organization && (
-                    <p className="text-sm text-gray-500">{mail.destination.organization}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{mail.destination.organization}</p>
                   )}
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
-                <TagIcon className="w-5 h-5 text-gray-400 mt-0.5" />
+                <TagIcon className="w-5 h-5 text-gray-400 mt-0.5 dark:text-gray-500" />
                 <div>
-                  <p className="text-sm text-gray-500">Service expéditeur</p>
-                  <p className="font-medium text-gray-900">{mail.service?.name}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Service expéditeur</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{mail.service?.name}</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
-                <DocumentTextIcon className="w-5 h-5 text-gray-400 mt-0.5" />
+                <DocumentTextIcon className="w-5 h-5 text-gray-400 mt-0.5 dark:text-gray-500" />
                 <div>
-                  <p className="text-sm text-gray-500">Méthode d'envoi</p>
-                  <p className="font-medium text-gray-900">{METHOD_LABELS[mail.sendingMethod] || mail.sendingMethod}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Méthode d'envoi</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{METHOD_LABELS[mail.sendingMethod] || mail.sendingMethod}</p>
                 </div>
               </div>
 
               {mail.trackingNumber && (
                 <div className="flex items-start gap-3">
-                  <DocumentTextIcon className="w-5 h-5 text-gray-400 mt-0.5" />
+                  <DocumentTextIcon className="w-5 h-5 text-gray-400 mt-0.5 dark:text-gray-500" />
                   <div>
-                    <p className="text-sm text-gray-500">N° de suivi</p>
-                    <p className="font-medium text-gray-900">{mail.trackingNumber}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">N° de suivi</p>
+                    <p className="font-medium text-gray-900 dark:text-gray-100">{mail.trackingNumber}</p>
                   </div>
                 </div>
               )}
 
               <div className="flex items-start gap-3">
-                <CalendarDaysIcon className="w-5 h-5 text-gray-400 mt-0.5" />
+                <CalendarDaysIcon className="w-5 h-5 text-gray-400 mt-0.5 dark:text-gray-500" />
                 <div>
-                  <p className="text-sm text-gray-500">Dates</p>
-                  <p className="text-sm text-gray-700">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Dates</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
                     Créé le {new Date(mail.createdAt).toLocaleDateString('fr-FR')}
                   </p>
                   {mail.sentDate && (
-                    <p className="text-sm text-gray-700">
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
                       Envoyé le {new Date(mail.sentDate).toLocaleDateString('fr-FR')}
                     </p>
                   )}
                   {mail.archivedDate && (
-                    <p className="text-sm text-gray-700">
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
                       Archivé le {new Date(mail.archivedDate).toLocaleDateString('fr-FR')}
                     </p>
                   )}
@@ -244,10 +244,10 @@ export default function OutgoingMailDetailPage() {
 
               {mail.sender && (
                 <div className="flex items-start gap-3">
-                  <DocumentTextIcon className="w-5 h-5 text-gray-400 mt-0.5" />
+                  <DocumentTextIcon className="w-5 h-5 text-gray-400 mt-0.5 dark:text-gray-500" />
                   <div>
-                    <p className="text-sm text-gray-500">Créé par</p>
-                    <p className="font-medium text-gray-900">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Créé par</p>
+                    <p className="font-medium text-gray-900 dark:text-gray-100">
                       {mail.sender.firstName} {mail.sender.lastName}
                     </p>
                   </div>
@@ -256,12 +256,12 @@ export default function OutgoingMailDetailPage() {
 
               {mail.linkedIncomingMail && (
                 <div className="flex items-start gap-3">
-                  <LinkIcon className="w-5 h-5 text-gray-400 mt-0.5" />
+                  <LinkIcon className="w-5 h-5 text-gray-400 mt-0.5 dark:text-gray-500" />
                   <div>
-                    <p className="text-sm text-gray-500">Courrier entrant lié</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Courrier entrant lié</p>
                     <Link
                       to={`/courriers/${mail.linkedIncomingMail._id}`}
-                      className="text-primary-600 hover:text-primary-800 font-medium"
+                      className="text-primary-600 hover:text-primary-800 font-medium dark:text-primary-400 dark:hover:text-primary-300"
                     >
                       {mail.linkedIncomingMail.reference} - {mail.linkedIncomingMail.subject}
                     </Link>
@@ -273,15 +273,15 @@ export default function OutgoingMailDetailPage() {
 
           {mail.content && (
             <div className="card p-5">
-              <h3 className="font-semibold text-gray-900 mb-2">Description</h3>
-              <p className="text-gray-700 whitespace-pre-wrap">{mail.content}</p>
+              <h3 className="font-semibold text-gray-900 mb-2 dark:text-gray-100">Description</h3>
+              <p className="text-gray-700 whitespace-pre-wrap dark:text-gray-300">{mail.content}</p>
             </div>
           )}
 
           {mail.notes && (
             <div className="card p-5">
-              <h3 className="font-semibold text-gray-900 mb-2">Notes</h3>
-              <p className="text-gray-700 whitespace-pre-wrap">{mail.notes}</p>
+              <h3 className="font-semibold text-gray-900 mb-2 dark:text-gray-100">Notes</h3>
+              <p className="text-gray-700 whitespace-pre-wrap dark:text-gray-300">{mail.notes}</p>
             </div>
           )}
         </div>
@@ -292,12 +292,12 @@ export default function OutgoingMailDetailPage() {
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowDeleteConfirm(false)} />
           <div className="flex min-h-full items-center justify-center p-4">
-            <div className="relative bg-white rounded-2xl shadow-xl max-w-md w-full p-6 text-center">
-              <div className="w-12 h-12 rounded-full bg-danger-100 mx-auto mb-4 flex items-center justify-center">
-                <ExclamationTriangleIcon className="w-6 h-6 text-danger-600" />
+            <div className="relative bg-white rounded-2xl shadow-xl max-w-md w-full p-6 text-center dark:bg-gray-800">
+              <div className="w-12 h-12 rounded-full bg-danger-100 mx-auto mb-4 flex items-center justify-center dark:bg-danger-900/40">
+                <ExclamationTriangleIcon className="w-6 h-6 text-danger-600 dark:text-danger-400" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Déplacer ce courrier vers la corbeille ?</h3>
-              <p className="text-gray-600 mb-6">Il pourra être restauré depuis Administration &gt; Corbeille.</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2 dark:text-gray-100">Déplacer ce courrier vers la corbeille ?</h3>
+              <p className="text-gray-600 mb-6 dark:text-gray-400">Il pourra être restauré depuis Administration &gt; Corbeille.</p>
               <div className="flex items-center justify-center gap-3">
                 <button onClick={() => setShowDeleteConfirm(false)} className="btn-secondary">Annuler</button>
                 <button

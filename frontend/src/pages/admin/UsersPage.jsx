@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usersAPI, groupsAPI, servicesAPI } from '../../services/api';
-import LoadingSpinner from '../../components/LoadingSpinner';
+import { SkeletonTableRows } from '../../components/Skeleton';
 import Pagination from '../../components/Pagination';
 import {
   UserPlusIcon,
@@ -65,11 +65,11 @@ export default function UsersPage() {
   };
 
   const roleColors = {
-    admin: 'bg-danger-100 text-danger-700',
+    admin: 'bg-danger-100 dark:bg-danger-900/40 text-danger-700 dark:text-danger-300',
     supervisor: 'bg-primary-100 text-primary-700',
-    archiviste: 'bg-warning-100 text-warning-700',
-    utilisateur: 'bg-gray-100 text-gray-700',
-    observateur: 'bg-cyan-100 text-cyan-700'
+    archiviste: 'bg-warning-100 dark:bg-warning-900/40 text-warning-700 dark:text-warning-300',
+    utilisateur: 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300',
+    observateur: 'bg-cyan-100 dark:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300'
   };
 
   const roleLabels = {
@@ -80,15 +80,13 @@ export default function UsersPage() {
     observateur: 'Observateur'
   };
 
-  if (isLoading) return <LoadingSpinner />;
-
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Gestion des utilisateurs</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Gestion des utilisateurs</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
             {data?.pagination?.total || 0} utilisateur(s) au total
           </p>
         </div>
@@ -101,7 +99,7 @@ export default function UsersPage() {
       {/* Search */}
       <div className="card p-4">
         <div className="relative max-w-md">
-          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
           <input
             type="text"
             value={search}
@@ -119,31 +117,40 @@ export default function UsersPage() {
       <div className="card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50">
+            <thead className="bg-gray-50 dark:bg-gray-800">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Utilisateur
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Email
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Groupe
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Services
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Statut
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
-              {data?.users?.map((user) => (
-                <tr key={user._id} className="hover:bg-gray-50 transition-colors">
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+              {isLoading ? (
+                <SkeletonTableRows rows={6} columns={6} />
+              ) : data?.users?.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                    Aucun utilisateur
+                  </td>
+                </tr>
+              ) : (
+                data?.users?.map((user) => (
+                <tr key={user._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-3">
                       {user.avatar ? (
@@ -153,21 +160,21 @@ export default function UsersPage() {
                           className="w-10 h-10 rounded-full object-cover"
                         />
                       ) : (
-                        <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
-                          <span className="text-primary-600 font-semibold">
+                        <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/40 flex items-center justify-center">
+                          <span className="text-primary-600 dark:text-primary-400 font-semibold">
                             {user.firstName?.[0]}{user.lastName?.[0]}
                           </span>
                         </div>
                       )}
                       <div>
-                        <p className="font-medium text-gray-900">
+                        <p className="font-medium text-gray-900 dark:text-gray-100">
                           {user.firstName} {user.lastName}
                         </p>
-                        <p className="text-sm text-gray-500">@{user.username}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">@{user.username}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                  <td className="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-400">
                     {user.email}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -182,7 +189,7 @@ export default function UsersPage() {
                         {user.group.name}
                       </span>
                     ) : (
-                      <span className="text-gray-400">-</span>
+                      <span className="text-gray-400 dark:text-gray-500">-</span>
                     )}
                   </td>
                   <td className="px-6 py-4">
@@ -200,7 +207,7 @@ export default function UsersPage() {
                         </span>
                       ))}
                       {user.services?.length > 2 && (
-                        <span className="badge bg-gray-100 text-gray-600">
+                        <span className="badge bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
                           +{user.services.length - 2}
                         </span>
                       )}
@@ -215,20 +222,21 @@ export default function UsersPage() {
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => openEditModal(user)}
-                        className="btn-icon text-gray-500 hover:text-primary-600"
+                        className="btn-icon text-gray-500 dark:text-gray-400 hover:text-primary-600"
                       >
                         <PencilSquareIcon className="w-5 h-5" />
                       </button>
                       <button
                         onClick={() => setDeleteConfirm(user)}
-                        className="btn-icon text-gray-500 hover:text-danger-600"
+                        className="btn-icon text-gray-500 dark:text-gray-400 hover:text-danger-600"
                       >
                         <TrashIcon className="w-5 h-5" />
                       </button>
                     </div>
                   </td>
                 </tr>
-              ))}
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -265,17 +273,17 @@ export default function UsersPage() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="relative bg-white rounded-2xl shadow-xl max-w-md w-full"
+                className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full"
                 onClick={(e) => e.stopPropagation()}
               >
               <div className="p-6 text-center">
-                <div className="w-12 h-12 rounded-full bg-danger-100 mx-auto mb-4 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-full bg-danger-100 dark:bg-danger-900/40 mx-auto mb-4 flex items-center justify-center">
                   <ExclamationTriangleIcon className="w-6 h-6 text-danger-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                   Supprimer l'utilisateur ?
                 </h3>
-                <p className="text-gray-600 mb-6">
+                <p className="text-gray-600 dark:text-gray-400 mb-6">
                   Êtes-vous sûr de vouloir supprimer <strong>{deleteConfirm.firstName} {deleteConfirm.lastName}</strong> ?
                   Cette action est irréversible.
                 </p>
@@ -388,11 +396,11 @@ function UserModal({ user, groups, services, onClose }) {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="relative bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-auto"
+          className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-auto"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="p-6 border-b flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-900">
+          <div className="p-6 border-b dark:border-gray-700 flex items-center justify-between">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
             {user ? 'Modifier l\'utilisateur' : 'Nouvel utilisateur'}
           </h2>
           <button onClick={onClose} className="btn-icon">
@@ -478,7 +486,7 @@ function UserModal({ user, groups, services, onClose }) {
 
           <div>
             <label className="label">Services</label>
-            <div className="flex flex-wrap gap-2 p-3 bg-gray-50 rounded-lg">
+            <div className="flex flex-wrap gap-2 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
               {services?.map((service) => (
                 <button
                   key={service._id}
@@ -513,19 +521,19 @@ function UserModal({ user, groups, services, onClose }) {
               id="isActive"
               checked={formData.isActive}
               onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
-              className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+              className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
             />
-            <label htmlFor="isActive" className="text-gray-700">Utilisateur actif</label>
+            <label htmlFor="isActive" className="text-gray-700 dark:text-gray-300">Utilisateur actif</label>
           </div>
 
           {errors.submit && (
-            <div className="flex items-center gap-2 p-3 bg-danger-50 text-danger-700 rounded-lg">
+            <div className="flex items-center gap-2 p-3 bg-danger-50 dark:bg-danger-900/40 text-danger-700 dark:text-danger-300 rounded-lg">
               <ExclamationTriangleIcon className="w-5 h-5" />
               {errors.submit}
             </div>
           )}
 
-          <div className="flex justify-end gap-3 pt-4 border-t">
+          <div className="flex justify-end gap-3 pt-4 border-t dark:border-gray-700">
             <button type="button" onClick={onClose} className="btn-secondary">
               Annuler
             </button>

@@ -7,6 +7,7 @@ import { fr } from 'date-fns/locale';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { mailsAPI, sendersAPI, servicesAPI, subjectsAPI, usersAPI, imapAPI } from '../../services/api';
 import LoadingSpinner from '../../components/LoadingSpinner';
+import { Skeleton } from '../../components/Skeleton';
 import TagInput from '../../components/TagInput';
 import toast from 'react-hot-toast';
 import {
@@ -443,25 +444,23 @@ export default function IncomingMailsPage() {
 
   const isFormValid = formData.senderName && formData.subject && formData.service && formData.assignedTo;
 
-  if (isLoading) return <LoadingSpinner />;
-
   return (
     <div className="h-[calc(100vh-8rem)] flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Courriers entrants</h1>
-          <p className="text-gray-600">
-            {pendingFiles?.length || 0} fichier(s) en attente d'import
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Courriers entrants</h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            {isLoading ? '...' : (pendingFiles?.length || 0)} fichier(s) en attente d'import
           </p>
         </div>
         <div className="flex items-center gap-3">
           {/* Indicateur de statut OCR */}
           {ocrStatus && (
             <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${
-              ocrStatus === 'checking' ? 'bg-blue-100 text-blue-700' :
-              ocrStatus === 'processing' ? 'bg-amber-100 text-amber-700' :
-              'bg-green-100 text-green-700'
+              ocrStatus === 'checking' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' :
+              ocrStatus === 'processing' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' :
+              'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'
             }`}>
               {ocrStatus === 'checking' && (
                 <>
@@ -534,14 +533,26 @@ export default function IncomingMailsPage() {
           animate={{ opacity: 1, x: 0 }}
           className="col-span-3 card flex flex-col overflow-hidden"
         >
-          <div className="p-3 border-b bg-gray-50">
-            <h2 className="font-semibold text-gray-900 text-sm">
+          <div className="p-3 border-b bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
+            <h2 className="font-semibold text-gray-900 text-sm dark:text-gray-100">
               Fichiers en attente
             </h2>
           </div>
-          <div className="flex-1 overflow-y-auto divide-y">
-            {pendingFiles?.length === 0 ? (
-              <div className="p-6 text-center text-gray-500">
+          <div className="flex-1 overflow-y-auto divide-y dark:divide-gray-700">
+            {isLoading ? (
+              Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="p-3">
+                  <div className="flex items-start gap-2">
+                    <Skeleton className="w-5 h-5 rounded flex-shrink-0 mt-0.5" />
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-3 w-1/2" />
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : pendingFiles?.length === 0 ? (
+              <div className="p-6 text-center text-gray-500 dark:text-gray-400">
                 <DocumentTextIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
                 <p className="text-sm">Aucun fichier en attente</p>
               </div>
@@ -552,17 +563,17 @@ export default function IncomingMailsPage() {
                   onClick={() => handleSelectFile(file)}
                   className={`p-3 cursor-pointer transition-colors ${
                     selectedFile?._id === file._id
-                      ? 'bg-primary-50 border-l-4 border-l-primary-500'
-                      : 'hover:bg-gray-50'
+                      ? 'bg-primary-50 border-l-4 border-l-primary-500 dark:bg-primary-900/20'
+                      : 'hover:bg-gray-50 dark:hover:bg-gray-700/50'
                   }`}
                 >
                   <div className="flex items-start gap-2">
                     <DocumentTextIcon className="w-5 h-5 text-danger-500 flex-shrink-0 mt-0.5" />
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-gray-900 truncate">
+                      <p className="text-sm font-medium text-gray-900 truncate dark:text-gray-100">
                         {file.originalName || file.fileName}
                       </p>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-gray-500 mt-1 dark:text-gray-400">
                         {file.createdAt && format(new Date(file.createdAt), 'dd/MM/yyyy HH:mm', { locale: fr })}
                       </p>
                     </div>
@@ -573,7 +584,7 @@ export default function IncomingMailsPage() {
                           deleteMutation.mutate(file._id);
                         }
                       }}
-                      className="p-1 text-gray-400 hover:text-danger-600 transition-colors"
+                      className="p-1 text-gray-400 hover:text-danger-600 transition-colors dark:text-gray-500 dark:hover:text-danger-400"
                     >
                       <TrashIcon className="w-4 h-4" />
                     </button>
@@ -591,51 +602,51 @@ export default function IncomingMailsPage() {
           transition={{ delay: 0.1 }}
           className="col-span-5 card flex flex-col overflow-hidden"
         >
-          <div className="p-3 border-b bg-gray-50 flex items-center justify-between">
-            <h2 className="font-semibold text-gray-900 text-sm">Aperçu du document</h2>
+          <div className="p-3 border-b bg-gray-50 flex items-center justify-between dark:bg-gray-800 dark:border-gray-700">
+            <h2 className="font-semibold text-gray-900 text-sm dark:text-gray-100">Aperçu du document</h2>
             {pdfUrl && (
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setScale(s => Math.max(0.5, s - 0.25))}
-                  className="p-1 hover:bg-gray-200 rounded"
+                  className="p-1 hover:bg-gray-200 rounded dark:hover:bg-gray-600"
                   title="Zoom arrière"
                 >
                   <MagnifyingGlassMinusIcon className="w-4 h-4" />
                 </button>
-                <span className="text-xs text-gray-600 w-10 text-center">{Math.round(scale * 100)}%</span>
+                <span className="text-xs text-gray-600 w-10 text-center dark:text-gray-400">{Math.round(scale * 100)}%</span>
                 <button
                   onClick={() => setScale(s => Math.min(2, s + 0.25))}
-                  className="p-1 hover:bg-gray-200 rounded"
+                  className="p-1 hover:bg-gray-200 rounded dark:hover:bg-gray-600"
                   title="Zoom avant"
                 >
                   <MagnifyingGlassPlusIcon className="w-4 h-4" />
                 </button>
-                <div className="w-px h-4 bg-gray-300 mx-1" />
+                <div className="w-px h-4 bg-gray-300 mx-1 dark:bg-gray-600" />
                 <button
                   onClick={() => setRotation(r => (r - 90 + 360) % 360)}
-                  className="p-1 hover:bg-gray-200 rounded"
+                  className="p-1 hover:bg-gray-200 rounded dark:hover:bg-gray-600"
                   title="Pivoter à gauche"
                 >
                   <ArrowUturnLeftIcon className="w-4 h-4" />
                 </button>
                 <button
                   onClick={() => setRotation(r => (r + 90) % 360)}
-                  className="p-1 hover:bg-gray-200 rounded"
+                  className="p-1 hover:bg-gray-200 rounded dark:hover:bg-gray-600"
                   title="Pivoter à droite"
                 >
                   <ArrowUturnRightIcon className="w-4 h-4" />
                 </button>
-                <div className="w-px h-4 bg-gray-300 mx-1" />
+                <div className="w-px h-4 bg-gray-300 mx-1 dark:bg-gray-600" />
                 <button
                   onClick={() => { setCropMode(m => !m); setCropDrag(null); }}
-                  className={`p-1 rounded ${cropMode ? 'bg-primary-100 text-primary-700' : 'hover:bg-gray-200'}`}
+                  className={`p-1 rounded ${cropMode ? 'bg-primary-100 text-primary-700 dark:bg-primary-900/40 dark:text-primary-300' : 'hover:bg-gray-200 dark:hover:bg-gray-600'}`}
                   title={cropMode ? 'Annuler le mode recadrage' : 'Recadrer manuellement'}
                 >
                   <ScissorsIcon className="w-4 h-4" />
                 </button>
                 <button
                   onClick={handleAutoCrop}
-                  className="p-1 hover:bg-gray-200 rounded"
+                  className="p-1 hover:bg-gray-200 rounded dark:hover:bg-gray-600"
                   title="Rogner les bords automatiquement"
                 >
                   <SparklesIcon className="w-4 h-4" />
@@ -643,7 +654,7 @@ export default function IncomingMailsPage() {
                 {cropRect && (
                   <button
                     onClick={() => setCropRect(null)}
-                    className="p-1 hover:bg-gray-200 rounded text-danger-500"
+                    className="p-1 hover:bg-gray-200 rounded text-danger-500 dark:hover:bg-gray-600 dark:text-danger-400"
                     title="Supprimer le recadrage"
                   >
                     <XMarkIcon className="w-4 h-4" />
@@ -652,14 +663,14 @@ export default function IncomingMailsPage() {
               </div>
             )}
           </div>
-          <div ref={pdfViewerRef} className="flex-1 overflow-auto bg-gray-100 flex items-center justify-center p-4">
+          <div ref={pdfViewerRef} className="flex-1 overflow-auto bg-gray-100 flex items-center justify-center p-4 dark:bg-gray-900">
             {!selectedFile ? (
-              <div className="text-center text-gray-500">
+              <div className="text-center text-gray-500 dark:text-gray-400">
                 <DocumentTextIcon className="w-16 h-16 mx-auto mb-3 opacity-30" />
                 <p className="text-sm">Sélectionnez un fichier pour voir l'aperçu</p>
               </div>
             ) : pdfError ? (
-              <div className="text-center text-danger-600 p-4">
+              <div className="text-center text-danger-600 p-4 dark:text-danger-400">
                 <p className="text-sm font-medium">{pdfError}</p>
               </div>
             ) : pdfUrl ? (
@@ -733,21 +744,21 @@ export default function IncomingMailsPage() {
             )}
           </div>
           {pdfUrl && numPages && (
-            <div className="p-2 border-t bg-gray-50 flex items-center justify-center gap-4">
+            <div className="p-2 border-t bg-gray-50 flex items-center justify-center gap-4 dark:bg-gray-800 dark:border-gray-700">
               <button
                 onClick={() => setPageNumber(p => Math.max(1, p - 1))}
                 disabled={pageNumber <= 1}
-                className="p-1 hover:bg-gray-200 rounded disabled:opacity-50"
+                className="p-1 hover:bg-gray-200 rounded disabled:opacity-50 dark:hover:bg-gray-600"
               >
                 <ChevronLeftIcon className="w-5 h-5" />
               </button>
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-gray-600 dark:text-gray-400">
                 Page {pageNumber} / {numPages}
               </span>
               <button
                 onClick={() => setPageNumber(p => Math.min(numPages, p + 1))}
                 disabled={pageNumber >= numPages}
-                className="p-1 hover:bg-gray-200 rounded disabled:opacity-50"
+                className="p-1 hover:bg-gray-200 rounded disabled:opacity-50 dark:hover:bg-gray-600"
               >
                 <ChevronRightIcon className="w-5 h-5" />
               </button>
@@ -762,12 +773,12 @@ export default function IncomingMailsPage() {
           transition={{ delay: 0.2 }}
           className="col-span-4 card flex flex-col overflow-hidden"
         >
-          <div className="p-3 border-b bg-gray-50">
-            <h2 className="font-semibold text-gray-900 text-sm">Informations du courrier</h2>
+          <div className="p-3 border-b bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
+            <h2 className="font-semibold text-gray-900 text-sm dark:text-gray-100">Informations du courrier</h2>
           </div>
           <div className="flex-1 overflow-y-auto p-4">
             {!selectedFile ? (
-              <div className="h-full flex items-center justify-center text-gray-500">
+              <div className="h-full flex items-center justify-center text-gray-500 dark:text-gray-400">
                 <div className="text-center">
                   <DocumentTextIcon className="w-12 h-12 mx-auto mb-2 opacity-30" />
                   <p className="text-sm">Sélectionnez un fichier pour remplir les informations</p>
@@ -777,8 +788,8 @@ export default function IncomingMailsPage() {
               <div className="space-y-4">
                 {/* Expéditeur */}
                 <div className="relative" onClick={(e) => e.stopPropagation()}>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Expéditeur <span className="text-danger-500">*</span>
+                  <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
+                    Expéditeur <span className="text-danger-500 dark:text-danger-400">*</span>
                   </label>
                   <input
                     type="text"
@@ -793,7 +804,7 @@ export default function IncomingMailsPage() {
                     className="input"
                   />
                   {showSenderDropdown && filteredSenders.length > 0 && formData.senderName && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto dark:bg-gray-800 dark:border-gray-700">
                       {filteredSenders.map((sender) => (
                         <div
                           key={sender._id}
@@ -802,7 +813,7 @@ export default function IncomingMailsPage() {
                             setSenderSearch('');
                             setShowSenderDropdown(false);
                           }}
-                          className="px-3 py-2 hover:bg-primary-50 cursor-pointer text-sm"
+                          className="px-3 py-2 hover:bg-primary-50 cursor-pointer text-sm dark:text-gray-200 dark:hover:bg-primary-900/20"
                         >
                           {sender.name}
                         </div>
@@ -813,8 +824,8 @@ export default function IncomingMailsPage() {
 
                 {/* Objet */}
                 <div className="relative" onClick={(e) => e.stopPropagation()}>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Objet <span className="text-danger-500">*</span>
+                  <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
+                    Objet <span className="text-danger-500 dark:text-danger-400">*</span>
                   </label>
                   <input
                     type="text"
@@ -829,7 +840,7 @@ export default function IncomingMailsPage() {
                     className="input"
                   />
                   {showSubjectDropdown && filteredSubjects.length > 0 && formData.subject && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto dark:bg-gray-800 dark:border-gray-700">
                       {filteredSubjects.map((subject) => (
                         <div
                           key={subject._id}
@@ -838,7 +849,7 @@ export default function IncomingMailsPage() {
                             setSubjectSearch('');
                             setShowSubjectDropdown(false);
                           }}
-                          className="px-3 py-2 hover:bg-primary-50 cursor-pointer text-sm"
+                          className="px-3 py-2 hover:bg-primary-50 cursor-pointer text-sm dark:text-gray-200 dark:hover:bg-primary-900/20"
                         >
                           {subject.name}
                         </div>
@@ -849,8 +860,8 @@ export default function IncomingMailsPage() {
 
                 {/* Service */}
                 <div className="relative" onClick={(e) => e.stopPropagation()}>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Service <span className="text-danger-500">*</span>
+                  <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
+                    Service <span className="text-danger-500 dark:text-danger-400">*</span>
                   </label>
                   <input
                     type="text"
@@ -865,7 +876,7 @@ export default function IncomingMailsPage() {
                     className="input"
                   />
                   {showServiceDropdown && filteredServices.length > 0 && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto dark:bg-gray-800 dark:border-gray-700">
                       {filteredServices.map((service) => (
                         <div
                           key={service._id}
@@ -874,7 +885,7 @@ export default function IncomingMailsPage() {
                             setServiceSearch(service.name);
                             setShowServiceDropdown(false);
                           }}
-                          className="px-3 py-2 hover:bg-primary-50 cursor-pointer text-sm"
+                          className="px-3 py-2 hover:bg-primary-50 cursor-pointer text-sm dark:text-gray-200 dark:hover:bg-primary-900/20"
                         >
                           {service.name}
                         </div>
@@ -888,7 +899,7 @@ export default function IncomingMailsPage() {
                         setFormData({ ...formData, service: '' });
                         setServiceSearch('');
                       }}
-                      className="absolute right-2 top-8 text-gray-400 hover:text-gray-600"
+                      className="absolute right-2 top-8 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
                     >
                       <XMarkIcon className="w-4 h-4" />
                     </button>
@@ -897,8 +908,8 @@ export default function IncomingMailsPage() {
 
                 {/* Destinataire */}
                 <div className="relative" onClick={(e) => e.stopPropagation()}>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Destinataire <span className="text-danger-500">*</span>
+                  <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
+                    Destinataire <span className="text-danger-500 dark:text-danger-400">*</span>
                   </label>
                   <input
                     type="text"
@@ -913,7 +924,7 @@ export default function IncomingMailsPage() {
                     className="input"
                   />
                   {showRecipientDropdown && filteredRecipients.length > 0 && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto dark:bg-gray-800 dark:border-gray-700">
                       {filteredRecipients.map((user) => (
                         <div
                           key={user.id}
@@ -922,11 +933,11 @@ export default function IncomingMailsPage() {
                             setRecipientSearch(`${user.lastName} ${user.firstName}`);
                             setShowRecipientDropdown(false);
                           }}
-                          className="px-3 py-2 hover:bg-primary-50 cursor-pointer text-sm flex items-center gap-2"
+                          className="px-3 py-2 hover:bg-primary-50 cursor-pointer text-sm flex items-center gap-2 dark:text-gray-200 dark:hover:bg-primary-900/20"
                         >
-                          <UserIcon className="w-4 h-4 text-gray-400" />
+                          <UserIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                           <span>{user.lastName} {user.firstName}</span>
-                          <span className="text-xs text-gray-400 ml-auto">{user.services?.[0]?.name}</span>
+                          <span className="text-xs text-gray-400 ml-auto dark:text-gray-500">{user.services?.[0]?.name}</span>
                         </div>
                       ))}
                     </div>
@@ -938,7 +949,7 @@ export default function IncomingMailsPage() {
                         setFormData({ ...formData, assignedTo: '' });
                         setRecipientSearch('');
                       }}
-                      className="absolute right-2 top-8 text-gray-400 hover:text-gray-600"
+                      className="absolute right-2 top-8 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
                     >
                       <XMarkIcon className="w-4 h-4" />
                     </button>
@@ -947,7 +958,7 @@ export default function IncomingMailsPage() {
 
                 {/* Destinataires en copie */}
                 <div className="relative" onClick={(e) => e.stopPropagation()}>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
                     Destinataire(s) en copie
                   </label>
                   {/* Tags des destinataires sélectionnés */}
@@ -956,7 +967,7 @@ export default function IncomingMailsPage() {
                       {formData.copyTo.map((userId) => (
                         <span
                           key={userId}
-                          className="inline-flex items-center gap-1 px-2 py-1 bg-primary-100 text-primary-700 text-xs rounded-full"
+                          className="inline-flex items-center gap-1 px-2 py-1 bg-primary-100 text-primary-700 text-xs rounded-full dark:bg-primary-900/40 dark:text-primary-300"
                         >
                           {getUserFullName(userId)}
                           <button
@@ -965,7 +976,7 @@ export default function IncomingMailsPage() {
                               ...formData,
                               copyTo: formData.copyTo.filter(id => id !== userId)
                             })}
-                            className="hover:text-primary-900"
+                            className="hover:text-primary-900 dark:hover:text-primary-100"
                           >
                             <XMarkIcon className="w-3 h-3" />
                           </button>
@@ -985,7 +996,7 @@ export default function IncomingMailsPage() {
                     className="input"
                   />
                   {showCopyDropdown && filteredCopyRecipients.length > 0 && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto dark:bg-gray-800 dark:border-gray-700">
                       {filteredCopyRecipients.map((user) => (
                         <div
                           key={user.id}
@@ -997,11 +1008,11 @@ export default function IncomingMailsPage() {
                             setCopySearch('');
                             setShowCopyDropdown(false);
                           }}
-                          className="px-3 py-2 hover:bg-primary-50 cursor-pointer text-sm flex items-center gap-2"
+                          className="px-3 py-2 hover:bg-primary-50 cursor-pointer text-sm flex items-center gap-2 dark:text-gray-200 dark:hover:bg-primary-900/20"
                         >
-                          <UserIcon className="w-4 h-4 text-gray-400" />
+                          <UserIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                           <span>{user.lastName} {user.firstName}</span>
-                          <span className="text-xs text-gray-400 ml-auto">{user.services?.[0]?.name}</span>
+                          <span className="text-xs text-gray-400 ml-auto dark:text-gray-500">{user.services?.[0]?.name}</span>
                         </div>
                       ))}
                     </div>
@@ -1010,7 +1021,7 @@ export default function IncomingMailsPage() {
 
                 {/* Priorité */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
                     Priorité
                   </label>
                   <select
@@ -1027,7 +1038,7 @@ export default function IncomingMailsPage() {
 
                 {/* Date d'échéance */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
                     Date d'échéance (optionnel)
                   </label>
                   <input
@@ -1036,14 +1047,14 @@ export default function IncomingMailsPage() {
                     onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
                     className="input"
                   />
-                  <p className="text-xs text-gray-400 mt-1">
+                  <p className="text-xs text-gray-400 mt-1 dark:text-gray-500">
                     Laissez vide pour appliquer le délai réglementaire par défaut
                   </p>
                 </div>
 
                 {/* Tags */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
                     Tags (optionnel)
                   </label>
                   <TagInput
@@ -1054,7 +1065,7 @@ export default function IncomingMailsPage() {
 
                 {/* Notes */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
                     Notes (optionnel)
                   </label>
                   <textarea
@@ -1068,10 +1079,10 @@ export default function IncomingMailsPage() {
               </div>
             )}
           </div>
-          
+
           {/* Actions */}
           {selectedFile && (
-            <div className="p-4 border-t bg-gray-50 flex items-center justify-end gap-3">
+            <div className="p-4 border-t bg-gray-50 flex items-center justify-end gap-3 dark:bg-gray-800 dark:border-gray-700">
               <button
                 onClick={() => {
                   setSelectedFile(null);

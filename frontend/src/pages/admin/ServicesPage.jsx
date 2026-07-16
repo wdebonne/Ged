@@ -54,8 +54,8 @@ export default function ServicesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Gestion des services</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Gestion des services</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
             {services?.length || 0} service(s) configuré(s)
           </p>
         </div>
@@ -87,20 +87,20 @@ export default function ServicesPage() {
                   />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900">{service.name}</h3>
-                  <p className="text-sm text-gray-500">{service.code}</p>
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100">{service.name}</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{service.code}</p>
                 </div>
               </div>
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => openEditModal(service)}
-                  className="btn-icon text-gray-500 hover:text-primary-600"
+                  className="btn-icon text-gray-500 dark:text-gray-400 hover:text-primary-600"
                 >
                   <PencilSquareIcon className="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => setDeleteConfirm(service)}
-                  className="btn-icon text-gray-500 hover:text-danger-600"
+                  className="btn-icon text-gray-500 dark:text-gray-400 hover:text-danger-600"
                 >
                   <TrashIcon className="w-5 h-5" />
                 </button>
@@ -108,22 +108,22 @@ export default function ServicesPage() {
             </div>
 
             {service.description && (
-              <p className="text-sm text-gray-600 mb-4">{service.description}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{service.description}</p>
             )}
 
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-500">
+              <span className="text-gray-500 dark:text-gray-400">
                 {service.usersCount || 0} utilisateur(s)
               </span>
-              <span className="text-gray-500">
+              <span className="text-gray-500 dark:text-gray-400">
                 {service.mailsCount || 0} courrier(s)
               </span>
             </div>
 
             {service.supervisors?.length > 0 && (
               <div className="mt-3 pt-3 border-t flex items-center gap-2 flex-wrap">
-                <UserIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                <span className="text-xs text-gray-600">
+                <UserIcon className="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                <span className="text-xs text-gray-600 dark:text-gray-400">
                   Responsable(s) : {service.supervisors.map(s => `${s.firstName} ${s.lastName}`).join(', ')}
                 </span>
                 {service.notifySupervisor && (
@@ -133,8 +133,8 @@ export default function ServicesPage() {
             )}
 
             {service.email && (
-              <div className="mt-3 pt-3 border-t">
-                <p className="text-xs text-gray-500">Email: {service.email}</p>
+              <div className="mt-3 pt-3 border-t dark:border-gray-700">
+                <p className="text-xs text-gray-500 dark:text-gray-400">Email: {service.email}</p>
               </div>
             )}
           </motion.div>
@@ -161,17 +161,17 @@ export default function ServicesPage() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="relative bg-white rounded-2xl shadow-xl max-w-md w-full"
+                className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full"
                 onClick={(e) => e.stopPropagation()}
               >
               <div className="p-6 text-center">
-                <div className="w-12 h-12 rounded-full bg-danger-100 mx-auto mb-4 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-full bg-danger-100 dark:bg-danger-900/40 mx-auto mb-4 flex items-center justify-center">
                   <ExclamationTriangleIcon className="w-6 h-6 text-danger-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                   Supprimer le service ?
                 </h3>
-                <p className="text-gray-600 mb-6">
+                <p className="text-gray-600 dark:text-gray-400 mb-6">
                   Êtes-vous sûr de vouloir supprimer le service <strong>{deleteConfirm.name}</strong> ?
                   Cette action est irréversible.
                 </p>
@@ -277,11 +277,11 @@ function ServiceModal({ service, onClose }) {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="relative bg-white rounded-2xl shadow-xl max-w-lg w-full"
+          className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-lg w-full"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="p-6 border-b flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-900">
+          <div className="p-6 border-b dark:border-gray-700 flex items-center justify-between">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
             {service ? 'Modifier le service' : 'Nouveau service'}
           </h2>
           <button onClick={onClose} className="btn-icon">
@@ -362,9 +362,9 @@ function ServiceModal({ service, onClose }) {
           <div>
             <label className="label">Responsable(s)</label>
             {isLoadingUsers ? (
-              <p className="text-sm text-gray-500 p-3">Chargement...</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 p-3">Chargement...</p>
             ) : (
-              <div className="grid grid-cols-2 gap-2 p-3 bg-gray-50 rounded-lg max-h-48 overflow-y-auto border border-gray-200">
+              <div className="grid grid-cols-2 gap-2 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-700">
                 {Array.isArray(users) && users.map(u => (
                   <label key={u._id} className="flex items-center gap-2 cursor-pointer py-1">
                     <input
@@ -376,16 +376,16 @@ function ServiceModal({ service, onClose }) {
                           ? prev.supervisors.filter(id => id !== u._id)
                           : [...prev.supervisors, u._id]
                       }))}
-                      className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                      className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
                     />
-                    <span className="text-sm text-gray-700 truncate">
+                    <span className="text-sm text-gray-700 dark:text-gray-300 truncate">
                       {u.firstName} {u.lastName}
                     </span>
                   </label>
                 ))}
               </div>
             )}
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               Les responsables recevront un email lors de l'arrivée d'un nouveau courrier pour ce service
             </p>
           </div>
@@ -398,9 +398,9 @@ function ServiceModal({ service, onClose }) {
                 id="notifySupervisor"
                 checked={formData.notifySupervisor}
                 onChange={(e) => setFormData(prev => ({ ...prev, notifySupervisor: e.target.checked }))}
-                className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
               />
-              <label htmlFor="notifySupervisor" className="text-gray-700 flex items-center gap-2">
+              <label htmlFor="notifySupervisor" className="text-gray-700 dark:text-gray-300 flex items-center gap-2">
                 <BellIcon className="w-4 h-4" />
                 Notifier les responsables par email
               </label>
@@ -413,19 +413,19 @@ function ServiceModal({ service, onClose }) {
               id="isActive"
               checked={formData.isActive}
               onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
-              className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+              className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
             />
-            <label htmlFor="isActive" className="text-gray-700">Service actif</label>
+            <label htmlFor="isActive" className="text-gray-700 dark:text-gray-300">Service actif</label>
           </div>
 
           {errors.submit && (
-            <div className="flex items-center gap-2 p-3 bg-danger-50 text-danger-700 rounded-lg">
+            <div className="flex items-center gap-2 p-3 bg-danger-50 dark:bg-danger-900/40 text-danger-700 dark:text-danger-300 rounded-lg">
               <ExclamationTriangleIcon className="w-5 h-5" />
               {errors.submit}
             </div>
           )}
 
-          <div className="flex justify-end gap-3 pt-4 border-t">
+          <div className="flex justify-end gap-3 pt-4 border-t dark:border-gray-700">
             <button type="button" onClick={onClose} className="btn-secondary">
               Annuler
             </button>

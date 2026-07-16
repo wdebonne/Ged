@@ -50,18 +50,18 @@ function ConfirmModal({ title, message, onConfirm, onCancel, danger = true, isLo
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-white rounded-xl shadow-xl max-w-md w-full p-6"
+        className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6"
       >
         <div className="flex items-start gap-4">
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${danger ? 'bg-red-100' : 'bg-blue-100'}`}>
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${danger ? 'bg-red-100 dark:bg-red-900/40' : 'bg-blue-100 dark:bg-blue-900/40'}`}>
             {danger
               ? <ExclamationTriangleIcon className="w-5 h-5 text-red-600" />
               : <InformationCircleIcon className="w-5 h-5 text-blue-600" />
             }
           </div>
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">{title}</h3>
-            <p className="text-sm text-gray-600">{message}</p>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">{title}</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">{message}</p>
           </div>
         </div>
         <div className="flex gap-3 mt-6 justify-end">
@@ -88,35 +88,35 @@ function VerifyResult({ result, onClose }) {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 max-h-[80vh] overflow-y-auto"
+        className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full p-6 max-h-[80vh] overflow-y-auto"
       >
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <CheckCircleIcon className="w-6 h-6 text-green-600" />
-            <h3 className="text-lg font-semibold text-gray-900">Sauvegarde valide</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Sauvegarde valide</h3>
           </div>
-          <button onClick={onClose} className="p-1 text-gray-400 hover:text-gray-600">
+          <button onClick={onClose} className="p-1 text-gray-400 dark:text-gray-500 hover:text-gray-600">
             <XMarkIcon className="w-5 h-5" />
           </button>
         </div>
 
         <div className="space-y-4">
-          <div className="bg-gray-50 rounded-lg p-4 text-sm space-y-2">
-            <div className="flex justify-between"><span className="text-gray-500">Date</span><span className="font-medium">{formatDate(manifest?.createdAt)}</span></div>
-            <div className="flex justify-between"><span className="text-gray-500">Version</span><span className="font-medium">{manifest?.appVersion || '—'}</span></div>
-            <div className="flex justify-between"><span className="text-gray-500">Taille</span><span className="font-medium">{sizeFormatted}</span></div>
-            <div className="flex justify-between"><span className="text-gray-500">Fichiers joints</span><span className="font-medium">{manifest?.includesFiles ? `Oui (${fileCount})` : 'Non'}</span></div>
-            <div className="flex justify-between"><span className="text-gray-500">Entrées ZIP</span><span className="font-medium">{entryCount}</span></div>
+          <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 text-sm space-y-2">
+            <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Date</span><span className="font-medium">{formatDate(manifest?.createdAt)}</span></div>
+            <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Version</span><span className="font-medium">{manifest?.appVersion || '—'}</span></div>
+            <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Taille</span><span className="font-medium">{sizeFormatted}</span></div>
+            <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Fichiers joints</span><span className="font-medium">{manifest?.includesFiles ? `Oui (${fileCount})` : 'Non'}</span></div>
+            <div className="flex justify-between"><span className="text-gray-500 dark:text-gray-400">Entrées ZIP</span><span className="font-medium">{entryCount}</span></div>
           </div>
 
           {manifest?.stats && (
             <div>
-              <h4 className="text-sm font-semibold text-gray-700 mb-2">Données contenues</h4>
+              <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Données contenues</h4>
               <div className="grid grid-cols-2 gap-2">
                 {Object.entries(manifest.stats).map(([k, v]) => (
-                  <div key={k} className="bg-primary-50 rounded-lg p-2 text-center">
-                    <div className="text-lg font-bold text-primary-700">{v}</div>
-                    <div className="text-xs text-primary-600 capitalize">{k}</div>
+                  <div key={k} className="bg-primary-50 dark:bg-primary-900/30 rounded-lg p-2 text-center">
+                    <div className="text-lg font-bold text-primary-700 dark:text-primary-400">{v}</div>
+                    <div className="text-xs text-primary-600 dark:text-primary-400 capitalize">{k}</div>
                   </div>
                 ))}
               </div>
@@ -124,15 +124,15 @@ function VerifyResult({ result, onClose }) {
           )}
 
           {missingCollections?.length > 0 && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-              <p className="text-sm text-yellow-800 font-medium">Collections manquantes :</p>
-              <ul className="list-disc list-inside text-sm text-yellow-700 mt-1">
+            <div className="bg-yellow-50 dark:bg-yellow-900/40 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
+              <p className="text-sm text-yellow-800 dark:text-yellow-300 font-medium">Collections manquantes :</p>
+              <ul className="list-disc list-inside text-sm text-yellow-700 dark:text-yellow-300 mt-1">
                 {missingCollections.map(c => <li key={c}>{c}</li>)}
               </ul>
             </div>
           )}
 
-          <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-800">
+          <div className="bg-green-50 dark:bg-green-900/40 border border-green-200 dark:border-green-800 rounded-lg p-3 text-sm text-green-800 dark:text-green-300">
             ✅ L'archive est intègre et contient un manifest valide.
           </div>
         </div>
@@ -162,14 +162,14 @@ function CreateBackupSection({ onCreated }) {
 
   return (
     <div className="card p-6">
-      <h2 className="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+      <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
         <CircleStackIcon className="w-5 h-5 text-primary-600" />
         Créer une sauvegarde maintenant
       </h2>
 
       <div className="grid sm:grid-cols-2 gap-4 mb-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Label (optionnel)</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Label (optionnel)</label>
           <input
             type="text"
             value={label}
@@ -185,9 +185,9 @@ function CreateBackupSection({ onCreated }) {
             id="includeFiles"
             checked={includeFiles}
             onChange={e => setIncludeFiles(e.target.checked)}
-            className="h-4 w-4 rounded border-gray-300 text-primary-600"
+            className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary-600"
           />
-          <label htmlFor="includeFiles" className="text-sm text-gray-700">
+          <label htmlFor="includeFiles" className="text-sm text-gray-700 dark:text-gray-300">
             Inclure les fichiers PDF (courriers, réponses, avatars)
           </label>
         </div>
@@ -338,11 +338,11 @@ function BackupListSection({ nextcloudEnabled }) {
   return (
     <>
       <div className="card">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 flex-wrap gap-3">
-          <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex-wrap gap-3">
+          <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
             <FolderIcon className="w-5 h-5 text-primary-600" />
             Sauvegardes disponibles
-            <span className="ml-2 text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{backups.length}</span>
+            <span className="ml-2 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded-full">{backups.length}</span>
           </h2>
           <div className="flex items-center gap-2">
             <ImportBackupButton onImported={() => { queryClient.invalidateQueries(['backups']); }} />
@@ -354,7 +354,7 @@ function BackupListSection({ nextcloudEnabled }) {
         </div>
 
         {backups.length === 0 ? (
-          <div className="p-12 text-center text-gray-400">
+          <div className="p-12 text-center text-gray-400 dark:text-gray-500">
             <CircleStackIcon className="w-10 h-10 mx-auto mb-3 opacity-40" />
             <p className="text-sm">Aucune sauvegarde disponible</p>
             <p className="text-xs mt-1">Créez votre première sauvegarde ci-dessus</p>
@@ -362,7 +362,7 @@ function BackupListSection({ nextcloudEnabled }) {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wide">
+              <thead className="bg-gray-50 dark:bg-gray-800 text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                 <tr>
                   <th className="px-6 py-3 text-left">Fichier</th>
                   <th className="px-6 py-3 text-left">Date</th>
@@ -370,14 +370,14 @@ function BackupListSection({ nextcloudEnabled }) {
                   <th className="px-6 py-3 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
                 {backups.map((b) => (
-                  <tr key={b.filename} className="hover:bg-gray-50 transition-colors">
+                  <tr key={b.filename} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     <td className="px-6 py-3">
-                      <span className="font-mono text-xs text-gray-700">{b.filename}</span>
+                      <span className="font-mono text-xs text-gray-700 dark:text-gray-300">{b.filename}</span>
                     </td>
-                    <td className="px-6 py-3 text-gray-600">{formatDate(b.createdAt)}</td>
-                    <td className="px-6 py-3 text-gray-600">{formatBytes(b.size)}</td>
+                    <td className="px-6 py-3 text-gray-600 dark:text-gray-400">{formatDate(b.createdAt)}</td>
+                    <td className="px-6 py-3 text-gray-600 dark:text-gray-400">{formatBytes(b.size)}</td>
                     <td className="px-6 py-3">
                       <div className="flex items-center justify-end gap-1.5 flex-wrap">
                         {/* Vérifier */}
@@ -445,7 +445,7 @@ function BackupListSection({ nextcloudEnabled }) {
       </div>
 
       {/* Légende des actions */}
-      <div className="flex flex-wrap gap-4 text-xs text-gray-500 px-1">
+      <div className="flex flex-wrap gap-4 text-xs text-gray-500 dark:text-gray-400 px-1">
         <span className="flex items-center gap-1"><ShieldCheckIcon className="w-3.5 h-3.5 text-green-600" />Vérifier l'intégrité</span>
         <span className="flex items-center gap-1"><ArrowDownTrayIcon className="w-3.5 h-3.5 text-blue-600" />Télécharger</span>
         {nextcloudEnabled && <span className="flex items-center gap-1"><CloudArrowUpIcon className="w-3.5 h-3.5 text-purple-600" />Envoyer vers NextCloud</span>}
@@ -530,21 +530,21 @@ function AutoBackupConfig() {
 
   return (
     <div className="card p-6">
-      <h2 className="text-base font-semibold text-gray-900 mb-6 flex items-center gap-2">
+      <h2 className="text-base font-semibold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
         <ClockIcon className="w-5 h-5 text-primary-600" />
         Sauvegarde automatique
       </h2>
 
       <div className="space-y-6">
         {/* Activer */}
-        <div className="flex items-center justify-between py-3 border-b border-gray-100">
+        <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
           <div>
-            <p className="font-medium text-gray-900">Activer la sauvegarde automatique</p>
-            <p className="text-xs text-gray-500 mt-0.5">Lance automatiquement une sauvegarde selon le planning défini</p>
+            <p className="font-medium text-gray-900 dark:text-gray-100">Activer la sauvegarde automatique</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Lance automatiquement une sauvegarde selon le planning défini</p>
           </div>
           <button
             onClick={() => set('auto_enabled', !form.auto_enabled)}
-            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.auto_enabled ? 'bg-primary-600' : 'bg-gray-300'}`}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.auto_enabled ? 'bg-primary-600' : 'bg-gray-300 dark:bg-gray-600'}`}
           >
             <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${form.auto_enabled ? 'translate-x-6' : 'translate-x-1'}`} />
           </button>
@@ -552,11 +552,11 @@ function AutoBackupConfig() {
 
         {/* Planning cron */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
             Planning (expression cron)
             <button
               onClick={() => setShowCronHelp(!showCronHelp)}
-              className="text-gray-400 hover:text-gray-600"
+              className="text-gray-400 dark:text-gray-500 hover:text-gray-600"
             >
               <InformationCircleIcon className="w-4 h-4" />
             </button>
@@ -569,7 +569,7 @@ function AutoBackupConfig() {
                 className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${
                   form.schedule === p.value
                     ? 'bg-primary-600 text-white border-primary-600'
-                    : 'bg-white text-gray-600 border-gray-300 hover:border-primary-400'
+                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-300 dark:border-gray-600 hover:border-primary-400'
                 }`}
               >
                 {p.label}
@@ -584,16 +584,16 @@ function AutoBackupConfig() {
             className="input w-full font-mono"
           />
           {showCronHelp && (
-            <div className="mt-2 p-3 bg-gray-50 rounded-lg text-xs text-gray-600">
+            <div className="mt-2 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg text-xs text-gray-600 dark:text-gray-400">
               <p className="font-medium mb-1">Format : minute heure jour-mois mois jour-semaine</p>
-              <p>Exemples : <code className="bg-gray-100 px-1 rounded">0 2 * * *</code> = tous les jours à 2h00 | <code className="bg-gray-100 px-1 rounded">0 2 * * 1</code> = chaque lundi à 2h</p>
+              <p>Exemples : <code className="bg-gray-100 dark:bg-gray-700 px-1 rounded">0 2 * * *</code> = tous les jours à 2h00 | <code className="bg-gray-100 dark:bg-gray-700 px-1 rounded">0 2 * * 1</code> = chaque lundi à 2h</p>
             </div>
           )}
         </div>
 
         {/* Nombre max de sauvegardes */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Nombre maximum de sauvegardes locales conservées
           </label>
           <input
@@ -604,7 +604,7 @@ function AutoBackupConfig() {
             max={100}
             className="input w-32"
           />
-          <p className="text-xs text-gray-500 mt-1">Les plus anciennes seront supprimées automatiquement</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Les plus anciennes seront supprimées automatiquement</p>
         </div>
 
         {/* Inclure les fichiers */}
@@ -614,22 +614,22 @@ function AutoBackupConfig() {
             id="autoIncludeFiles"
             checked={form.include_files}
             onChange={e => set('include_files', e.target.checked)}
-            className="h-4 w-4 rounded border-gray-300 text-primary-600"
+            className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary-600"
           />
-          <label htmlFor="autoIncludeFiles" className="text-sm text-gray-700">
+          <label htmlFor="autoIncludeFiles" className="text-sm text-gray-700 dark:text-gray-300">
             Inclure les fichiers PDF dans la sauvegarde automatique
           </label>
         </div>
 
         {/* NextCloud */}
-        <div className="border-t border-gray-100 pt-6">
+        <div className="border-t border-gray-100 dark:border-gray-700 pt-6">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <p className="font-medium text-gray-900 flex items-center gap-2">
+              <p className="font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2">
                 <CloudArrowUpIcon className="w-4 h-4 text-purple-600" />
                 Envoyer vers NextCloud après chaque sauvegarde
               </p>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                 {ncStatus?.connected
                   ? '✅ NextCloud connecté'
                   : '⚠️ NextCloud non connecté — configurez-le dans Paramètres > Stockage externe'
@@ -640,7 +640,7 @@ function AutoBackupConfig() {
               onClick={() => set('nextcloud_enabled', !form.nextcloud_enabled)}
               disabled={!ncStatus?.connected}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                form.nextcloud_enabled && ncStatus?.connected ? 'bg-purple-600' : 'bg-gray-300'
+                form.nextcloud_enabled && ncStatus?.connected ? 'bg-purple-600' : 'bg-gray-300 dark:bg-gray-600'
               } disabled:opacity-50`}
             >
               <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
@@ -649,32 +649,32 @@ function AutoBackupConfig() {
             </button>
           </div>
           {form.nextcloud_enabled && ncStatus?.connected && (
-            <p className="text-xs text-purple-700 bg-purple-50 rounded-lg p-2">
+            <p className="text-xs text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/40 rounded-lg p-2">
               Les sauvegardes seront déposées dans le dossier <strong>GED-Courrier/Sauvegardes</strong> sur votre serveur NextCloud.
             </p>
           )}
         </div>
 
         {/* Rapport email */}
-        <div className="border-t border-gray-100 pt-6">
+        <div className="border-t border-gray-100 dark:border-gray-700 pt-6">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <p className="font-medium text-gray-900 flex items-center gap-2">
+              <p className="font-medium text-gray-900 dark:text-gray-100 flex items-center gap-2">
                 <EnvelopeIcon className="w-4 h-4 text-blue-600" />
                 Envoyer un rapport par email
               </p>
-              <p className="text-xs text-gray-500 mt-0.5">Un email récapitulatif est envoyé après chaque sauvegarde (succès ou échec)</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Un email récapitulatif est envoyé après chaque sauvegarde (succès ou échec)</p>
             </div>
             <button
               onClick={() => set('email_report', !form.email_report)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.email_report ? 'bg-blue-600' : 'bg-gray-300'}`}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${form.email_report ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'}`}
             >
               <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${form.email_report ? 'translate-x-6' : 'translate-x-1'}`} />
             </button>
           </div>
           {form.email_report && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Destinataires (séparés par des virgules)</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Destinataires (séparés par des virgules)</label>
               <input
                 type="text"
                 value={form.email_recipients}
@@ -682,7 +682,7 @@ function AutoBackupConfig() {
                 placeholder="admin@mairie.fr, it@mairie.fr"
                 className="input w-full"
               />
-              <p className="text-xs text-gray-500 mt-1">Le serveur SMTP doit être configuré dans Paramètres > SMTP</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Le serveur SMTP doit être configuré dans Paramètres > SMTP</p>
             </div>
           )}
         </div>
@@ -728,19 +728,19 @@ export default function BackupPage() {
     <div className="p-6 space-y-6 max-w-5xl">
       {/* En-tête */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-3">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
           <CircleStackIcon className="w-7 h-7 text-primary-600" />
           Sauvegardes
         </h1>
-        <p className="text-gray-500 mt-1 text-sm">
+        <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">
           Créez et restaurez des sauvegardes complètes de votre application (base de données + fichiers).
         </p>
       </div>
 
       {/* Avertissement restauration */}
-      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex gap-3">
+      <div className="bg-amber-50 dark:bg-amber-900/40 border border-amber-200 dark:border-amber-800 rounded-lg p-4 flex gap-3">
         <ExclamationTriangleIcon className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-        <div className="text-sm text-amber-800">
+        <div className="text-sm text-amber-800 dark:text-amber-300">
           <p className="font-medium">Avant toute restauration</p>
           <p className="mt-0.5">Créez impérativement une sauvegarde de l'état actuel. La restauration écrase intégralement la base de données et les fichiers.</p>
         </div>

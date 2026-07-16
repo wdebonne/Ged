@@ -385,10 +385,10 @@ export default function MailDetailPage() {
           {isAdmin && (
             <button
               onClick={() => setShowExportOptionsModal(true)}
-              className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+              className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors dark:border-gray-700 dark:hover:bg-gray-700/50"
               title="Options d'export de l'historique"
             >
-              <Cog6ToothIcon className="w-5 h-5 text-gray-500" />
+              <Cog6ToothIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
             </button>
           )}
           
@@ -404,48 +404,48 @@ export default function MailDetailPage() {
             </button>
             
             {showExportMenu && (
-              <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+              <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50 dark:bg-gray-800 dark:border-gray-700">
                 <button
                   onClick={handleExportCourrier}
                   disabled={exportLoading === 'courrier'}
-                  className="w-full px-4 py-2.5 text-left hover:bg-gray-50 flex items-center gap-3 disabled:opacity-50"
+                  className="w-full px-4 py-2.5 text-left hover:bg-gray-50 flex items-center gap-3 disabled:opacity-50 dark:hover:bg-gray-700/50"
                 >
                   <DocumentIcon className="w-5 h-5 text-blue-500" />
                   <div>
-                    <div className="font-medium text-gray-900">Courrier uniquement</div>
-                    <div className="text-xs text-gray-500">Télécharge le PDF du courrier</div>
+                    <div className="font-medium text-gray-900 dark:text-gray-100">Courrier uniquement</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Télécharge le PDF du courrier</div>
                   </div>
                   {exportLoading === 'courrier' && (
                     <div className="ml-auto animate-spin w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
                   )}
                 </button>
-                
+
                 <button
                   onClick={handleExportHistorique}
                   disabled={exportLoading === 'historique'}
-                  className="w-full px-4 py-2.5 text-left hover:bg-gray-50 flex items-center gap-3 disabled:opacity-50"
+                  className="w-full px-4 py-2.5 text-left hover:bg-gray-50 flex items-center gap-3 disabled:opacity-50 dark:hover:bg-gray-700/50"
                 >
                   <ClockIcon className="w-5 h-5 text-amber-500" />
                   <div>
-                    <div className="font-medium text-gray-900">Historique uniquement</div>
-                    <div className="text-xs text-gray-500">PDF avec infos et timeline</div>
+                    <div className="font-medium text-gray-900 dark:text-gray-100">Historique uniquement</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">PDF avec infos et timeline</div>
                   </div>
                   {exportLoading === 'historique' && (
                     <div className="ml-auto animate-spin w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full"></div>
                   )}
                 </button>
-                
-                <div className="border-t border-gray-100 my-1"></div>
-                
+
+                <div className="border-t border-gray-100 my-1 dark:border-gray-700"></div>
+
                 <button
                   onClick={handleExportTout}
                   disabled={exportLoading === 'tout'}
-                  className="w-full px-4 py-2.5 text-left hover:bg-gray-50 flex items-center gap-3 disabled:opacity-50"
+                  className="w-full px-4 py-2.5 text-left hover:bg-gray-50 flex items-center gap-3 disabled:opacity-50 dark:hover:bg-gray-700/50"
                 >
                   <FolderArrowDownIcon className="w-5 h-5 text-green-500" />
                   <div>
-                    <div className="font-medium text-gray-900">Export complet (ZIP)</div>
-                    <div className="text-xs text-gray-500">Courrier + historique + réponses</div>
+                    <div className="font-medium text-gray-900 dark:text-gray-100">Export complet (ZIP)</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Courrier + historique + réponses</div>
                   </div>
                   {exportLoading === 'tout' && (
                     <div className="ml-auto animate-spin w-4 h-4 border-2 border-green-500 border-t-transparent rounded-full"></div>
@@ -529,53 +529,53 @@ export default function MailDetailPage() {
               style={{ width: '450px' }}
             >
               <div className="card overflow-hidden sticky top-4">
-                <div className="p-3 border-b bg-gray-50 flex items-center justify-between">
-                  <h2 className="font-semibold text-gray-900 text-sm flex items-center gap-2">
+                <div className="p-3 border-b bg-gray-50 flex items-center justify-between dark:bg-gray-800 dark:border-gray-700">
+                  <h2 className="font-semibold text-gray-900 text-sm flex items-center gap-2 dark:text-gray-100">
                     <DocumentTextIcon className="w-5 h-5" />
                     Aperçu
                   </h2>
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => setScale(s => Math.max(0.5, s - 0.25))}
-                      className="p-1.5 hover:bg-gray-200 rounded"
+                      className="p-1.5 hover:bg-gray-200 rounded dark:hover:bg-gray-600"
                       title="Zoom arrière"
                     >
                       <MagnifyingGlassMinusIcon className="w-4 h-4" />
                     </button>
-                    <span className="text-xs text-gray-600 min-w-[40px] text-center">{Math.round(scale * 100)}%</span>
+                    <span className="text-xs text-gray-600 min-w-[40px] text-center dark:text-gray-400">{Math.round(scale * 100)}%</span>
                     <button
                       onClick={() => setScale(s => Math.min(2, s + 0.25))}
-                      className="p-1.5 hover:bg-gray-200 rounded"
+                      className="p-1.5 hover:bg-gray-200 rounded dark:hover:bg-gray-600"
                       title="Zoom avant"
                     >
                       <MagnifyingGlassPlusIcon className="w-4 h-4" />
                     </button>
-                    <div className="w-px h-4 bg-gray-300 mx-1"></div>
+                    <div className="w-px h-4 bg-gray-300 mx-1 dark:bg-gray-600"></div>
                     <button
                       onClick={handlePrint}
-                      className="p-1.5 hover:bg-gray-200 rounded"
+                      className="p-1.5 hover:bg-gray-200 rounded dark:hover:bg-gray-600"
                       title="Imprimer"
                     >
                       <PrinterIcon className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => setShowFullscreen(true)}
-                      className="p-1.5 hover:bg-gray-200 rounded"
+                      className="p-1.5 hover:bg-gray-200 rounded dark:hover:bg-gray-600"
                       title="Plein écran"
                     >
                       <ArrowsPointingOutIcon className="w-4 h-4" />
                     </button>
-                    <div className="w-px h-4 bg-gray-300 mx-1"></div>
+                    <div className="w-px h-4 bg-gray-300 mx-1 dark:bg-gray-600"></div>
                     <button
                       onClick={() => setShowPreview(false)}
-                      className="p-1.5 hover:bg-gray-200 rounded"
+                      className="p-1.5 hover:bg-gray-200 rounded dark:hover:bg-gray-600"
                       title="Fermer"
                     >
                       <EyeSlashIcon className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
-                <div className="bg-gray-100 flex items-center justify-center p-4 overflow-auto" style={{ maxHeight: 'calc(100vh - 200px)' }}>
+                <div className="bg-gray-100 flex items-center justify-center p-4 overflow-auto dark:bg-gray-900" style={{ maxHeight: 'calc(100vh - 200px)' }}>
                   <Document
                     file={`/uploads/${mail.filePath}`}
                     onLoadSuccess={({ numPages }) => {
@@ -597,21 +597,21 @@ export default function MailDetailPage() {
                   </Document>
                 </div>
                 {numPages && (
-                  <div className="p-2 border-t bg-gray-50 flex items-center justify-center gap-4">
+                  <div className="p-2 border-t bg-gray-50 flex items-center justify-center gap-4 dark:bg-gray-800 dark:border-gray-700">
                     <button
                       onClick={() => setPageNumber(p => Math.max(1, p - 1))}
                       disabled={pageNumber <= 1}
-                      className="p-1 hover:bg-gray-200 rounded disabled:opacity-50"
+                      className="p-1 hover:bg-gray-200 rounded disabled:opacity-50 dark:hover:bg-gray-600"
                     >
                       <ChevronLeftIcon className="w-5 h-5" />
                     </button>
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">
                       Page {pageNumber} / {numPages}
                     </span>
                     <button
                       onClick={() => setPageNumber(p => Math.min(numPages, p + 1))}
                       disabled={pageNumber >= numPages}
-                      className="p-1 hover:bg-gray-200 rounded disabled:opacity-50"
+                      className="p-1 hover:bg-gray-200 rounded disabled:opacity-50 dark:hover:bg-gray-600"
                     >
                       <ChevronRightIcon className="w-5 h-5" />
                     </button>
@@ -635,16 +635,16 @@ export default function MailDetailPage() {
                 <div className="p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div>
-                      <span className="text-sm font-mono text-gray-500">
+                      <span className="text-sm font-mono text-gray-500 dark:text-gray-400">
                         {mail.chronoNumber ? (
                           <>
-                            <span className="font-semibold text-gray-700">N° {mail.chronoNumber}</span>
-                            <span className="mx-1.5 text-gray-300">·</span>
+                            <span className="font-semibold text-gray-700 dark:text-gray-300">N° {mail.chronoNumber}</span>
+                            <span className="mx-1.5 text-gray-300 dark:text-gray-600">·</span>
                             {mail.reference}
                           </>
                         ) : mail.reference}
                       </span>
-                      <h1 className="text-2xl font-bold text-gray-900 mt-1">
+                      <h1 className="text-2xl font-bold text-gray-900 mt-1 dark:text-gray-100">
                         {mail.subject}
                       </h1>
                     </div>
@@ -660,7 +660,7 @@ export default function MailDetailPage() {
                       <span className={`badge ${
                         mail.status === 'pending' ? 'badge-warning' :
                         mail.status === 'processed' ? 'badge-success' :
-                        'bg-gray-100 text-gray-700'
+                        'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
                       }`}>
                         {mail.status === 'pending' ? 'À traiter' :
                          mail.status === 'processed' ? 'Traité' : 'Archivé'}
@@ -669,14 +669,14 @@ export default function MailDetailPage() {
                   </div>
 
               <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="flex items-center gap-2 text-gray-600">
+                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                   <UserIcon className="w-4 h-4" />
                   <span>Expéditeur:{' '}
                     {mail.sender && typeof mail.sender === 'object' ? (
                       <button
                         type="button"
                         onClick={() => setShowContactModal(true)}
-                        className="font-bold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer transition-colors"
+                        className="font-bold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer transition-colors dark:text-blue-400 dark:hover:text-blue-300"
                       >
                         {mail.sender.name}
                       </button>
@@ -685,33 +685,33 @@ export default function MailDetailPage() {
                     )}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 text-gray-600">
+                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                   <CalendarIcon className="w-4 h-4" />
                   <span>Reçu le: <strong>{format(new Date(mail.receivedDate), 'dd MMMM yyyy', { locale: fr })}</strong></span>
                 </div>
                 {mail.dueDate && (
-                  <div className="flex items-center gap-2 text-gray-600">
+                  <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                     <ClockIcon className="w-4 h-4" />
                     <span>
                       Échéance:{' '}
-                      <strong className={mail.status === 'pending' && new Date(mail.dueDate) < new Date() ? 'text-danger-600' : ''}>
+                      <strong className={mail.status === 'pending' && new Date(mail.dueDate) < new Date() ? 'text-danger-600 dark:text-danger-400' : ''}>
                         {format(new Date(mail.dueDate), 'dd MMMM yyyy', { locale: fr })}
                       </strong>
                     </span>
                     {mail.status === 'pending' && new Date(mail.dueDate) < new Date() && (
-                      <span className="badge bg-danger-100 text-danger-700 font-semibold">⚠ En retard</span>
+                      <span className="badge bg-danger-100 text-danger-700 font-semibold dark:bg-danger-900/40 dark:text-danger-300">⚠ En retard</span>
                     )}
                   </div>
                 )}
                 {mail.service && (
-                  <div className="flex items-center gap-2 text-gray-600">
+                  <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                     <BuildingOfficeIcon className="w-4 h-4" />
-                    <span>Service: 
-                      <span 
+                    <span>Service:
+                      <span
                         className="ml-2 badge"
-                        style={{ 
+                        style={{
                           backgroundColor: `${mail.service.color}20`,
-                          color: mail.service.color 
+                          color: mail.service.color
                         }}
                       >
                         {mail.service.name}
@@ -720,7 +720,7 @@ export default function MailDetailPage() {
                   </div>
                 )}
                 {mail.assignedTo && (
-                  <div className="flex items-center gap-2 text-gray-600">
+                  <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                     <UserIcon className="w-4 h-4" />
                     <span>Assigné à: <strong>{mail.assignedTo.firstName} {mail.assignedTo.lastName}</strong></span>
                   </div>
@@ -734,18 +734,18 @@ export default function MailDetailPage() {
               )}
 
               {mail.notes && (
-                <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                  <h3 className="text-sm font-semibold text-gray-700 mb-2">Notes</h3>
-                  <p className="text-gray-600">{mail.notes}</p>
+                <div className="mt-4 p-4 bg-gray-50 rounded-lg dark:bg-gray-800">
+                  <h3 className="text-sm font-semibold text-gray-700 mb-2 dark:text-gray-300">Notes</h3>
+                  <p className="text-gray-600 dark:text-gray-400">{mail.notes}</p>
                 </div>
               )}
 
               {mail.ocrText && (
-                <div className="mt-4 p-4 bg-blue-50 rounded-lg">
-                  <h3 className="text-sm font-semibold text-blue-700 mb-2">
+                <div className="mt-4 p-4 bg-blue-50 rounded-lg dark:bg-blue-900/20">
+                  <h3 className="text-sm font-semibold text-blue-700 mb-2 dark:text-blue-300">
                     Contenu extrait (OCR)
                   </h3>
-                  <p className="text-blue-600 text-sm whitespace-pre-wrap">{mail.ocrText}</p>
+                  <p className="text-blue-600 text-sm whitespace-pre-wrap dark:text-blue-300">{mail.ocrText}</p>
                 </div>
               )}
             </div>
@@ -759,8 +759,8 @@ export default function MailDetailPage() {
               transition={{ delay: 0.1 }}
               className="card"
             >
-              <div className="p-4 border-b">
-                <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+              <div className="p-4 border-b dark:border-gray-700">
+                <h2 className="font-semibold text-gray-900 flex items-center gap-2 dark:text-gray-100">
                   <DocumentTextIcon className="w-5 h-5" />
                   Document
                 </h2>
@@ -768,7 +768,7 @@ export default function MailDetailPage() {
               <div className="p-4">
                 <iframe
                   src={`/uploads/${mail.documentPath}`}
-                  className="w-full h-[600px] rounded-lg border"
+                  className="w-full h-[600px] rounded-lg border dark:border-gray-700"
                   title="Document PDF"
                 />
               </div>
@@ -782,8 +782,8 @@ export default function MailDetailPage() {
             transition={{ delay: 0.2 }}
             className="card"
           >
-            <div className="p-4 border-b flex items-center justify-between">
-              <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+            <div className="p-4 border-b flex items-center justify-between dark:border-gray-700">
+              <h2 className="font-semibold text-gray-900 flex items-center gap-2 dark:text-gray-100">
                 <ChatBubbleLeftRightIcon className="w-5 h-5" />
                 Réponses ({mail.responses?.length || 0})
               </h2>
@@ -799,13 +799,13 @@ export default function MailDetailPage() {
             </div>
             <div className="p-4">
               {mail.responses?.length === 0 ? (
-                <p className="text-center text-gray-500 py-8">
+                <p className="text-center text-gray-500 py-8 dark:text-gray-400">
                   Aucune réponse pour ce courrier
                 </p>
               ) : (
                 <div className="space-y-4">
                   {mail.responses?.map((response, index) => (
-                    <div key={response._id || index} className="border rounded-lg p-4">
+                    <div key={response._id || index} className="border rounded-lg p-4 dark:border-gray-700">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
                           {response.respondedBy?.avatar ? (
@@ -815,17 +815,17 @@ export default function MailDetailPage() {
                               className="w-8 h-8 rounded-full"
                             />
                           ) : (
-                            <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
-                              <span className="text-primary-600 text-sm font-semibold">
+                            <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center dark:bg-primary-900/40">
+                              <span className="text-primary-600 text-sm font-semibold dark:text-primary-300">
                                 {response.respondedBy?.firstName?.[0]}{response.respondedBy?.lastName?.[0]}
                               </span>
                             </div>
                           )}
                           <div>
-                            <p className="font-medium text-gray-900">
+                            <p className="font-medium text-gray-900 dark:text-gray-100">
                               {response.respondedBy?.firstName} {response.respondedBy?.lastName}
                             </p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
                               {format(new Date(response.date || response.createdAt), 'dd MMMM yyyy à HH:mm', { locale: fr })}
                             </p>
                           </div>
@@ -853,7 +853,7 @@ export default function MailDetailPage() {
                         </div>
                       </div>
                       {response.content && (
-                        <p className="text-gray-700 whitespace-pre-wrap mt-2">{response.content}</p>
+                        <p className="text-gray-700 whitespace-pre-wrap mt-2 dark:text-gray-300">{response.content}</p>
                       )}
                       {response.filePath && (
                         <div className="mt-3">
@@ -868,65 +868,65 @@ export default function MailDetailPage() {
                                 setResponseScale(1.0);
                               }
                             }}
-                            className="inline-flex items-center gap-1 text-primary-600 text-sm hover:underline"
+                            className="inline-flex items-center gap-1 text-primary-600 text-sm hover:underline dark:text-primary-400"
                           >
                             <DocumentTextIcon className="w-4 h-4" />
                             {responsePreview === response._id ? 'Masquer le document' : 'Voir le document joint'}
                           </button>
-                          
+
                           {/* Aperçu du document PDF */}
                           {responsePreview === response._id && (
-                            <div className="mt-3 border rounded-lg overflow-hidden bg-gray-100">
+                            <div className="mt-3 border rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 dark:border-gray-700">
                               {/* Barre d'outils */}
-                              <div className="p-2 bg-gray-50 border-b flex items-center justify-between">
+                              <div className="p-2 bg-gray-50 border-b flex items-center justify-between dark:bg-gray-800 dark:border-gray-700">
                                 <div className="flex items-center gap-2">
                                   <button
                                     onClick={() => setResponseScale(s => Math.max(0.5, s - 0.25))}
-                                    className="p-1.5 hover:bg-gray-200 rounded"
+                                    className="p-1.5 hover:bg-gray-200 rounded dark:hover:bg-gray-600"
                                     title="Zoom arrière"
                                   >
                                     <MagnifyingGlassMinusIcon className="w-4 h-4" />
                                   </button>
-                                  <span className="text-xs text-gray-600 min-w-[40px] text-center">{Math.round(responseScale * 100)}%</span>
+                                  <span className="text-xs text-gray-600 min-w-[40px] text-center dark:text-gray-400">{Math.round(responseScale * 100)}%</span>
                                   <button
                                     onClick={() => setResponseScale(s => Math.min(2, s + 0.25))}
-                                    className="p-1.5 hover:bg-gray-200 rounded"
+                                    className="p-1.5 hover:bg-gray-200 rounded dark:hover:bg-gray-600"
                                     title="Zoom avant"
                                   >
                                     <MagnifyingGlassPlusIcon className="w-4 h-4" />
                                   </button>
-                                  
+
                                   {responseNumPages > 1 && (
                                     <>
-                                      <div className="w-px h-4 bg-gray-300 mx-1"></div>
+                                      <div className="w-px h-4 bg-gray-300 mx-1 dark:bg-gray-600"></div>
                                       <button
                                         onClick={() => setResponsePageNumber(p => Math.max(1, p - 1))}
                                         disabled={responsePageNumber <= 1}
-                                        className="p-1.5 hover:bg-gray-200 rounded disabled:opacity-50"
+                                        className="p-1.5 hover:bg-gray-200 rounded disabled:opacity-50 dark:hover:bg-gray-600"
                                       >
                                         <ChevronLeftIcon className="w-4 h-4" />
                                       </button>
-                                      <span className="text-xs text-gray-600">
+                                      <span className="text-xs text-gray-600 dark:text-gray-400">
                                         {responsePageNumber} / {responseNumPages}
                                       </span>
                                       <button
                                         onClick={() => setResponsePageNumber(p => Math.min(responseNumPages, p + 1))}
                                         disabled={responsePageNumber >= responseNumPages}
-                                        className="p-1.5 hover:bg-gray-200 rounded disabled:opacity-50"
+                                        className="p-1.5 hover:bg-gray-200 rounded disabled:opacity-50 dark:hover:bg-gray-600"
                                       >
                                         <ChevronRightIcon className="w-4 h-4" />
                                       </button>
                                     </>
                                   )}
                                 </div>
-                                
+
                                 <div className="flex items-center gap-1">
                                   <button
                                     onClick={() => {
                                       setFullscreenResponsePath(`/uploads/${response.filePath}`);
                                       setShowResponseFullscreen(true);
                                     }}
-                                    className="p-1.5 hover:bg-gray-200 rounded"
+                                    className="p-1.5 hover:bg-gray-200 rounded dark:hover:bg-gray-600"
                                     title="Plein écran"
                                   >
                                     <ArrowsPointingOutIcon className="w-4 h-4" />
@@ -938,7 +938,7 @@ export default function MailDetailPage() {
                                         printWindow.addEventListener('load', () => printWindow.print());
                                       }
                                     }}
-                                    className="p-1.5 hover:bg-gray-200 rounded"
+                                    className="p-1.5 hover:bg-gray-200 rounded dark:hover:bg-gray-600"
                                     title="Imprimer"
                                   >
                                     <PrinterIcon className="w-4 h-4" />
@@ -946,7 +946,7 @@ export default function MailDetailPage() {
                                   <a
                                     href={`/uploads/${response.filePath}`}
                                     download
-                                    className="p-1.5 hover:bg-gray-200 rounded"
+                                    className="p-1.5 hover:bg-gray-200 rounded dark:hover:bg-gray-600"
                                     title="Télécharger"
                                   >
                                     <ArrowDownTrayIcon className="w-4 h-4" />
@@ -965,13 +965,13 @@ export default function MailDetailPage() {
                                     </div>
                                   }
                                   error={
-                                    <div className="text-center p-4 text-gray-500">
+                                    <div className="text-center p-4 text-gray-500 dark:text-gray-400">
                                       <p>Impossible de charger le document</p>
                                       <a
                                         href={`/uploads/${response.filePath}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="text-primary-600 hover:underline text-sm mt-2 inline-block"
+                                        className="text-primary-600 hover:underline text-sm mt-2 inline-block dark:text-primary-400"
                                       >
                                         Ouvrir dans un nouvel onglet
                                       </a>
@@ -1016,22 +1016,22 @@ export default function MailDetailPage() {
             transition={{ delay: 0.3 }}
             className="card"
           >
-            <div className="p-4 border-b">
-              <h2 className="font-semibold text-gray-900">Historique</h2>
+            <div className="p-4 border-b dark:border-gray-700">
+              <h2 className="font-semibold text-gray-900 dark:text-gray-100">Historique</h2>
             </div>
             <div className="p-4">
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary-100 flex items-center justify-center">
-                    <DocumentIcon className="w-3 h-3 text-primary-600" />
+                  <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary-100 flex items-center justify-center dark:bg-primary-900/40">
+                    <DocumentIcon className="w-3 h-3 text-primary-600 dark:text-primary-300" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-gray-900">Courrier créé</p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Courrier créé</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       {format(new Date(mail.createdAt), 'dd/MM/yyyy HH:mm', { locale: fr })}
                     </p>
                     {mail.importedBy && (
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
                         Par {mail.importedBy.firstName} {mail.importedBy.lastName}
                       </p>
                     )}
@@ -1041,12 +1041,12 @@ export default function MailDetailPage() {
                 {/* Attribution au service */}
                 {mail.service && (
                   <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center">
-                      <BuildingOfficeIcon className="w-3 h-3 text-amber-600" />
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center dark:bg-amber-900/40">
+                      <BuildingOfficeIcon className="w-3 h-3 text-amber-600 dark:text-amber-300" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-gray-900">Attribué au service</p>
-                      <p className="text-xs text-gray-600 font-medium">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Attribué au service</p>
+                      <p className="text-xs text-gray-600 font-medium dark:text-gray-400">
                         {mail.service.name}
                       </p>
                     </div>
@@ -1056,16 +1056,16 @@ export default function MailDetailPage() {
                 {/* Destinataire principal */}
                 {mail.recipient && (
                   <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-violet-100 flex items-center justify-center">
-                      <UserIcon className="w-3 h-3 text-violet-600" />
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-violet-100 flex items-center justify-center dark:bg-violet-900/40">
+                      <UserIcon className="w-3 h-3 text-violet-600 dark:text-violet-300" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-gray-900">Destinataire</p>
-                      <p className="text-xs text-gray-600 font-medium">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Destinataire</p>
+                      <p className="text-xs text-gray-600 font-medium dark:text-gray-400">
                         {mail.recipient.firstName} {mail.recipient.lastName}
                       </p>
                       {mail.recipient.email && (
-                        <p className="text-xs text-gray-500">{mail.recipient.email}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{mail.recipient.email}</p>
                       )}
                     </div>
                   </div>
@@ -1074,21 +1074,21 @@ export default function MailDetailPage() {
                 {/* Destinataires en copie */}
                 {mail.recipientsCopy?.length > 0 && (
                   <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-cyan-100 flex items-center justify-center">
-                      <UserIcon className="w-3 h-3 text-cyan-600" />
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-cyan-100 flex items-center justify-center dark:bg-cyan-900/40">
+                      <UserIcon className="w-3 h-3 text-cyan-600 dark:text-cyan-300" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                         En copie ({mail.recipientsCopy.length})
                       </p>
                       <div className="space-y-1 mt-1">
                         {mail.recipientsCopy.map((copyRecipient, index) => (
                           <div key={index} className="text-xs">
-                            <span className="text-gray-600 font-medium">
+                            <span className="text-gray-600 font-medium dark:text-gray-400">
                               {copyRecipient.firstName} {copyRecipient.lastName}
                             </span>
                             {copyRecipient.email && (
-                              <span className="text-gray-500 ml-1">({copyRecipient.email})</span>
+                              <span className="text-gray-500 ml-1 dark:text-gray-400">({copyRecipient.email})</span>
                             )}
                           </div>
                         ))}
@@ -1103,16 +1103,16 @@ export default function MailDetailPage() {
                   .sort((a, b) => new Date(a.readAt) - new Date(b.readAt))
                   .map((readLog, index) => (
                     <div key={`read-${index}`} className="flex items-start gap-3">
-                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center">
-                        <EyeIcon className="w-3 h-3 text-blue-600" />
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center dark:bg-blue-900/40">
+                        <EyeIcon className="w-3 h-3 text-blue-600 dark:text-blue-300" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-gray-900">Lu</p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Lu</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
                           {format(new Date(readLog.readAt), 'dd/MM/yyyy HH:mm', { locale: fr })}
                         </p>
                         {readLog.user && (
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
                             Par {readLog.user.firstName} {readLog.user.lastName}
                           </p>
                         )}
@@ -1123,16 +1123,16 @@ export default function MailDetailPage() {
 
                 {mail.processedDate && (
                   <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-success-100 flex items-center justify-center">
-                      <CheckCircleIcon className="w-3 h-3 text-success-600" />
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-success-100 flex items-center justify-center dark:bg-success-900/40">
+                      <CheckCircleIcon className="w-3 h-3 text-success-600 dark:text-success-300" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-gray-900">Traité</p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Traité</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
                         {format(new Date(mail.processedDate), 'dd/MM/yyyy HH:mm', { locale: fr })}
                       </p>
                       {mail.processedBy && (
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
                           Par {mail.processedBy.firstName} {mail.processedBy.lastName}
                         </p>
                       )}
@@ -1146,22 +1146,22 @@ export default function MailDetailPage() {
                   .sort((a, b) => new Date(a.date || a.createdAt) - new Date(b.date || b.createdAt))
                   .map((response, index) => (
                     <div key={`response-${index}`} className="flex items-start gap-3">
-                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center">
-                        <ChatBubbleLeftRightIcon className="w-3 h-3 text-indigo-600" />
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center dark:bg-indigo-900/40">
+                        <ChatBubbleLeftRightIcon className="w-3 h-3 text-indigo-600 dark:text-indigo-300" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-gray-900">
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
                           Réponse ({response.type === 'courrier' ? 'Courrier' : response.type === 'email' ? 'Email' : 'Téléphone'})
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
                           {format(new Date(response.date || response.createdAt), 'dd/MM/yyyy HH:mm', { locale: fr })}
                         </p>
                         {response.respondedBy && (
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-gray-500 dark:text-gray-400">
                             Par {response.respondedBy.firstName} {response.respondedBy.lastName}
                           </p>
                         )}
-                        <p className="text-xs text-gray-600 mt-1 italic line-clamp-2">
+                        <p className="text-xs text-gray-600 mt-1 italic line-clamp-2 dark:text-gray-400">
                           "{response.content}"
                         </p>
                       </div>
@@ -1171,16 +1171,16 @@ export default function MailDetailPage() {
 
                 {mail.archivedDate && (
                   <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
-                      <ArchiveBoxIcon className="w-3 h-3 text-gray-600" />
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center dark:bg-gray-700">
+                      <ArchiveBoxIcon className="w-3 h-3 text-gray-600 dark:text-gray-300" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-gray-900">Archivé</p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">Archivé</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
                         {format(new Date(mail.archivedDate), 'dd/MM/yyyy HH:mm', { locale: fr })}
                       </p>
                       {mail.archivedBy && (
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
                           Par {mail.archivedBy.firstName} {mail.archivedBy.lastName}
                         </p>
                       )}
@@ -1199,8 +1199,8 @@ export default function MailDetailPage() {
               transition={{ delay: 0.4 }}
               className="card"
             >
-              <div className="p-4 border-b">
-                <h2 className="font-semibold text-gray-900">
+              <div className="p-4 border-b dark:border-gray-700">
+                <h2 className="font-semibold text-gray-900 dark:text-gray-100">
                   Pièces jointes ({mail.attachments.length})
                 </h2>
               </div>
@@ -1211,13 +1211,13 @@ export default function MailDetailPage() {
                     href={`/uploads/${attachment.path}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-colors dark:hover:bg-gray-700/50"
                   >
-                    <DocumentTextIcon className="w-5 h-5 text-gray-400" />
-                    <span className="text-sm text-gray-700 truncate flex-1">
+                    <DocumentTextIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+                    <span className="text-sm text-gray-700 truncate flex-1 dark:text-gray-300">
                       {attachment.name}
                     </span>
-                    <ArrowDownTrayIcon className="w-4 h-4 text-gray-400" />
+                    <ArrowDownTrayIcon className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                   </a>
                 ))}
               </div>
@@ -1439,28 +1439,28 @@ export default function MailDetailPage() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="relative bg-white rounded-2xl shadow-xl max-w-md w-full"
+                className="relative bg-white rounded-2xl shadow-xl max-w-md w-full dark:bg-gray-800"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-lg font-bold text-gray-900">Fiche contact</h3>
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Fiche contact</h3>
                     <button
                       onClick={() => setShowContactModal(false)}
-                      className="text-gray-400 hover:text-gray-600 transition-colors"
+                      className="text-gray-400 hover:text-gray-600 transition-colors dark:text-gray-500 dark:hover:text-gray-300"
                     >
                       <XMarkIcon className="w-5 h-5" />
                     </button>
                   </div>
 
                   <div className="flex items-center gap-4 mb-6">
-                    <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center">
-                      <UserIcon className="w-7 h-7 text-blue-600" />
+                    <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center dark:bg-blue-900/40">
+                      <UserIcon className="w-7 h-7 text-blue-600 dark:text-blue-300" />
                     </div>
                     <div>
-                      <p className="text-lg font-semibold text-gray-900">{mail.sender.name}</p>
+                      <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">{mail.sender.name}</p>
                       {mail.sender.organization && (
-                        <p className="text-sm text-gray-500">{mail.sender.organization}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{mail.sender.organization}</p>
                       )}
                     </div>
                   </div>
@@ -1469,24 +1469,24 @@ export default function MailDetailPage() {
                     {mail.sender.email ? (
                       <a
                         href={`mailto:${mail.sender.email}`}
-                        className="flex items-center gap-3 p-3 rounded-xl bg-blue-50 hover:bg-blue-100 transition-colors group"
+                        className="flex items-center gap-3 p-3 rounded-xl bg-blue-50 hover:bg-blue-100 transition-colors group dark:bg-blue-900/20 dark:hover:bg-blue-900/30"
                       >
-                        <div className="w-10 h-10 rounded-full bg-blue-100 group-hover:bg-blue-200 flex items-center justify-center transition-colors">
-                          <EnvelopeIcon className="w-5 h-5 text-blue-600" />
+                        <div className="w-10 h-10 rounded-full bg-blue-100 group-hover:bg-blue-200 flex items-center justify-center transition-colors dark:bg-blue-900/40 dark:group-hover:bg-blue-900/60">
+                          <EnvelopeIcon className="w-5 h-5 text-blue-600 dark:text-blue-300" />
                         </div>
                         <div>
-                          <p className="text-xs text-gray-500 font-medium">Email</p>
-                          <p className="text-sm font-medium text-blue-600">{mail.sender.email}</p>
+                          <p className="text-xs text-gray-500 font-medium dark:text-gray-400">Email</p>
+                          <p className="text-sm font-medium text-blue-600 dark:text-blue-300">{mail.sender.email}</p>
                         </div>
                       </a>
                     ) : (
-                      <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
-                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                          <EnvelopeIcon className="w-5 h-5 text-gray-400" />
+                      <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-900">
+                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center dark:bg-gray-700">
+                          <EnvelopeIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                         </div>
                         <div>
-                          <p className="text-xs text-gray-500 font-medium">Email</p>
-                          <p className="text-sm text-gray-400 italic">Non renseigné</p>
+                          <p className="text-xs text-gray-500 font-medium dark:text-gray-400">Email</p>
+                          <p className="text-sm text-gray-400 italic dark:text-gray-500">Non renseigné</p>
                         </div>
                       </div>
                     )}
@@ -1494,52 +1494,52 @@ export default function MailDetailPage() {
                     {mail.sender.phone ? (
                       <a
                         href={`tel:${mail.sender.phone}`}
-                        className="flex items-center gap-3 p-3 rounded-xl bg-green-50 hover:bg-green-100 transition-colors group"
+                        className="flex items-center gap-3 p-3 rounded-xl bg-green-50 hover:bg-green-100 transition-colors group dark:bg-green-900/20 dark:hover:bg-green-900/30"
                       >
-                        <div className="w-10 h-10 rounded-full bg-green-100 group-hover:bg-green-200 flex items-center justify-center transition-colors">
-                          <PhoneIcon className="w-5 h-5 text-green-600" />
+                        <div className="w-10 h-10 rounded-full bg-green-100 group-hover:bg-green-200 flex items-center justify-center transition-colors dark:bg-green-900/40 dark:group-hover:bg-green-900/60">
+                          <PhoneIcon className="w-5 h-5 text-green-600 dark:text-green-300" />
                         </div>
                         <div>
-                          <p className="text-xs text-gray-500 font-medium">Téléphone</p>
-                          <p className="text-sm font-medium text-green-600">{mail.sender.phone}</p>
+                          <p className="text-xs text-gray-500 font-medium dark:text-gray-400">Téléphone</p>
+                          <p className="text-sm font-medium text-green-600 dark:text-green-300">{mail.sender.phone}</p>
                         </div>
                       </a>
                     ) : (
-                      <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
-                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                          <PhoneIcon className="w-5 h-5 text-gray-400" />
+                      <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-900">
+                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center dark:bg-gray-700">
+                          <PhoneIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                         </div>
                         <div>
-                          <p className="text-xs text-gray-500 font-medium">Téléphone</p>
-                          <p className="text-sm text-gray-400 italic">Non renseigné</p>
+                          <p className="text-xs text-gray-500 font-medium dark:text-gray-400">Téléphone</p>
+                          <p className="text-sm text-gray-400 italic dark:text-gray-500">Non renseigné</p>
                         </div>
                       </div>
                     )}
 
                     {mail.sender.address ? (
-                      <div className="flex items-center gap-3 p-3 rounded-xl bg-orange-50">
-                        <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center">
-                          <MapPinIcon className="w-5 h-5 text-orange-600" />
+                      <div className="flex items-center gap-3 p-3 rounded-xl bg-orange-50 dark:bg-orange-900/20">
+                        <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center dark:bg-orange-900/40">
+                          <MapPinIcon className="w-5 h-5 text-orange-600 dark:text-orange-300" />
                         </div>
                         <div className="flex-1">
-                          <p className="text-xs text-gray-500 font-medium">Adresse</p>
-                          <p className="text-sm font-medium text-gray-700 whitespace-pre-line">{mail.sender.address}</p>
+                          <p className="text-xs text-gray-500 font-medium dark:text-gray-400">Adresse</p>
+                          <p className="text-sm font-medium text-gray-700 whitespace-pre-line dark:text-gray-300">{mail.sender.address}</p>
                         </div>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
-                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                          <MapPinIcon className="w-5 h-5 text-gray-400" />
+                      <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-900">
+                        <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center dark:bg-gray-700">
+                          <MapPinIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                         </div>
                         <div>
-                          <p className="text-xs text-gray-500 font-medium">Adresse</p>
-                          <p className="text-sm text-gray-400 italic">Non renseignée</p>
+                          <p className="text-xs text-gray-500 font-medium dark:text-gray-400">Adresse</p>
+                          <p className="text-sm text-gray-400 italic dark:text-gray-500">Non renseignée</p>
                         </div>
                       </div>
                     )}
                   </div>
 
-                  <div className="mt-6 pt-4 border-t">
+                  <div className="mt-6 pt-4 border-t dark:border-gray-700">
                     <button
                       onClick={() => setShowContactModal(false)}
                       className="w-full btn-secondary"
@@ -1561,11 +1561,11 @@ export default function MailDetailPage() {
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="relative bg-white rounded-2xl shadow-xl max-w-lg w-full"
+              className="relative bg-white rounded-2xl shadow-xl max-w-lg w-full dark:bg-gray-800"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">
+                <h2 className="text-xl font-bold text-gray-900 mb-4 dark:text-gray-100">
                   Ajouter une réponse
                 </h2>
                 <form onSubmit={handleAddResponse}>

@@ -111,8 +111,8 @@ export default function EmailTemplatesPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Modèles de Mail</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Modèles de Mail</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
             Gérez les modèles d'emails pour les notifications automatiques
           </p>
         </div>
@@ -125,9 +125,9 @@ export default function EmailTemplatesPage() {
       {/* Liste par action */}
       {Object.keys(groupedTemplates).length === 0 ? (
         <div className="card p-12 text-center">
-          <EnvelopeIcon className="w-16 h-16 mx-auto text-gray-300 mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun modèle</h3>
-          <p className="text-gray-500 mb-4">Créez votre premier modèle de mail</p>
+          <EnvelopeIcon className="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Aucun modèle</h3>
+          <p className="text-gray-500 dark:text-gray-400 mb-4">Créez votre premier modèle de mail</p>
           <button onClick={handleCreate} className="btn-primary">
             <PlusIcon className="w-5 h-5 mr-2" />
             Créer un modèle
@@ -142,8 +142,8 @@ export default function EmailTemplatesPage() {
               animate={{ opacity: 1, y: 0 }}
               className="card"
             >
-              <div className="p-4 border-b bg-gray-50">
-                <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+              <div className="p-4 border-b bg-gray-50 dark:bg-gray-900">
+                <h2 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                   <EnvelopeIcon className="w-5 h-5 text-primary-600" />
                   {getActionLabel(action)}
                 </h2>
@@ -152,24 +152,24 @@ export default function EmailTemplatesPage() {
                 {actionTemplates.map((template) => (
                   <div
                     key={template._id}
-                    className="p-4 flex items-center justify-between hover:bg-gray-50"
+                    className="p-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50"
                   >
                     <div className="flex items-center gap-4">
                       <div
                         className={`w-3 h-3 rounded-full ${
-                          template.isActive ? 'bg-success-500' : 'bg-gray-300'
+                          template.isActive ? 'bg-success-500' : 'bg-gray-300 dark:bg-gray-600'
                         }`}
                         title={template.isActive ? 'Actif' : 'Inactif'}
                       />
                       <div>
-                        <h3 className="font-medium text-gray-900">{template.name}</h3>
-                        <p className="text-sm text-gray-500">{template.subject}</p>
+                        <h3 className="font-medium text-gray-900 dark:text-gray-100">{template.name}</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{template.subject}</p>
                         <div className="flex items-center gap-2 mt-1">
                           {template.description && (
-                            <p className="text-xs text-gray-400">{template.description}</p>
+                            <p className="text-xs text-gray-400 dark:text-gray-500">{template.description}</p>
                           )}
                           {template.attachPdf && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-blue-50 text-blue-700">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs rounded-full bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">
                               <PaperClipIcon className="w-3 h-3" />
                               PDF joint
                             </span>
@@ -182,8 +182,8 @@ export default function EmailTemplatesPage() {
                         onClick={() => toggleMutation.mutate(template._id)}
                         className={`px-3 py-1 text-xs rounded-full ${
                           template.isActive
-                            ? 'bg-success-100 text-success-700'
-                            : 'bg-gray-100 text-gray-600'
+                            ? 'bg-success-100 dark:bg-success-900/40 text-success-700 dark:text-success-300'
+                            : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
                         }`}
                       >
                         {template.isActive ? 'Actif' : 'Inactif'}
@@ -326,12 +326,12 @@ function TemplateModal({ template, actions, onClose }) {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="relative bg-white rounded-2xl shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col"
+          className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="p-4 border-b flex items-center justify-between bg-gray-50">
-            <h2 className="text-xl font-bold text-gray-900">
+          <div className="p-4 border-b dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-900">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
               {template ? 'Modifier le modèle' : 'Nouveau modèle'}
             </h2>
             <button onClick={onClose} className="btn-icon">
@@ -341,7 +341,7 @@ function TemplateModal({ template, actions, onClose }) {
 
           <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
             {/* Infos générales */}
-            <div className="p-4 border-b bg-gray-50 space-y-4">
+            <div className="p-4 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-900 space-y-4">
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="label">Nom du modèle *</label>
@@ -396,9 +396,9 @@ function TemplateModal({ template, actions, onClose }) {
                       id="isActive"
                       checked={formData.isActive}
                       onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                      className="w-4 h-4 rounded border-gray-300 text-primary-600"
+                      className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600"
                     />
-                    <label htmlFor="isActive" className="text-sm text-gray-700">Activer ce modèle</label>
+                    <label htmlFor="isActive" className="text-sm text-gray-700 dark:text-gray-300">Activer ce modèle</label>
                   </div>
                   {showAttachPdf && (
                     <div className="flex items-center gap-2">
@@ -407,9 +407,9 @@ function TemplateModal({ template, actions, onClose }) {
                         id="attachPdf"
                         checked={formData.attachPdf}
                         onChange={(e) => setFormData({ ...formData, attachPdf: e.target.checked })}
-                        className="w-4 h-4 rounded border-gray-300 text-primary-600"
+                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600"
                       />
-                      <label htmlFor="attachPdf" className="text-sm text-gray-700">Joindre le PDF du courrier</label>
+                      <label htmlFor="attachPdf" className="text-sm text-gray-700 dark:text-gray-300">Joindre le PDF du courrier</label>
                     </div>
                   )}
                 </div>
@@ -419,9 +419,9 @@ function TemplateModal({ template, actions, onClose }) {
             {/* Contenu principal */}
             <div className="flex-1 flex overflow-hidden">
               {/* Variables disponibles */}
-              <div className="w-64 border-r bg-gray-50 p-4 overflow-y-auto">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">Variables disponibles</h3>
-                <p className="text-xs text-gray-500 mb-3">Cliquez pour insérer, double-cliquez pour copier</p>
+              <div className="w-64 border-r dark:border-gray-700 bg-gray-50 dark:bg-gray-900 p-4 overflow-y-auto">
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Variables disponibles</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Cliquez pour insérer, double-cliquez pour copier</p>
                 <div className="space-y-1">
                   {availableVariables.map((variable) => (
                     <button
@@ -429,10 +429,10 @@ function TemplateModal({ template, actions, onClose }) {
                       type="button"
                       onClick={() => insertVariable(variable)}
                       onDoubleClick={() => copyVariable(variable)}
-                      className="w-full text-left px-2 py-1.5 text-xs font-mono bg-white border rounded hover:bg-primary-50 hover:border-primary-300 transition-colors flex items-center justify-between group"
+                      className="w-full text-left px-2 py-1.5 text-xs font-mono bg-white dark:bg-gray-800 dark:border-gray-600 border rounded hover:bg-primary-50 dark:hover:bg-primary-900/30 hover:border-primary-300 transition-colors flex items-center justify-between group"
                     >
-                      <span className="truncate">{variable}</span>
-                      <ClipboardDocumentIcon className="w-3 h-3 text-gray-400 opacity-0 group-hover:opacity-100" />
+                      <span className="truncate dark:text-gray-200">{variable}</span>
+                      <ClipboardDocumentIcon className="w-3 h-3 text-gray-400 dark:text-gray-500 opacity-0 group-hover:opacity-100" />
                     </button>
                   ))}
                 </div>
@@ -441,14 +441,14 @@ function TemplateModal({ template, actions, onClose }) {
               {/* Éditeur et aperçu */}
               <div className="flex-1 flex flex-col overflow-hidden">
                 {/* Tabs */}
-                <div className="flex border-b bg-white">
+                <div className="flex border-b dark:border-gray-700 bg-white dark:bg-gray-800">
                   <button
                     type="button"
                     onClick={() => setActiveTab('editor')}
                     className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
                       activeTab === 'editor'
                         ? 'border-primary-500 text-primary-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                        : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
                     }`}
                   >
                     <CodeBracketIcon className="w-4 h-4" />
@@ -460,7 +460,7 @@ function TemplateModal({ template, actions, onClose }) {
                     className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
                       activeTab === 'preview'
                         ? 'border-primary-500 text-primary-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                        : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
                     }`}
                   >
                     <EyeIcon className="w-4 h-4" />
@@ -475,11 +475,11 @@ function TemplateModal({ template, actions, onClose }) {
                       id="html-editor"
                       value={formData.htmlContent}
                       onChange={(e) => setFormData({ ...formData, htmlContent: e.target.value })}
-                      className="w-full h-full p-4 font-mono text-sm resize-none focus:outline-none"
+                      className="w-full h-full p-4 font-mono text-sm resize-none focus:outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
                       placeholder="Saisissez votre code HTML ici..."
                     />
                   ) : (
-                    <div className="h-full overflow-auto bg-gray-100 p-4">
+                    <div className="h-full overflow-auto bg-gray-100 dark:bg-gray-700 p-4">
                       <div className="bg-white rounded-lg shadow-sm mx-auto max-w-2xl">
                         <iframe
                           srcDoc={formData.htmlContent}
@@ -494,7 +494,7 @@ function TemplateModal({ template, actions, onClose }) {
             </div>
 
             {/* Footer */}
-            <div className="p-4 border-t bg-gray-50 flex justify-end gap-3">
+            <div className="p-4 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end gap-3">
               <button type="button" onClick={onClose} className="btn-secondary">
                 Annuler
               </button>
@@ -533,13 +533,13 @@ function PreviewModal({ content, onClose }) {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="relative bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden"
+          className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="p-4 border-b flex items-center justify-between bg-gray-50">
+          <div className="p-4 border-b dark:border-gray-700 flex items-center justify-between bg-gray-50 dark:bg-gray-900">
             <div>
-              <h2 className="text-xl font-bold text-gray-900">Aperçu du mail</h2>
-              <p className="text-sm text-gray-500 mt-1">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Aperçu du mail</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 Sujet: {content.subject}
               </p>
             </div>
@@ -547,7 +547,7 @@ function PreviewModal({ content, onClose }) {
               <XMarkIcon className="w-6 h-6" />
             </button>
           </div>
-          <div className="overflow-auto max-h-[70vh] bg-gray-100 p-6">
+          <div className="overflow-auto max-h-[70vh] bg-gray-100 dark:bg-gray-700 p-6">
             <div className="bg-white rounded-lg shadow-sm mx-auto max-w-2xl overflow-hidden">
               <iframe
                 srcDoc={content.html}
@@ -556,7 +556,7 @@ function PreviewModal({ content, onClose }) {
               />
             </div>
           </div>
-          <div className="p-4 border-t bg-gray-50 flex justify-end">
+          <div className="p-4 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex justify-end">
             <button onClick={onClose} className="btn-primary">
               Fermer
             </button>

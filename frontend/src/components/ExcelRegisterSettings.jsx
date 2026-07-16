@@ -53,10 +53,10 @@ function NextCloudFilePicker({ value, onChange }) {
   }
 
   return (
-    <div className="border rounded-lg p-3 space-y-2 bg-gray-50">
+    <div className="border rounded-lg p-3 space-y-2 bg-gray-50 dark:bg-gray-900">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-gray-700">Chemin : {currentPath}</span>
-        <button onClick={() => setIsOpen(false)} className="text-sm text-gray-500 hover:text-gray-700">Fermer</button>
+        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Chemin : {currentPath}</span>
+        <button onClick={() => setIsOpen(false)} className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700">Fermer</button>
       </div>
       {currentPath !== '/' && (
         <button
@@ -79,7 +79,7 @@ function NextCloudFilePicker({ value, onChange }) {
                 setIsOpen(false);
               }
             }}
-            className="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-left rounded hover:bg-gray-100"
+            className="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-left rounded hover:bg-gray-100 dark:hover:bg-gray-700"
           >
             {item.type === 'directory' ? (
               <FolderIcon className="w-4 h-4 text-yellow-500" />
@@ -87,10 +87,10 @@ function NextCloudFilePicker({ value, onChange }) {
               <TableCellsIcon className="w-4 h-4 text-green-600" />
             )}
             <span>{item.basename}</span>
-            {item.type === 'directory' && <ChevronRightIcon className="w-3 h-3 ml-auto text-gray-400" />}
+            {item.type === 'directory' && <ChevronRightIcon className="w-3 h-3 ml-auto text-gray-400 dark:text-gray-500" />}
           </button>
         ))}
-        {folders.length === 0 && <p className="text-sm text-gray-400 py-2">Dossier vide</p>}
+        {folders.length === 0 && <p className="text-sm text-gray-400 dark:text-gray-500 py-2">Dossier vide</p>}
       </div>
     </div>
   );
@@ -109,7 +109,7 @@ function ColumnMappingSection({ title, columns, mapping, fields, onChange }) {
 
   if (!columns || columns.length === 0) {
     return (
-      <div className="text-sm text-gray-500 italic py-2">
+      <div className="text-sm text-gray-500 dark:text-gray-400 italic py-2">
         Aucune colonne détectée. Uploadez un template pour configurer le mapping.
       </div>
     );
@@ -117,19 +117,19 @@ function ColumnMappingSection({ title, columns, mapping, fields, onChange }) {
 
   return (
     <div>
-      <h4 className="font-medium text-gray-700 mb-3">{title}</h4>
+      <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-3">{title}</h4>
       <div className="space-y-2">
         {columns.map((col) => (
           <div key={col.column} className="flex items-center gap-3">
             <div className="w-20 flex-shrink-0">
-              <span className="inline-flex items-center px-2.5 py-1 rounded-md text-sm font-mono font-medium bg-gray-100 text-gray-700">
+              <span className="inline-flex items-center px-2.5 py-1 rounded-md text-sm font-mono font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
                 {col.column}
               </span>
             </div>
-            <div className="w-40 flex-shrink-0 text-sm text-gray-500 truncate" title={col.header}>
+            <div className="w-40 flex-shrink-0 text-sm text-gray-500 dark:text-gray-400 truncate" title={col.header}>
               {col.header || '(vide)'}
             </div>
-            <ChevronRightIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
+            <ChevronRightIcon className="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" />
             <select
               value={mapping[col.column] || ''}
               onChange={(e) => handleChange(col.column, e.target.value)}
@@ -282,14 +282,14 @@ export default function ExcelRegisterSettings() {
   };
 
   if (configLoading) {
-    return <div className="flex justify-center py-8"><ArrowPathIcon className="w-6 h-6 animate-spin text-gray-400" /></div>;
+    return <div className="flex justify-center py-8"><ArrowPathIcon className="w-6 h-6 animate-spin text-gray-400 dark:text-gray-500" /></div>;
   }
 
   return (
     <div className="space-y-6">
       {/* Status Bar */}
       {config.enabled && (
-        <div className={`flex items-center gap-3 p-3 rounded-lg ${status.fileExists ? 'bg-success-50 text-success-700' : 'bg-gray-50 text-gray-600'}`}>
+        <div className={`flex items-center gap-3 p-3 rounded-lg ${status.fileExists ? 'bg-success-50 dark:bg-success-900/40 text-success-700 dark:text-success-300' : 'bg-gray-50 dark:bg-gray-900 text-gray-600 dark:text-gray-400'}`}>
           {status.fileExists ? (
             <CheckCircleIcon className="w-5 h-5" />
           ) : (
@@ -306,8 +306,8 @@ export default function ExcelRegisterSettings() {
       {/* Section 1: Activation */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-gray-800">Registre Excel automatique</h3>
-          <p className="text-sm text-gray-500">Génère automatiquement un fichier Excel pour chaque courrier créé</p>
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Registre Excel automatique</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400">Génère automatiquement un fichier Excel pour chaque courrier créé</p>
         </div>
         <label className="relative inline-flex items-center cursor-pointer">
           <input
@@ -316,7 +316,7 @@ export default function ExcelRegisterSettings() {
             onChange={(e) => setConfig(prev => ({ ...prev, enabled: e.target.checked }))}
             className="sr-only peer"
           />
-          <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600" />
+          <div className="w-11 h-6 bg-gray-200 dark:bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 dark:border-gray-600 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600" />
         </label>
       </div>
 
@@ -324,7 +324,7 @@ export default function ExcelRegisterSettings() {
         <>
           {/* Section 2: App URL */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">URL de l'application (pour les liens dans le registre)</label>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">URL de l'application (pour les liens dans le registre)</label>
             <input
               type="text"
               value={config.appBaseUrl}
@@ -332,12 +332,12 @@ export default function ExcelRegisterSettings() {
               placeholder="https://ged.exemple.fr"
               className="input w-full"
             />
-            <p className="text-xs text-gray-400 mt-1">Utilisé pour générer les liens vers les pages de détail des courriers</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Utilisé pour générer les liens vers les pages de détail des courriers</p>
           </div>
 
           {/* Section 3: Template Source */}
           <div>
-            <h3 className="text-base font-semibold text-gray-800 mb-3">Modèle Excel</h3>
+            <h3 className="text-base font-semibold text-gray-800 dark:text-gray-200 mb-3">Modèle Excel</h3>
             <div className="flex gap-4 mb-4">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
@@ -366,9 +366,9 @@ export default function ExcelRegisterSettings() {
             {config.templateSource === 'local' ? (
               <div>
                 {config.templatePath ? (
-                  <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                  <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/40 rounded-lg">
                     <TableCellsIcon className="w-5 h-5 text-green-600" />
-                    <span className="text-sm text-green-700 flex-1">Modèle chargé : {config.templatePath}</span>
+                    <span className="text-sm text-green-700 dark:text-green-300 flex-1">Modèle chargé : {config.templatePath}</span>
                     <button onClick={() => deleteMutation.mutate()} className="text-red-500 hover:text-red-700">
                       <TrashIcon className="w-5 h-5" />
                     </button>
@@ -377,15 +377,15 @@ export default function ExcelRegisterSettings() {
                   <div
                     {...getRootProps()}
                     className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors ${
-                      isDragActive ? 'border-primary-400 bg-primary-50' : 'border-gray-300 hover:border-primary-400'
+                      isDragActive ? 'border-primary-400 bg-primary-50' : 'border-gray-300 dark:border-gray-600 hover:border-primary-400'
                     }`}
                   >
                     <input {...getInputProps()} />
-                    <ArrowUpTrayIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm text-gray-600">
+                    <ArrowUpTrayIcon className="w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
                       {isDragActive ? 'Déposez le fichier ici...' : 'Glissez-déposez un fichier .xlsx ou cliquez pour sélectionner'}
                     </p>
-                    <p className="text-xs text-gray-400 mt-1">Maximum 10 Mo</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Maximum 10 Mo</p>
                   </div>
                 )}
                 {uploadMutation.isPending && (
@@ -415,10 +415,10 @@ export default function ExcelRegisterSettings() {
           {/* Section 4: Sheet assignment */}
           {sheets.length > 0 && (
             <div>
-              <h3 className="text-base font-semibold text-gray-800 mb-3">Configuration des feuilles</h3>
+              <h3 className="text-base font-semibold text-gray-800 dark:text-gray-200 mb-3">Configuration des feuilles</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Feuille courrier arrivé</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Feuille courrier arrivé</label>
                   <select
                     value={selectedIncomingSheet}
                     onChange={(e) => setSelectedIncomingSheet(e.target.value)}
@@ -429,7 +429,7 @@ export default function ExcelRegisterSettings() {
                       <option key={s.name} value={s.name}>{s.name}</option>
                     ))}
                   </select>
-                  <label className="block text-sm font-medium text-gray-700 mt-2 mb-1">Ligne de départ</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mt-2 mb-1">Ligne de départ</label>
                   <input
                     type="number"
                     min={1}
@@ -439,7 +439,7 @@ export default function ExcelRegisterSettings() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Feuille courrier départ</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Feuille courrier départ</label>
                   <select
                     value={selectedOutgoingSheet}
                     onChange={(e) => setSelectedOutgoingSheet(e.target.value)}
@@ -450,7 +450,7 @@ export default function ExcelRegisterSettings() {
                       <option key={s.name} value={s.name}>{s.name}</option>
                     ))}
                   </select>
-                  <label className="block text-sm font-medium text-gray-700 mt-2 mb-1">Ligne de départ</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mt-2 mb-1">Ligne de départ</label>
                   <input
                     type="number"
                     min={1}
@@ -466,11 +466,11 @@ export default function ExcelRegisterSettings() {
           {/* Section 5: Column Mapping */}
           {sheets.length > 0 && (
             <div>
-              <h3 className="text-base font-semibold text-gray-800 mb-3">Mapping des colonnes</h3>
-              <p className="text-sm text-gray-500 mb-4">Associez chaque colonne de votre modèle à un champ de données</p>
+              <h3 className="text-base font-semibold text-gray-800 dark:text-gray-200 mb-3">Mapping des colonnes</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Associez chaque colonne de votre modèle à un champ de données</p>
 
               {selectedIncomingSheet && (
-                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                   <ColumnMappingSection
                     title="Courrier Arrivé"
                     columns={incomingSheetColumns}
@@ -482,7 +482,7 @@ export default function ExcelRegisterSettings() {
               )}
 
               {selectedOutgoingSheet && (
-                <div className="p-4 bg-gray-50 rounded-lg">
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                   <ColumnMappingSection
                     title="Courrier Départ"
                     columns={outgoingSheetColumns}
@@ -497,10 +497,10 @@ export default function ExcelRegisterSettings() {
 
           {/* Section 6: Output options */}
           <div>
-            <h3 className="text-base font-semibold text-gray-800 mb-3">Options de sortie</h3>
+            <h3 className="text-base font-semibold text-gray-800 dark:text-gray-200 mb-3">Options de sortie</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Format de date</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Format de date</label>
                 <select
                   value={config.dateFormat}
                   onChange={(e) => setConfig(prev => ({ ...prev, dateFormat: e.target.value }))}
@@ -512,7 +512,7 @@ export default function ExcelRegisterSettings() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Délai du buffer (secondes)</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Délai du buffer (secondes)</label>
                 <input
                   type="number"
                   min={5}
@@ -521,10 +521,10 @@ export default function ExcelRegisterSettings() {
                   onChange={(e) => setConfig(prev => ({ ...prev, debounceDelay: parseInt(e.target.value) || 30 }))}
                   className="input w-32"
                 />
-                <p className="text-xs text-gray-400 mt-1">Temps d'attente avant mise à jour du fichier après un nouveau courrier</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Temps d'attente avant mise à jour du fichier après un nouveau courrier</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nom du fichier de sortie</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nom du fichier de sortie</label>
                 <input
                   type="text"
                   value={config.outputFileName}
@@ -532,26 +532,26 @@ export default function ExcelRegisterSettings() {
                   placeholder="Registre-Courrier-{YEAR}"
                   className="input w-full"
                 />
-                <p className="text-xs text-gray-400 mt-1">Variables : {'{YEAR}'}, {'{DATE}'}</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Variables : {'{YEAR}'}, {'{DATE}'}</p>
               </div>
             </div>
           </div>
 
           {/* Section 7: NextCloud auto-save */}
           <div>
-            <h3 className="text-base font-semibold text-gray-800 mb-3">Sauvegarde NextCloud</h3>
+            <h3 className="text-base font-semibold text-gray-800 dark:text-gray-200 mb-3">Sauvegarde NextCloud</h3>
             <label className="flex items-center gap-3 cursor-pointer mb-3">
               <input
                 type="checkbox"
                 checked={config.autoSaveToNextCloud}
                 onChange={(e) => setConfig(prev => ({ ...prev, autoSaveToNextCloud: e.target.checked }))}
-                className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                className="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
               />
-              <span className="text-sm text-gray-700">Sauvegarder automatiquement le registre sur NextCloud après chaque mise à jour</span>
+              <span className="text-sm text-gray-700 dark:text-gray-300">Sauvegarder automatiquement le registre sur NextCloud après chaque mise à jour</span>
             </label>
             {config.autoSaveToNextCloud && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Dossier de destination NextCloud</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dossier de destination NextCloud</label>
                 <NextCloudFilePicker
                   value={config.nextcloudOutputPath}
                   onChange={(val) => setConfig(prev => ({ ...prev, nextcloudOutputPath: val }))}

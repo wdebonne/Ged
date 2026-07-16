@@ -158,25 +158,25 @@ export default function BulkActionsBar({ selectedIds, onClear, actions = [] }) {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4"
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md mx-4"
           >
-            <div className="flex items-center justify-between px-6 py-4 border-b">
+            <div className="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
-                  <UserPlusIcon className="w-5 h-5 text-primary-600" />
+                <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/40 flex items-center justify-center">
+                  <UserPlusIcon className="w-5 h-5 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900">Réattribuer</h2>
-                  <p className="text-sm text-gray-500">{selectedIds.length} courrier(s) sélectionné(s)</p>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Réattribuer</h2>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{selectedIds.length} courrier(s) sélectionné(s)</p>
                 </div>
               </div>
-              <button onClick={closeModal} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                <XMarkIcon className="w-5 h-5 text-gray-500" />
+              <button onClick={closeModal} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
+                <XMarkIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
               </button>
             </div>
             <form onSubmit={handleReassign} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Nouveau destinataire *
                 </label>
                 <select
@@ -194,8 +194,8 @@ export default function BulkActionsBar({ selectedIds, onClear, actions = [] }) {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nouveau service <span className="text-gray-400">(optionnel)</span>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Nouveau service <span className="text-gray-400 dark:text-gray-500">(optionnel)</span>
                 </label>
                 <select
                   value={serviceId}
@@ -231,29 +231,29 @@ export default function BulkActionsBar({ selectedIds, onClear, actions = [] }) {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4"
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-md mx-4"
           >
-            <div className="flex items-center justify-between px-6 py-4 border-b">
+            <div className="flex items-center justify-between px-6 py-4 border-b dark:border-gray-700">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
-                  <TagIcon className="w-5 h-5 text-primary-600" />
+                <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/40 flex items-center justify-center">
+                  <TagIcon className="w-5 h-5 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900">Taguer</h2>
-                  <p className="text-sm text-gray-500">{selectedIds.length} courrier(s) sélectionné(s)</p>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Taguer</h2>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{selectedIds.length} courrier(s) sélectionné(s)</p>
                 </div>
               </div>
-              <button onClick={closeModal} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                <XMarkIcon className="w-5 h-5 text-gray-500" />
+              <button onClick={closeModal} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
+                <XMarkIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
               </button>
             </div>
             <form onSubmit={handleTag} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tags</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tags</label>
                 <TagInput value={tags} onChange={setTags} />
               </div>
               <div className="flex items-center gap-4">
-                <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
                   <input
                     type="radio"
                     name="tagMode"
@@ -262,7 +262,7 @@ export default function BulkActionsBar({ selectedIds, onClear, actions = [] }) {
                   />
                   Ajouter
                 </label>
-                <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
                   <input
                     type="radio"
                     name="tagMode"
@@ -314,7 +314,7 @@ export function SelectCheckbox({ checked, onToggle }) {
 export function SelectAllRow({ pageIds, selectedIds, onChange }) {
   const allSelected = pageIds.length > 0 && pageIds.every(id => selectedIds.includes(id));
   return (
-    <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer select-none w-fit">
+    <label className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 cursor-pointer select-none w-fit">
       <input
         type="checkbox"
         checked={allSelected}
@@ -325,7 +325,7 @@ export function SelectAllRow({ pageIds, selectedIds, onChange }) {
             onChange([...new Set([...selectedIds, ...pageIds])]);
           }
         }}
-        className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
       />
       Tout sélectionner sur cette page
       {selectedIds.length > 0 && (

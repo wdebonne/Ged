@@ -38,14 +38,14 @@ export default function ForgotPasswordPage() {
         animate={{ opacity: 1, y: 0 }}
         className="text-center"
       >
-        <div className="w-16 h-16 bg-success-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <EnvelopeIcon className="w-8 h-8 text-success-600" />
+        <div className="w-16 h-16 bg-success-100 dark:bg-success-900/40 rounded-full flex items-center justify-center mx-auto mb-4">
+          <EnvelopeIcon className="w-8 h-8 text-success-600 dark:text-success-400" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Email envoyé !</h2>
-        <p className="text-gray-600 mb-6">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Email envoyé !</h2>
+        <p className="text-gray-600 dark:text-gray-400 mb-6">
           Si un compte existe avec l'adresse <strong>{email}</strong>, vous recevrez un lien de réinitialisation dans quelques instants.
         </p>
-        <p className="text-sm text-gray-500 mb-6">
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
           N'oubliez pas de vérifier vos spams.
         </p>
         <Link to="/login" className="btn-primary">
@@ -59,14 +59,14 @@ export default function ForgotPasswordPage() {
     <div>
       <Link
         to="/login"
-        className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900 mb-6"
+        className="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 mb-6"
       >
         <ArrowLeftIcon className="w-4 h-4" />
         Retour à la connexion
       </Link>
 
-      <h2 className="text-2xl font-bold text-gray-900 mb-2">Mot de passe oublié</h2>
-      <p className="text-gray-600 mb-6">
+      <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Mot de passe oublié</h2>
+      <p className="text-gray-600 dark:text-gray-400 mb-6">
         Entrez votre adresse email pour recevoir un lien de réinitialisation.
       </p>
 

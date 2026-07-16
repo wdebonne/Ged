@@ -990,7 +990,8 @@ export default function StatisticsPage() {
           padding: 35,
           usePointStyle: true,
           pointStyle: 'circle',
-          font: { size: 22, weight: '600' }
+          font: { size: 22, weight: '600' },
+          color: 'rgb(156, 163, 175)'
         }
       },
       tooltip: {
@@ -1009,12 +1010,12 @@ export default function StatisticsPage() {
     scales: {
       x: {
         grid: { display: false },
-        ticks: { font: { size: 18, weight: '600' } }
+        ticks: { font: { size: 18, weight: '600' }, color: 'rgb(156, 163, 175)' }
       },
       y: {
         beginAtZero: true,
-        grid: { color: 'rgba(0, 0, 0, 0.05)' },
-        ticks: { stepSize: 1, font: { size: 18, weight: '600' } }
+        grid: { color: 'rgba(128, 128, 128, 0.1)' },
+        ticks: { stepSize: 1, font: { size: 18, weight: '600' }, color: 'rgb(156, 163, 175)' }
       }
     }
   };
@@ -1024,12 +1025,12 @@ export default function StatisticsPage() {
     scales: {
       x: {
         grid: { display: false },
-        ticks: { font: { size: 18, weight: '600' } }
+        ticks: { font: { size: 18, weight: '600' }, color: 'rgb(156, 163, 175)' }
       },
       y: {
         beginAtZero: true,
-        grid: { color: 'rgba(0, 0, 0, 0.05)' },
-        ticks: { stepSize: 1, font: { size: 18, weight: '600' } }
+        grid: { color: 'rgba(128, 128, 128, 0.1)' },
+        ticks: { stepSize: 1, font: { size: 18, weight: '600' }, color: 'rgb(156, 163, 175)' }
       }
     }
   };
@@ -1092,19 +1093,19 @@ export default function StatisticsPage() {
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
+        className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden dark:bg-gray-800 dark:border-gray-700"
       >
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
+          className="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
         >
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-indigo-100 rounded-lg">
-              <FunnelIcon className="w-5 h-5 text-indigo-600" />
+            <div className="p-2 bg-indigo-100 dark:bg-indigo-900/40 rounded-lg">
+              <FunnelIcon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
             </div>
             <div className="text-left">
-              <h2 className="font-semibold text-gray-900">Filtres</h2>
-              <p className="text-sm text-gray-500">
+              <h2 className="font-semibold text-gray-900 dark:text-gray-100">Filtres</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 {filters.scope === 'all' ? 'Tous les courriers' : filters.scope === 'service' ? 'Mon service' : filters.scope === 'delegated' ? 'Courriers délégués' : 'Mes courriers'}
                 {filters.startDate && ` • Depuis ${new Date(filters.startDate).toLocaleDateString('fr-FR')}`}
                 {filters.endDate && ` jusqu'au ${new Date(filters.endDate).toLocaleDateString('fr-FR')}`}
@@ -1112,9 +1113,9 @@ export default function StatisticsPage() {
             </div>
           </div>
           {showFilters ? (
-            <ChevronUpIcon className="w-5 h-5 text-gray-400" />
+            <ChevronUpIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
           ) : (
-            <ChevronDownIcon className="w-5 h-5 text-gray-400" />
+            <ChevronDownIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
           )}
         </button>
         
@@ -1125,15 +1126,15 @@ export default function StatisticsPage() {
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="border-t border-gray-100"
+              className="border-t border-gray-100 dark:border-gray-700"
             >
               <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Périmètre</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Périmètre</label>
                   <select
                     value={filters.scope}
                     onChange={(e) => setFilters(prev => ({ ...prev, scope: e.target.value }))}
-                    className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                    className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
                   >
                     <option value="my">Mes courriers</option>
                     <option value="delegated">Courriers délégués</option>
@@ -1147,29 +1148,29 @@ export default function StatisticsPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Date début</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Date début</label>
                   <input
                     type="date"
                     value={filters.startDate}
                     onChange={(e) => setFilters(prev => ({ ...prev, startDate: e.target.value }))}
-                    className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                    className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">Date fin</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Date fin</label>
                   <input
                     type="date"
                     value={filters.endDate}
                     onChange={(e) => setFilters(prev => ({ ...prev, endDate: e.target.value }))}
-                    className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                    className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
                   />
                 </div>
 
                 {(canViewAll || canViewService) && (
                   <>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Service</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Service</label>
                       <Select
                         value={filters.serviceId
                           ? { value: filters.serviceId, label: services?.find(s => (s._id?.toString?.() || s._id) === filters.serviceId)?.name || '' }
@@ -1185,14 +1186,14 @@ export default function StatisticsPage() {
                         classNamePrefix="react-select"
                         className="react-select-container"
                         styles={{
-                          control: (base) => ({ ...base, minHeight: '42px', borderRadius: '0.75rem', backgroundColor: 'rgb(249,250,251)', borderColor: 'rgb(229,231,235)' }),
+                          control: (base) => ({ ...base, minHeight: '42px', borderRadius: '0.75rem' }),
                           menu: (base) => ({ ...base, borderRadius: '0.75rem', zIndex: 50 })
                         }}
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Utilisateur</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Utilisateur</label>
                       <Select
                         value={filters.userId
                           ? { value: filters.userId, label: (() => { const u = users?.find(u => (u._id?.toString?.() || u._id || u.id) === filters.userId); return u ? `${u.firstName} ${u.lastName}` : ''; })() }
@@ -1214,7 +1215,7 @@ export default function StatisticsPage() {
                         classNamePrefix="react-select"
                         className="react-select-container"
                         styles={{
-                          control: (base) => ({ ...base, minHeight: '42px', borderRadius: '0.75rem', backgroundColor: 'rgb(249,250,251)', borderColor: 'rgb(229,231,235)' }),
+                          control: (base) => ({ ...base, minHeight: '42px', borderRadius: '0.75rem' }),
                           menu: (base) => ({ ...base, borderRadius: '0.75rem', zIndex: 50 })
                         }}
                       />
@@ -1361,17 +1362,17 @@ export default function StatisticsPage() {
           <div data-export-section="importChart">
             <ChartCard title="Courriers importés" icon={InboxArrowDownIcon}>
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-                <div className="bg-blue-50 rounded-xl p-4 text-center">
-                  <p className="text-3xl font-bold text-blue-700">{stats?.importSummary?.manual || 0}</p>
-                  <p className="text-blue-600 text-sm mt-1">Import manuel</p>
+                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 text-center">
+                  <p className="text-3xl font-bold text-blue-700 dark:text-blue-400">{stats?.importSummary?.manual || 0}</p>
+                  <p className="text-blue-600 dark:text-blue-400 text-sm mt-1">Import manuel</p>
                 </div>
-                <div className="bg-emerald-50 rounded-xl p-4 text-center">
-                  <p className="text-3xl font-bold text-emerald-700">{stats?.importSummary?.imap || 0}</p>
-                  <p className="text-emerald-600 text-sm mt-1">Import IMAP</p>
+                <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-4 text-center">
+                  <p className="text-3xl font-bold text-emerald-700 dark:text-emerald-400">{stats?.importSummary?.imap || 0}</p>
+                  <p className="text-emerald-600 dark:text-emerald-400 text-sm mt-1">Import IMAP</p>
                 </div>
-                <div className="bg-purple-50 rounded-xl p-4 text-center">
-                  <p className="text-3xl font-bold text-purple-700">{(stats?.importSummary?.manual || 0) + (stats?.importSummary?.imap || 0)}</p>
-                  <p className="text-purple-600 text-sm mt-1">Total importés</p>
+                <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4 text-center">
+                  <p className="text-3xl font-bold text-purple-700 dark:text-purple-400">{(stats?.importSummary?.manual || 0) + (stats?.importSummary?.imap || 0)}</p>
+                  <p className="text-purple-600 dark:text-purple-400 text-sm mt-1">Total importés</p>
                 </div>
               </div>
               <div className="h-72">
@@ -1417,8 +1418,8 @@ export default function StatisticsPage() {
               </div>
             </div>
             
-            <div className="bg-white rounded-xl p-4 h-64">
-              <Line 
+            <div className="bg-white/95 dark:bg-gray-800/90 rounded-xl p-4 h-64">
+              <Line
                 data={myPerformanceChartData} 
                 options={{
                   ...lineOptions,
@@ -1440,29 +1441,29 @@ export default function StatisticsPage() {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Utilisateur</th>
-                      <th className="text-right py-3 px-4 text-sm font-semibold text-gray-600">Traités</th>
-                      <th className="text-right py-3 px-4 text-sm font-semibold text-gray-600">Temps moy.</th>
+                    <tr className="border-b border-gray-200 dark:border-gray-700">
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">Utilisateur</th>
+                      <th className="text-right py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">Traités</th>
+                      <th className="text-right py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">Temps moy.</th>
                   </tr>
                 </thead>
                 <tbody>
                   {stats.userStats.map((userStat) => (
-                    <tr key={userStat._id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                    <tr key={userStat._id} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
                             {userStat.firstName?.charAt(0)}{userStat.lastName?.charAt(0)}
                           </div>
-                          <span className="font-medium text-gray-900">{userStat.firstName} {userStat.lastName}</span>
+                          <span className="font-medium text-gray-900 dark:text-gray-100">{userStat.firstName} {userStat.lastName}</span>
                         </div>
                       </td>
                       <td className="text-right py-3 px-4">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300">
                           {userStat.processed}
                         </span>
                       </td>
-                      <td className="text-right py-3 px-4 text-gray-600">{userStat.avgTime ? `${userStat.avgTime}h` : '-'}</td>
+                      <td className="text-right py-3 px-4 text-gray-600 dark:text-gray-400">{userStat.avgTime ? `${userStat.avgTime}h` : '-'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -1483,27 +1484,27 @@ export default function StatisticsPage() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Service</th>
-                    <th className="text-right py-3 px-4 text-sm font-semibold text-gray-600">Total</th>
-                    <th className="text-right py-3 px-4 text-sm font-semibold text-gray-600">À traiter</th>
-                    <th className="text-right py-3 px-4 text-sm font-semibold text-gray-600">Traités</th>
-                    <th className="text-right py-3 px-4 text-sm font-semibold text-gray-600">Archivés</th>
+                  <tr className="border-b border-gray-200 dark:border-gray-700">
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">Service</th>
+                    <th className="text-right py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">Total</th>
+                    <th className="text-right py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">À traiter</th>
+                    <th className="text-right py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">Traités</th>
+                    <th className="text-right py-3 px-4 text-sm font-semibold text-gray-600 dark:text-gray-300">Archivés</th>
                   </tr>
                 </thead>
                 <tbody>
                   {stats.serviceStats.map((service) => (
-                    <tr key={service._id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                    <tr key={service._id} className="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
-                          <span 
-                            className="w-3 h-3 rounded-full flex-shrink-0" 
+                          <span
+                            className="w-3 h-3 rounded-full flex-shrink-0"
                             style={{ backgroundColor: service.color || '#3B82F6' }}
                           />
-                          <span className="font-medium text-gray-900">{service.name}</span>
+                          <span className="font-medium text-gray-900 dark:text-gray-100">{service.name}</span>
                         </div>
                       </td>
-                      <td className="text-right py-3 px-4 font-semibold text-gray-900">{service.total}</td>
+                      <td className="text-right py-3 px-4 font-semibold text-gray-900 dark:text-gray-100">{service.total}</td>
                       <td className="text-right py-3 px-4"><span className="text-amber-600 font-medium">{service.pending}</span></td>
                       <td className="text-right py-3 px-4"><span className="text-emerald-600 font-medium">{service.processed}</span></td>
                       <td className="text-right py-3 px-4"><span className="text-violet-600 font-medium">{service.archived}</span></td>
@@ -1548,14 +1549,14 @@ function StatCard({ title, value, icon: Icon, gradient, iconBg, iconColor, delay
     <motion.div
       variants={itemVariants}
       transition={{ delay }}
-      className="relative overflow-hidden bg-white rounded-2xl shadow-sm border border-gray-100 p-5 group hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
+      className="relative overflow-hidden bg-white rounded-2xl shadow-sm border border-gray-100 p-5 group hover:shadow-lg hover:-translate-y-1 transition-all duration-300 dark:bg-gray-800 dark:border-gray-700"
     >
       <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`} />
-      
+
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm font-medium text-gray-500 mb-1">{title}</p>
-          <p className="text-3xl font-bold text-gray-900">{value.toLocaleString('fr-FR')}</p>
+          <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">{title}</p>
+          <p className="text-3xl font-bold text-gray-900 dark:text-gray-100">{value.toLocaleString('fr-FR')}</p>
         </div>
         <div className={`p-3 ${iconBg} rounded-xl`}>
           <Icon className={`w-6 h-6 ${iconColor}`} />
@@ -1570,9 +1571,9 @@ function StatCard({ title, value, icon: Icon, gradient, iconBg, iconColor, delay
 // Composant carte temps
 function TimeCard({ title, value, unit, icon: Icon, color, description }) {
   const colorClasses = {
-    blue: { bg: 'bg-blue-50', iconBg: 'bg-blue-500', text: 'text-blue-600', value: 'text-blue-700', border: 'border-blue-100' },
-    green: { bg: 'bg-emerald-50', iconBg: 'bg-emerald-500', text: 'text-emerald-600', value: 'text-emerald-700', border: 'border-emerald-100' },
-    red: { bg: 'bg-red-50', iconBg: 'bg-red-500', text: 'text-red-600', value: 'text-red-700', border: 'border-red-100' }
+    blue: { bg: 'bg-blue-50 dark:bg-blue-900/20', iconBg: 'bg-blue-500', text: 'text-blue-600 dark:text-blue-400', value: 'text-blue-700 dark:text-blue-400', border: 'border-blue-100 dark:border-blue-900/40' },
+    green: { bg: 'bg-emerald-50 dark:bg-emerald-900/20', iconBg: 'bg-emerald-500', text: 'text-emerald-600 dark:text-emerald-400', value: 'text-emerald-700 dark:text-emerald-400', border: 'border-emerald-100 dark:border-emerald-900/40' },
+    red: { bg: 'bg-red-50 dark:bg-red-900/20', iconBg: 'bg-red-500', text: 'text-red-600 dark:text-red-400', value: 'text-red-700 dark:text-red-400', border: 'border-red-100 dark:border-red-900/40' }
   };
 
   const colors = colorClasses[color];
@@ -1592,7 +1593,7 @@ function TimeCard({ title, value, unit, icon: Icon, color, description }) {
             <span className={`text-3xl font-bold ${colors.value}`}>{value}</span>
             <span className={`text-lg ${colors.text}`}>{unit}</span>
           </div>
-          <p className="text-xs text-gray-500 mt-1">{description}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{description}</p>
         </div>
       </div>
     </motion.div>
@@ -1605,13 +1606,13 @@ function ChartCard({ title, icon: Icon, children }) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6"
+      className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 dark:bg-gray-800 dark:border-gray-700"
     >
       <div className="flex items-center gap-3 mb-6">
-        <div className="p-2 bg-indigo-100 rounded-lg">
-          <Icon className="w-5 h-5 text-indigo-600" />
+        <div className="p-2 bg-indigo-100 dark:bg-indigo-900/40 rounded-lg">
+          <Icon className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
         </div>
-        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
       </div>
       {children}
     </motion.div>

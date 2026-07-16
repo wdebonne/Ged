@@ -23,15 +23,15 @@ function ConfirmModal({ title, message, onConfirm, onCancel, isLoading = false }
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-white rounded-xl shadow-xl max-w-md w-full p-6"
+        className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6"
       >
         <div className="flex items-start gap-4">
-          <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-red-100">
+          <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-red-100 dark:bg-red-900/40">
             <ExclamationTriangleIcon className="w-5 h-5 text-red-600" />
           </div>
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-900 mb-1">{title}</h3>
-            <p className="text-sm text-gray-600">{message}</p>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">{title}</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">{message}</p>
           </div>
         </div>
         <div className="flex gap-3 mt-6 justify-end">
@@ -125,8 +125,8 @@ export default function TrashPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <TrashIcon className="w-6 h-6 text-gray-500" />
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+          <TrashIcon className="w-6 h-6 text-gray-500 dark:text-gray-400" />
           Corbeille
         </h1>
         {data?.items?.length > 0 && (
@@ -142,8 +142,8 @@ export default function TrashPage() {
 
       {/* Réglage de rétention */}
       <div className="card p-4 flex flex-wrap items-center gap-3">
-        <ClockIcon className="w-5 h-5 text-gray-400" />
-        <span className="text-sm text-gray-700">
+        <ClockIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+        <span className="text-sm text-gray-700 dark:text-gray-300">
           Les éléments sont supprimés définitivement après
         </span>
         <input
@@ -158,11 +158,11 @@ export default function TrashPage() {
           }}
           className="input w-20 text-center"
         />
-        <span className="text-sm text-gray-700">jours (0 = purge désactivée)</span>
+        <span className="text-sm text-gray-700 dark:text-gray-300">jours (0 = purge désactivée)</span>
       </div>
 
       {/* Onglets */}
-      <div className="flex gap-2 border-b border-gray-200">
+      <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
         {TABS.map(tab => (
           <button
             key={tab.type}
@@ -170,7 +170,7 @@ export default function TrashPage() {
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
               type === tab.type
                 ? 'border-primary-600 text-primary-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
+                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700'
             }`}
           >
             {tab.label}
@@ -180,7 +180,7 @@ export default function TrashPage() {
 
       {/* Recherche */}
       <div className="relative max-w-sm">
-        <MagnifyingGlassIcon className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+        <MagnifyingGlassIcon className="w-5 h-5 text-gray-400 dark:text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
         <input
           type="text"
           value={search}
@@ -212,17 +212,17 @@ export default function TrashPage() {
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs font-mono text-gray-500">
+                        <span className="text-xs font-mono text-gray-500 dark:text-gray-400">
                           {item.chronoNumber || item.reference}
                         </span>
                         {item.daysRemaining !== null && (
-                          <span className="badge bg-red-100 text-red-700">
+                          <span className="badge bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300">
                             {item.daysRemaining === 0 ? 'Purge imminente' : `${item.daysRemaining}j restants`}
                           </span>
                         )}
                       </div>
-                      <h3 className="text-lg font-semibold text-gray-900 truncate">{item.subject}</h3>
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm text-gray-600">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">{item.subject}</h3>
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm text-gray-600 dark:text-gray-400">
                         <span>{item.senderName || item.destinationName}</span>
                         <span>
                           Supprimé le {format(new Date(item.deletedAt), 'dd MMMM yyyy à HH:mm', { locale: fr })}
@@ -238,7 +238,7 @@ export default function TrashPage() {
                         )}
                       </div>
                       {item.deleteReason && (
-                        <p className="text-sm text-gray-500 mt-1 italic">Motif : {item.deleteReason}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 italic">Motif : {item.deleteReason}</p>
                       )}
                     </div>
                     <div className="flex items-center gap-2">

@@ -7,6 +7,19 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ---
 
+## [3.20.1] - 2026-07-15
+
+### Corrigé
+
+- **Performance de la recherche sur les courriers** : la recherche plein texte utilisait `$regex` sur le champ `ocrContent`, qui ne peut pas s'appuyer sur l'index et déclenchait un scan complet de la collection à chaque frappe. Le contenu OCR passe désormais par l'index `$text` déjà défini sur les modèles `Mail`/`OutgoingMail` (recherche de phrase, insensible à la casse) ; les champs courts (objet, expéditeur/destinataire, référence, nom de fichier…) restent en `$regex` pour la recherche par sous-chaîne, peu coûteuse sur ces champs
+
+### Technique
+
+- Nouveau helper `backend/src/utils/mailSearch.js` (`buildSearchOr()`), utilisé par `GET /api/mails`, `GET /api/outgoing-mails` et `GET /api/search` — élimine la duplication de la construction des clauses de recherche
+- **Découpage de `mail.routes.js`** (57 Ko, handlers inline) en contrôleurs sous `backend/src/controllers/mail/` : `mailList`, `mailPending`, `mailImport`, `mailActions`, `mailComments`, `mailExport` (`.controller.js`), plus les helpers partagés (`canViewMail`, `canActOnMail`, `performArchive`, `parseTags`, `resolveDueDate`…) dans `mail.helpers.js`. `mail.routes.js` ne contient plus que le routage (comportement et permissions inchangés)
+- **Séparation `app.js` / `server.js`** : `backend/src/app.js` exporte l'application Express (middlewares + routes), important par les tests sans connexion MongoDB ni démarrage des tâches planifiées ; `server.js` conserve la connexion à la base, les migrations, le seed initial et le lancement des services (IMAP, LDAP, sauvegardes, rappels, purge de la corbeille)
+- **Premiers tests automatisés du projet** : `vitest` + `supertest` + `mongodb-memory-server` (`backend/tests/`, `npm test` dans `backend/`) — authentification (login local, JWT, refresh, comptes désactivés), visibilité et permissions des courriers entrants (par service, délégation, action groupée, corbeille), recherche `$text`, flux complet d'import (upload → import, validation, contrôle d'accès Administrateur/Archiviste)
+
 ## [3.20.0] - 2026-07-15
 
 ### Ajouté

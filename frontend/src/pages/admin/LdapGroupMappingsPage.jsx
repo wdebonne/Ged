@@ -72,8 +72,8 @@ export default function LdapGroupMappingsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Correspondances LDAP</h1>
-          <p className="text-gray-600 mt-1">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Correspondances LDAP</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
             Attribuez automatiquement un rôle et des services GED en fonction des groupes AD/LDAP de l'utilisateur
           </p>
         </div>
@@ -87,51 +87,51 @@ export default function LdapGroupMappingsPage() {
       <div className="card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b">
+            <thead className="bg-gray-50 dark:bg-gray-800 border-b dark:border-gray-700">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                   Groupe AD
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                   Rôle GED
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                   Services accessibles
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                   Superviseur de
                 </th>
-                <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                   Priorité
                 </th>
-                <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-6 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                   Actif
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-200">
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {mappings.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="px-6 py-12 text-center text-gray-500">
+                  <td colSpan="7" className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                     Aucune correspondance définie
                   </td>
                 </tr>
               ) : (
                 mappings.map((mapping) => (
-                  <tr key={mapping._id} className="hover:bg-gray-50">
+                  <tr key={mapping._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center shrink-0">
                           <LinkIcon className="w-5 h-5 text-primary-700" />
                         </div>
                         <div className="min-w-0">
-                          <p className="font-medium text-gray-900">
+                          <p className="font-medium text-gray-900 dark:text-gray-100">
                             {mapping.ldapGroupName || mapping.ldapGroupDN}
                           </p>
-                          <p className="text-xs text-gray-500 truncate max-w-xs">{mapping.ldapGroupDN}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-xs">{mapping.ldapGroupDN}</p>
                         </div>
                       </div>
                     </td>
@@ -144,7 +144,7 @@ export default function LdapGroupMappingsPage() {
                           {mapping.gedGroup.name}
                         </span>
                       ) : (
-                        <span className="text-gray-400">-</span>
+                        <span className="text-gray-400 dark:text-gray-500">-</span>
                       )}
                     </td>
                     <td className="px-6 py-4">
@@ -160,7 +160,7 @@ export default function LdapGroupMappingsPage() {
                             </span>
                           ))
                         ) : (
-                          <span className="text-gray-400">-</span>
+                          <span className="text-gray-400 dark:text-gray-500">-</span>
                         )}
                       </div>
                     </td>
@@ -177,7 +177,7 @@ export default function LdapGroupMappingsPage() {
                             </span>
                           ))
                         ) : (
-                          <span className="text-gray-400">-</span>
+                          <span className="text-gray-400 dark:text-gray-500">-</span>
                         )}
                       </div>
                     </td>
@@ -193,13 +193,13 @@ export default function LdapGroupMappingsPage() {
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => openEditModal(mapping)}
-                          className="btn-icon text-gray-500 hover:text-primary-600"
+                          className="btn-icon text-gray-500 dark:text-gray-400 hover:text-primary-600"
                         >
                           <PencilSquareIcon className="w-5 h-5" />
                         </button>
                         <button
                           onClick={() => setDeleteConfirm(mapping)}
-                          className="btn-icon text-gray-500 hover:text-danger-600"
+                          className="btn-icon text-gray-500 dark:text-gray-400 hover:text-danger-600"
                         >
                           <TrashIcon className="w-5 h-5" />
                         </button>
@@ -235,17 +235,17 @@ export default function LdapGroupMappingsPage() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="relative bg-white rounded-2xl shadow-xl max-w-md w-full"
+                className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="p-6 text-center">
-                  <div className="w-12 h-12 rounded-full bg-danger-100 mx-auto mb-4 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-danger-100 dark:bg-danger-900/40 mx-auto mb-4 flex items-center justify-center">
                     <ExclamationTriangleIcon className="w-6 h-6 text-danger-600" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                     Supprimer cette correspondance ?
                   </h3>
-                  <p className="text-gray-600 mb-6">
+                  <p className="text-gray-600 dark:text-gray-400 mb-6">
                     Êtes-vous sûr de vouloir supprimer la correspondance pour{' '}
                     <strong>{deleteConfirm.ldapGroupName || deleteConfirm.ldapGroupDN}</strong> ?
                     Cette action est irréversible.
@@ -350,11 +350,11 @@ function MappingModal({ mapping, groups, services, onClose }) {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="relative bg-white rounded-2xl shadow-xl max-w-2xl w-full"
+          className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-2xl w-full"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="p-6 border-b flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-900">
+          <div className="p-6 border-b dark:border-gray-700 flex items-center justify-between">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
               {mapping ? 'Modifier la correspondance' : 'Nouvelle correspondance'}
             </h2>
             <button onClick={onClose} className="btn-icon">
@@ -373,7 +373,7 @@ function MappingModal({ mapping, groups, services, onClose }) {
                 placeholder="cn=Compta,ou=group,dc=exemple,dc=com"
               />
               {errors.ldapGroupDN && <p className="text-sm text-danger-600 mt-1">{errors.ldapGroupDN}</p>}
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 Récupérez le DN via Paramètres &gt; LDAP &gt; "Lister les groupes AD"
               </p>
             </div>
@@ -397,7 +397,7 @@ function MappingModal({ mapping, groups, services, onClose }) {
                   onChange={(e) => setFormData((prev) => ({ ...prev, priority: e.target.value }))}
                   className="input"
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   En cas de conflit entre correspondances, la priorité la plus élevée définit le rôle
                 </p>
               </div>
@@ -432,9 +432,9 @@ function MappingModal({ mapping, groups, services, onClose }) {
 
             <div>
               <label className="label">Services accessibles</label>
-              <div className="grid grid-cols-2 gap-2 p-4 bg-gray-50 rounded-lg max-h-48 overflow-y-auto">
+              <div className="grid grid-cols-2 gap-2 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg max-h-48 overflow-y-auto">
                 {services.length === 0 ? (
-                  <p className="text-sm text-gray-500 col-span-2">Aucun service disponible</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 col-span-2">Aucun service disponible</p>
                 ) : (
                   services.map((service) => (
                     <label key={service._id} className="flex items-center gap-2 cursor-pointer">
@@ -442,9 +442,9 @@ function MappingModal({ mapping, groups, services, onClose }) {
                         type="checkbox"
                         checked={formData.services.includes(service._id)}
                         onChange={() => toggleService(service._id)}
-                        className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
                       />
-                      <span className="text-sm text-gray-700">{service.name}</span>
+                      <span className="text-sm text-gray-700 dark:text-gray-300">{service.name}</span>
                     </label>
                   ))
                 )}
@@ -453,9 +453,9 @@ function MappingModal({ mapping, groups, services, onClose }) {
 
             <div>
               <label className="label">Devient superviseur de</label>
-              <div className="grid grid-cols-2 gap-2 p-4 bg-gray-50 rounded-lg max-h-48 overflow-y-auto">
+              <div className="grid grid-cols-2 gap-2 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg max-h-48 overflow-y-auto">
                 {services.length === 0 ? (
-                  <p className="text-sm text-gray-500 col-span-2">Aucun service disponible</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 col-span-2">Aucun service disponible</p>
                 ) : (
                   services.map((service) => (
                     <label key={service._id} className="flex items-center gap-2 cursor-pointer">
@@ -463,9 +463,9 @@ function MappingModal({ mapping, groups, services, onClose }) {
                         type="checkbox"
                         checked={formData.supervisorServices.includes(service._id)}
                         onChange={() => toggleSupervisorService(service._id)}
-                        className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                        className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
                       />
-                      <span className="text-sm text-gray-700">{service.name}</span>
+                      <span className="text-sm text-gray-700 dark:text-gray-300">{service.name}</span>
                     </label>
                   ))
                 )}
@@ -478,19 +478,19 @@ function MappingModal({ mapping, groups, services, onClose }) {
                 id="mappingActive"
                 checked={formData.isActive}
                 onChange={(e) => setFormData((prev) => ({ ...prev, isActive: e.target.checked }))}
-                className="w-4 h-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
               />
-              <label htmlFor="mappingActive" className="text-gray-700">Correspondance active</label>
+              <label htmlFor="mappingActive" className="text-gray-700 dark:text-gray-300">Correspondance active</label>
             </div>
 
             {errors.submit && (
-              <div className="flex items-center gap-2 p-3 bg-danger-50 text-danger-700 rounded-lg">
+              <div className="flex items-center gap-2 p-3 bg-danger-50 dark:bg-danger-900/40 text-danger-700 dark:text-danger-300 rounded-lg">
                 <ExclamationTriangleIcon className="w-5 h-5" />
                 {errors.submit}
               </div>
             )}
 
-            <div className="flex justify-end gap-3 pt-4 border-t">
+            <div className="flex justify-end gap-3 pt-4 border-t dark:border-gray-700">
               <button type="button" onClick={onClose} className="btn-secondary">
                 Annuler
               </button>

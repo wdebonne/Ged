@@ -39,14 +39,14 @@ export default function Pagination({ currentPage, totalPages, onPageChange }) {
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
         aria-label="Page précédente"
-        className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         <ChevronLeftIcon className="w-5 h-5" />
       </button>
 
       {pages.map((page, index) => (
         page === '...' ? (
-          <span key={`ellipsis-${index}`} className="px-3 py-2 text-gray-400" aria-hidden="true">
+          <span key={`ellipsis-${index}`} className="px-3 py-2 text-gray-400 dark:text-gray-500" aria-hidden="true">
             ...
           </span>
         ) : (
@@ -58,7 +58,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange }) {
             className={`px-3 py-2 rounded-lg transition-colors ${
               currentPage === page
                 ? 'bg-primary-600 text-white'
-                : 'hover:bg-gray-100 text-gray-700'
+                : 'hover:bg-gray-100 text-gray-700 dark:hover:bg-gray-700 dark:text-gray-300'
             }`}
           >
             {page}
@@ -70,7 +70,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange }) {
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
         aria-label="Page suivante"
-        className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
         <ChevronRightIcon className="w-5 h-5" />
       </button>

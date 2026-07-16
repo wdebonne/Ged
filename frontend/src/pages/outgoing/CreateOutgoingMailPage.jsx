@@ -167,19 +167,19 @@ export default function CreateOutgoingMailPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Nouveau courrier départ</h1>
-        <p className="text-gray-600 mt-1">Créer un nouveau courrier sortant</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Nouveau courrier départ</h1>
+        <p className="text-gray-600 mt-1 dark:text-gray-400">Créer un nouveau courrier sortant</p>
       </div>
 
       {replyTo && (
-        <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <ArrowUturnLeftIcon className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-          <div className="text-sm text-blue-800">
+        <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg dark:bg-blue-900/20 dark:border-blue-800">
+          <ArrowUturnLeftIcon className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5 dark:text-blue-400" />
+          <div className="text-sm text-blue-800 dark:text-blue-300">
             <p>
               En réponse au courrier entrant <strong>{replyTo.reference}</strong>
               {replyTo.subject ? <> — « {replyTo.subject} »</> : null}
             </p>
-            <p className="text-blue-600 mt-1">
+            <p className="text-blue-600 mt-1 dark:text-blue-400">
               Le courrier entrant passera automatiquement en « traité » lors de l'envoi de ce courrier départ.
             </p>
           </div>
@@ -203,22 +203,22 @@ export default function CreateOutgoingMailPage() {
             className={`input ${errors.subject ? 'border-danger-500' : ''}`}
             placeholder="Rechercher ou saisir un objet..."
           />
-          {errors.subject && <p className="text-sm text-danger-600 mt-1">{errors.subject}</p>}
+          {errors.subject && <p className="text-sm text-danger-600 mt-1 dark:text-danger-400">{errors.subject}</p>}
           {showSubjectResults && subjectResults.length > 0 && (
-            <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+            <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto dark:bg-gray-800 dark:border-gray-700">
               {subjectResults.map((subj) => (
                 <button
                   key={subj._id}
                   type="button"
-                  className="w-full text-left px-4 py-2 hover:bg-gray-50"
+                  className="w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50"
                   onClick={() => {
                     setSubjectSearch(subj.name);
                     setFormData(prev => ({ ...prev, subject: subj.name }));
                     setShowSubjectResults(false);
                   }}
                 >
-                  <p className="font-medium text-gray-900">{subj.name}</p>
-                  {subj.category && <p className="text-sm text-gray-500">{subj.category}</p>}
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{subj.name}</p>
+                  {subj.category && <p className="text-sm text-gray-500 dark:text-gray-400">{subj.category}</p>}
                 </button>
               ))}
             </div>
@@ -241,18 +241,18 @@ export default function CreateOutgoingMailPage() {
             className={`input ${errors.destination ? 'border-danger-500' : ''}`}
             placeholder="Rechercher ou saisir un nouveau contact..."
           />
-          {errors.destination && <p className="text-sm text-danger-600 mt-1">{errors.destination}</p>}
+          {errors.destination && <p className="text-sm text-danger-600 mt-1 dark:text-danger-400">{errors.destination}</p>}
           {showDestResults && destinationResults.length > 0 && (
-            <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+            <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto dark:bg-gray-800 dark:border-gray-700">
               {destinationResults.map((dest) => (
                 <button
                   key={dest._id}
                   type="button"
-                  className="w-full text-left px-4 py-2 hover:bg-gray-50"
+                  className="w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/50"
                   onClick={() => selectDestination(dest)}
                 >
-                  <p className="font-medium text-gray-900">{dest.name}</p>
-                  {dest.organization && <p className="text-sm text-gray-500">{dest.organization}</p>}
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{dest.name}</p>
+                  {dest.organization && <p className="text-sm text-gray-500 dark:text-gray-400">{dest.organization}</p>}
                 </button>
               ))}
             </div>
@@ -273,7 +273,7 @@ export default function CreateOutgoingMailPage() {
                 <option key={s._id} value={s._id}>{s.name}</option>
               ))}
             </select>
-            {errors.service && <p className="text-sm text-danger-600 mt-1">{errors.service}</p>}
+            {errors.service && <p className="text-sm text-danger-600 mt-1 dark:text-danger-400">{errors.service}</p>}
           </div>
           <div>
             <label className="label">Priorité</label>
@@ -330,17 +330,17 @@ export default function CreateOutgoingMailPage() {
         <div>
           <label className="label">Document PDF *</label>
           {file ? (
-            <div className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-              <CheckCircleIcon className="w-5 h-5 text-green-600" />
-              <span className="text-green-800 flex-1 truncate">{file.name}</span>
-              <button type="button" onClick={() => setFile(null)} className="text-green-600 hover:text-green-800">
+            <div className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg dark:bg-green-900/20 dark:border-green-800">
+              <CheckCircleIcon className="w-5 h-5 text-green-600 dark:text-green-400" />
+              <span className="text-green-800 flex-1 truncate dark:text-green-300">{file.name}</span>
+              <button type="button" onClick={() => setFile(null)} className="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300">
                 <XMarkIcon className="w-5 h-5" />
               </button>
             </div>
           ) : (
-            <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 ${errors.file ? 'border-danger-400' : 'border-gray-300'}`}>
-              <DocumentArrowUpIcon className="w-8 h-8 text-gray-400 mb-2" />
-              <span className="text-sm text-gray-500">Cliquez pour sélectionner un PDF</span>
+            <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 ${errors.file ? 'border-danger-400' : 'border-gray-300 dark:border-gray-600'}`}>
+              <DocumentArrowUpIcon className="w-8 h-8 text-gray-400 mb-2 dark:text-gray-500" />
+              <span className="text-sm text-gray-500 dark:text-gray-400">Cliquez pour sélectionner un PDF</span>
               <input
                 type="file"
                 className="hidden"
@@ -349,18 +349,18 @@ export default function CreateOutgoingMailPage() {
               />
             </label>
           )}
-          {errors.file && <p className="text-sm text-danger-600 mt-1">{errors.file}</p>}
+          {errors.file && <p className="text-sm text-danger-600 mt-1 dark:text-danger-400">{errors.file}</p>}
         </div>
 
         {errors.submit && (
-          <div className="flex items-center gap-2 p-3 bg-danger-50 text-danger-700 rounded-lg">
+          <div className="flex items-center gap-2 p-3 bg-danger-50 text-danger-700 rounded-lg dark:bg-danger-900/20 dark:text-danger-400">
             <ExclamationTriangleIcon className="w-5 h-5" />
             {errors.submit}
           </div>
         )}
 
         {/* Boutons */}
-        <div className="flex justify-end gap-3 pt-4 border-t">
+        <div className="flex justify-end gap-3 pt-4 border-t dark:border-gray-700">
           <button type="button" onClick={() => navigate(-1)} className="btn-secondary">
             Annuler
           </button>

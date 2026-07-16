@@ -82,7 +82,7 @@ export default function MailFilters({ filters, onChange }) {
         </div>
         <button
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className={`btn-secondary flex items-center gap-2 ${showAdvanced ? 'bg-primary-50 text-primary-600' : ''}`}
+          className={`btn-secondary flex items-center gap-2 ${showAdvanced ? 'bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400' : ''}`}
         >
           <FunnelIcon className="w-5 h-5" />
           Filtres
@@ -93,7 +93,7 @@ export default function MailFilters({ filters, onChange }) {
         {hasActiveFilters && (
           <button
             onClick={clearFilters}
-            className="btn-secondary flex items-center gap-2 text-danger-600 hover:bg-danger-50"
+            className="btn-secondary flex items-center gap-2 text-danger-600 hover:bg-danger-50 dark:text-danger-400 dark:hover:bg-danger-900/20"
           >
             <XMarkIcon className="w-5 h-5" />
             Réinitialiser
@@ -103,7 +103,7 @@ export default function MailFilters({ filters, onChange }) {
 
       {/* Advanced Filters */}
       {showAdvanced && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 border-t">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 border-t dark:border-gray-700">
           <div>
             <label className="label">Service</label>
             <select
@@ -188,14 +188,14 @@ export default function MailFilters({ filters, onChange }) {
             </select>
           </div>
           <div className="flex items-end">
-            <label className="flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg border border-gray-200 hover:bg-danger-50 w-full">
+            <label className="flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg border border-gray-200 hover:bg-danger-50 dark:border-gray-700 dark:hover:bg-danger-900/20 w-full">
               <input
                 type="checkbox"
                 checked={localFilters.overdue === 'true'}
                 onChange={(e) => handleChange('overdue', e.target.checked ? 'true' : '')}
-                className="w-4 h-4 rounded border-gray-300 text-danger-600"
+                className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-danger-600"
               />
-              <span className="text-sm font-medium text-gray-700">⚠ En retard uniquement</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">⚠ En retard uniquement</span>
             </label>
           </div>
         </div>
