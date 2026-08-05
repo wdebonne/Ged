@@ -242,6 +242,30 @@ export const subjectsAPI = {
   delete: (id) => api.delete(`/subjects/${id}`)
 };
 
+// Catégories (référentiel + durées de conservation RGPD) — administration
+export const categoriesAPI = {
+  getAll: (params) => api.get('/categories', { params }),
+  getOptions: () => api.get('/categories/options'),
+  getOne: (id) => api.get(`/categories/${id}`),
+  create: (data) => api.post('/categories', data),
+  update: (id, data) => api.put(`/categories/${id}`, data),
+  delete: (id, { force = false } = {}) => api.delete(`/categories/${id}`, { params: { force } }),
+  previewRetention: (id, data) => api.post(`/categories/${id}/retention-preview`, data)
+};
+
+// Conformité RGPD (durées légales de conservation)
+export const rgpdAPI = {
+  getOverview: () => api.get('/rgpd/overview'),
+  getAlerts: (params) => api.get('/rgpd/alerts', { params }),
+  scan: () => api.post('/rgpd/scan'),
+  acknowledge: (id) => api.post(`/rgpd/alerts/${id}/acknowledge`),
+  exempt: (id, data) => api.post(`/rgpd/alerts/${id}/exempt`, data),
+  deleteDocument: (id) => api.post(`/rgpd/alerts/${id}/delete`),
+  bulkDelete: (data) => api.post('/rgpd/alerts/bulk-delete', data),
+  getSettings: () => api.get('/rgpd/settings'),
+  updateSettings: (data) => api.put('/rgpd/settings', data)
+};
+
 // Mails
 export const mailsAPI = {
   getAll: (params) => api.get('/mails', { params }),

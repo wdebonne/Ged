@@ -34,6 +34,8 @@ const GroupsPage = lazy(() => import('./pages/admin/GroupsPage'));
 const ServicesPage = lazy(() => import('./pages/admin/ServicesPage'));
 const ContactsPage = lazy(() => import('./pages/admin/SendersPage'));
 const SubjectsPage = lazy(() => import('./pages/admin/SubjectsPage'));
+const CategoriesPage = lazy(() => import('./pages/admin/CategoriesPage'));
+const RgpdPage = lazy(() => import('./pages/admin/RgpdPage'));
 const SettingsPage = lazy(() => import('./pages/admin/SettingsPage'));
 const LdapGroupMappingsPage = lazy(() => import('./pages/admin/LdapGroupMappingsPage'));
 const BackupPage = lazy(() => import('./pages/admin/BackupPage'));
@@ -51,11 +53,16 @@ const PageLoader = () => (
 );
 
 // Composant de route protégée
-const ProtectedRoute = ({ children, permissions = [] }) => {
+// `adminOnly` : réservé au groupe Administrateur (catégories, conformité RGPD)
+const ProtectedRoute = ({ children, permissions = [], adminOnly = false }) => {
   const { isAuthenticated, user } = useAuthStore();
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (adminOnly && user?.group?.name !== 'Administrateur') {
+    return <Navigate to="/" replace />;
   }
 
   if (permissions.length > 0 && user?.group?.permissions) {
@@ -193,6 +200,22 @@ function App() {
             element={
               <ProtectedRoute permissions={['view_contacts']}>
                 <SubjectsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/categories"
+            element={
+              <ProtectedRoute adminOnly>
+                <CategoriesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/rgpd"
+            element={
+              <ProtectedRoute adminOnly>
+                <RgpdPage />
               </ProtectedRoute>
             }
           />

@@ -126,7 +126,7 @@ Sur chaque page de liste, vous disposez de :
 - 👁️ **Voir** : Consulter le détail du courrier
 - ✏️ **Modifier** : Éditer les informations (si autorisé)
 - 📥 **Télécharger** : Télécharger le fichier PDF
-- 🗑️ **Supprimer** : Déplace le courrier vers la **Corbeille** (admin uniquement) — il reste récupérable, voir [section 11.9](#119-corbeille)
+- 🗑️ **Supprimer** : Déplace le courrier vers la **Corbeille** (admin uniquement) — il reste récupérable, voir [section 11.11](#1111-corbeille)
 
 #### Sélection multiple et actions groupées
 
@@ -509,9 +509,49 @@ Créez et gérez une liste de contacts (expéditeurs pour le courrier entrant, d
 
 **Chemin : Administration > Objets**
 
-Créez des objets de courrier prédéfinis.
+Créez des objets de courrier prédéfinis. Chaque objet peut être rattaché à une **catégorie**, qui détermine la durée légale de conservation de tous les courriers portant cet objet (voir 11.6).
 
-### 11.6 Modèles d'emails
+### 11.6 Catégories et durées de conservation
+
+**Chemin : Administration > Catégories** *(réservé aux administrateurs)*
+
+Le référentiel des catégories regroupe les objets par nature de document (Facture, Contrat, Réclamation…). Chaque catégorie porte sa règle de conservation RGPD :
+
+- **Durée** et **unité** (jours, mois, années)
+- **Point de départ du décompte** : date de réception, de traitement, d'archivage, ou d'enregistrement dans la GED
+- **Base légale** : le texte qui justifie la durée (ex. « Art. L123-22 Code de commerce — 10 ans »)
+- **À l'échéance** : alerter seulement, ou mettre automatiquement en corbeille
+- **Rappels avant échéance** propres à la catégorie (sinon les seuils globaux s'appliquent)
+
+**Les changements sont rétroactifs.** Si la durée de conservation des factures passe de 3 ans à 2 ans, les échéances de toutes les factures déjà enregistrées sont recalculées immédiatement : celles qui dépassent la nouvelle durée basculent aussitôt en « à supprimer ». Avant d'enregistrer, le formulaire indique combien de documents existants seraient concernés, avec un échantillon des références. Chaque modification de durée est conservée dans l'historique de la catégorie (ancienne durée, nouvelle durée, motif, auteur).
+
+### 11.7 Conformité RGPD
+
+**Chemin : Administration > Conformité RGPD** *(réservé aux administrateurs)*
+
+Tableau de bord des durées légales de conservation :
+
+- **Indicateurs** : documents à supprimer, échéances sous 30 jours, dérogations en cours, documents déjà supprimés
+- **Répartition par catégorie** pour cibler rapidement les documents concernés
+- **Liste des documents suivis**, filtrable par statut, catégorie et recherche, avec pour chacun l'échéance, la règle appliquée et sa base légale
+
+Actions possibles sur un document :
+
+- **Mettre en corbeille** (unitairement, par sélection, ou tous les documents dépassés d'un coup) — les documents restent récupérables depuis la corbeille jusqu'à la purge automatique
+- **Marquer comme vu**, pour distinguer ce qui a déjà été examiné
+- **Accorder une dérogation** motivée et limitée dans le temps (contentieux en cours, obligation légale concurrente) : l'alerte est mise en sommeil jusqu'au terme accordé
+
+**Rappels** (bouton « Rappels ») :
+
+- Fréquence du contrôle automatique : quotidien, hebdomadaire ou mensuel, avec l'heure et le jour
+- Seuils de rappel avant échéance (90, 30 et 7 jours par défaut)
+- Fréquence de relance tant qu'un document dépassé n'a pas été traité
+- Autorisation globale de la mise en corbeille automatique (elle ne s'applique qu'aux catégories réglées sur « Mettre en corbeille automatiquement »)
+- Synthèse par email aux administrateurs, avec destinataires supplémentaires possibles (DPO, service archives)
+
+Les alertes arrivent dans la cloche de notifications des administrateurs et, si l'option est activée, par email. Le bouton **Contrôler maintenant** relance le contrôle sans attendre la prochaine échéance planifiée.
+
+### 11.8 Modèles d'emails
 
 **Chemin : Administration > Modèles d'emails**
 
@@ -522,7 +562,7 @@ Personnalisez les emails automatiques avec :
 - Prévisualisation en temps réel
 - **Pièce jointe PDF** : cochez « Joindre le PDF du courrier » pour inclure le document en PJ (disponible pour les templates liés aux courriers)
 
-### 11.7 Notifications par défaut
+### 11.9 Notifications par défaut
 
 **Chemin : Administration > Paramètres > Notifications**
 
@@ -549,7 +589,7 @@ La même page permet de configurer les **échéances de traitement** :
 
 Les rappels et alertes de retard sont envoyés chaque matin à 8h00 (horaire personnalisable via la variable d'environnement `REMINDER_CRON`).
 
-### 11.8 Paramètres système
+### 11.10 Paramètres système
 
 **Chemin : Administration > Paramètres**
 
@@ -584,7 +624,7 @@ Les rappels et alertes de retard sont envoyés chaque matin à 8h00 (horaire per
 - OneDrive, S3, NextCloud
 - Synchronisation automatique
 
-### 11.9 Corbeille
+### 11.11 Corbeille
 
 **Chemin : Administration > Corbeille**
 
@@ -604,7 +644,7 @@ La suppression d'un courrier (entrant ou sortant, action réservée aux administ
 
 > 💡 Cette page n'est visible que si vous avez la permission **`manage_trash`**.
 
-### 11.10 Journal d'audit
+### 11.12 Journal d'audit
 
 **Chemin : Administration > Journal d'audit**
 

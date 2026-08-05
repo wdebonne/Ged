@@ -11,9 +11,11 @@ import { startLdapGroupSyncService } from './services/ldapGroupSync.service.js';
 import { initBackupScheduler } from './services/backup.service.js';
 import { initReminderScheduler } from './services/reminder.service.js';
 import { initTrashPurgeScheduler } from './services/trash.service.js';
+import { initRetentionScheduler } from './services/retention.service.js';
 
 // Initialisation de la base
 import { User, Settings, Group, DEFAULT_PERMISSIONS } from './models/index.js';
+import { migrateCategories } from './scripts/migrate-categories.js';
 import { seedDatabase } from './scripts/seed.js';
 import { buildLdapUrl, isLdapForceDisabled } from './utils/ldap.utils.js';
 
@@ -101,6 +103,13 @@ const startServer = async () => {
     console.error('Erreur création groupe Observateur:', err.message);
   }
 
+  // Référentiel de catégories + rattachement des objets (idempotent)
+  try {
+    await migrateCategories();
+  } catch (err) {
+    console.error('Erreur migration catégories:', err.message);
+  }
+
   // Charger les settings LDAP de la base vers process.env (priorité sur le .env)
   const ldapSettings = await Settings.find({ category: 'ldap', key: /^ldap_/ });
   if (ldapSettings.length > 0) {
@@ -165,6 +174,9 @@ const startServer = async () => {
 
   // Initialiser la purge automatique de la corbeille (rétention configurable, défaut 30 jours)
   initTrashPurgeScheduler();
+
+  // Initialiser le contrôle des durées légales de conservation (RGPD, par catégorie)
+  initRetentionScheduler().catch(e => console.error('Erreur init contrôle RGPD:', e.message));
 };
 
 startServer();

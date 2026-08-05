@@ -12,6 +12,8 @@ const EMAIL_ACTIONS = {
   CORECIPIENT_PROCESSED: 'corecipient_processed',
   CORECIPIENT_ARCHIVED: 'corecipient_archived',
   ACK_RECEIPT: 'ack_receipt',
+  // Conformité RGPD : synthèse des durées de conservation dépassées / proches
+  RGPD_RETENTION_DIGEST: 'rgpd_retention_digest',
   CUSTOM: 'custom'
 };
 
@@ -115,6 +117,10 @@ emailTemplateSchema.statics.getAvailableVariables = function(action) {
     [EMAIL_ACTIONS.ACK_RECEIPT]: [
       '{{senderName}}', '{{mailReference}}', '{{mailChronoNumber}}',
       '{{mailSubject}}', '{{mailDate}}', '{{serviceName}}'
+    ],
+    [EMAIL_ACTIONS.RGPD_RETENTION_DIGEST]: [
+      '{{userName}}', '{{userFirstName}}', '{{expiredCount}}', '{{upcomingCount}}',
+      '{{deletedCount}}', '{{documentList}}', '{{rgpdUrl}}'
     ],
     [EMAIL_ACTIONS.CUSTOM]: []
   };

@@ -15,9 +15,16 @@ const subjectSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  // Libellé de la catégorie, dénormalisé depuis `categoryRef` (recherche + compatibilité)
   category: {
     type: String,
     trim: true
+  },
+  // Catégorie de référence : porte la durée de conservation RGPD
+  categoryRef: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Category',
+    default: null
   },
   color: {
     type: String,
@@ -33,6 +40,7 @@ const subjectSchema = new mongoose.Schema({
 
 // Index pour la recherche et l'autocomplétion
 subjectSchema.index({ name: 'text', category: 'text' });
+subjectSchema.index({ categoryRef: 1 });
 
 const Subject = mongoose.model('Subject', subjectSchema);
 

@@ -1,11 +1,20 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
-import { Subject, PERMISSIONS, AUDIT_CATEGORIES } from '../models/index.js';
+import { Subject, Category, PERMISSIONS, AUDIT_CATEGORIES } from '../models/index.js';
 import { authenticate, authorize } from '../middleware/auth.middleware.js';
 import { escapeRegex } from '../utils/regex.js';
 import { logAudit } from '../services/audit.service.js';
 
 const router = express.Router();
+
+// La catégorie porte la durée de conservation RGPD : on ne stocke que sa référence,
+// `category` restant le libellé dénormalisé (recherche plein texte, exports).
+const resolveCategory = async (categoryId) => {
+  if (!categoryId) return { categoryRef: null, category: '' };
+  const category = await Category.findById(categoryId).select('name');
+  if (!category) return { categoryRef: null, category: '' };
+  return { categoryRef: category._id, category: category.name };
+};
 
 // GET /api/subjects - Liste des objets avec pagination
 router.get('/', authenticate, async (req, res) => {
@@ -30,6 +39,7 @@ router.get('/', authenticate, async (req, res) => {
 
     const [subjects, total] = await Promise.all([
       Subject.find(query)
+        .populate('categoryRef', 'name color retentionEnabled retentionDuration retentionUnit legalBasis')
         .sort({ name: 1 })
         .skip(skip)
         .limit(parseInt(limit)),
@@ -89,7 +99,7 @@ router.get('/autocomplete', authenticate, async (req, res) => {
 });
 
 // POST /api/subjects - Créer un objet
-router.post('/', authenticate, authorize(PERMISSIONS.CREATE_SENDERS), [
+router.post('/', authenticate, authorize(PERMISSIONS.CREATE_CONTACTS), [
   body('name').trim().notEmpty().withMessage('Nom de l\'objet requis')
 ], async (req, res) => {
   try {
@@ -102,7 +112,7 @@ router.post('/', authenticate, authorize(PERMISSIONS.CREATE_SENDERS), [
       });
     }
 
-    const { name, code, description, category, color, isActive } = req.body;
+    const { name, code, description, categoryRef, color, isActive } = req.body;
 
     // Vérifier si l'objet existe déjà
     const existingSubject = await Subject.findOne({
@@ -120,7 +130,7 @@ router.post('/', authenticate, authorize(PERMISSIONS.CREATE_SENDERS), [
       name,
       code,
       description,
-      category,
+      ...(await resolveCategory(categoryRef)),
       color,
       isActive: isActive ?? true
     });
@@ -167,7 +177,7 @@ router.get('/:id', authenticate, async (req, res) => {
 });
 
 // PUT /api/subjects/:id - Modifier un objet
-router.put('/:id', authenticate, authorize(PERMISSIONS.EDIT_SENDERS), [
+router.put('/:id', authenticate, authorize(PERMISSIONS.EDIT_CONTACTS), [
   body('name').trim().notEmpty().withMessage('Nom de l\'objet requis')
 ], async (req, res) => {
   try {
@@ -189,7 +199,7 @@ router.put('/:id', authenticate, authorize(PERMISSIONS.EDIT_SENDERS), [
       });
     }
 
-    const { name, code, description, category, color, isActive } = req.body;
+    const { name, code, description, categoryRef, color, isActive } = req.body;
 
     // Vérifier si un autre objet avec ce nom existe
     const existingSubject = await Subject.findOne({
@@ -204,10 +214,13 @@ router.put('/:id', authenticate, authorize(PERMISSIONS.EDIT_SENDERS), [
       });
     }
 
+    const resolved = await resolveCategory(categoryRef);
+
     subject.name = name;
     subject.code = code;
     subject.description = description;
-    subject.category = category;
+    subject.categoryRef = resolved.categoryRef;
+    subject.category = resolved.category;
     subject.color = color;
     subject.isActive = isActive;
 
@@ -228,7 +241,7 @@ router.put('/:id', authenticate, authorize(PERMISSIONS.EDIT_SENDERS), [
 });
 
 // DELETE /api/subjects/:id - Supprimer un objet
-router.delete('/:id', authenticate, authorize(PERMISSIONS.DELETE_SENDERS), async (req, res) => {
+router.delete('/:id', authenticate, authorize(PERMISSIONS.DELETE_CONTACTS), async (req, res) => {
   try {
     const subject = await Subject.findById(req.params.id);
 

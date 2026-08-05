@@ -7,6 +7,35 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ---
 
+## [3.22.0] - 2026-08-05
+
+### Ajouté
+
+- **Gestion des catégories** (`/admin/categories`, réservée au groupe Administrateur) : référentiel à part entière, sur le modèle de la page Objets (création, modification, suppression, recherche, code, couleur, statut actif). La catégorie d'un objet n'est plus une liste figée dans le code mais une entrée du référentiel, sélectionnée depuis la page Objets
+- **Durées légales de conservation (RGPD) portées par la catégorie** : durée + unité (jours / mois / années), point de départ du décompte (réception, traitement, archivage, enregistrement), base légale de référence, action à échéance (alerter seulement ou mise en corbeille automatique) et seuils de rappel propres à la catégorie
+  - **Application rétroactive** : les échéances sont recalculées à chaque contrôle à partir de la durée courante de la catégorie. Faire passer les factures de 3 ans à 2 ans bascule immédiatement les documents concernés en « à supprimer », sans retraitement manuel
+  - **Simulation avant enregistrement** : le formulaire indique en direct combien de documents déjà enregistrés dépasseraient la nouvelle durée, avec un échantillon des références concernées
+  - **Historique des changements de durée** conservé sur la catégorie (ancienne durée, nouvelle durée, motif, auteur, nombre de documents devenus supprimables)
+- **Page Conformité RGPD** (`/admin/rgpd`, réservée au groupe Administrateur) : indicateurs (documents à supprimer, échéances sous 30 jours, dérogations, documents supprimés), répartition par catégorie, liste filtrable des documents suivis (statut, catégorie, recherche), mise en corbeille unitaire ou en lot, prise en compte d'une alerte, dérogation temporaire motivée (contentieux en cours, obligation légale concurrente), et contrôle à la demande
+- **Rappels paramétrables** : fréquence du contrôle automatique (quotidien / hebdomadaire / mensuel) avec heure et jour, seuils de rappel avant échéance (90/30/7 jours par défaut), fréquence de relance tant qu'un document en dépassement n'est pas traité, interrupteur global de la suppression automatique, synthèse par email et destinataires supplémentaires (DPO, service archives)
+- **Alertes** : notifications in-app aux administrateurs (échéance proche, documents à supprimer, suppressions automatiques effectuées, changement de durée sur une catégorie) et email de synthèse ; badge sur l'entrée « Conformité RGPD » de la barre latérale
+
+### Corrigé
+
+- Création, modification et suppression d'un objet renvoyaient systématiquement `403` : les routes s'appuyaient sur les constantes `PERMISSIONS.*_SENDERS`, supprimées lors du renommage expéditeurs → contacts, donc évaluées à `undefined`
+
+### Technique
+
+- Nouveaux modèles `Category` (référentiel + règle de conservation + historique) et `RetentionAlert` (une alerte par document, avec instantané de la règle appliquée : survit à la purge du document)
+- `Subject.categoryRef` référence la catégorie ; `Subject.category` reste le libellé dénormalisé (recherche plein texte, exports) et suit automatiquement le nom de la catégorie
+- Nouveau service `backend/src/services/retention.service.js` : calcul des échéances, contrôle planifié (`node-cron`, expression dérivée de la fréquence choisie et rechargée à chaque modification des paramètres), suppressions automatiques, notifications et synthèse email
+- Nouvelles routes `/api/categories` (lecture authentifiée, écriture `isAdmin`) et `/api/rgpd` (`isAdmin` intégral)
+- Migration idempotente au démarrage (`backend/src/scripts/migrate-categories.js`) : initialise le référentiel par défaut (7 catégories, conservation désactivée tant qu'un administrateur ne l'a pas validée) et convertit les catégories texte existantes des objets en références
+- Toutes les suppressions RGPD passent par la corbeille (soft delete) et sont journalisées dans le journal d'audit (`mail.rgpd_trashed`, `outgoing.rgpd_trashed`, `category.retention_changed`, `rgpd.settings_updated`…)
+- 14 tests supplémentaires (`backend/tests/rgpd.retention.test.js`) : cloisonnement administrateur, calcul des échéances, bascule rétroactive lors d'un changement de durée, simulation sans effet de bord, suppression manuelle et automatique, dérogation — 47 tests au total
+
+---
+
 ## [3.21.0] - 2026-07-16
 
 ### Ajouté

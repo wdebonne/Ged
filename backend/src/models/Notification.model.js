@@ -10,7 +10,12 @@ export const NOTIFICATION_TYPES = {
   MAIL_OVERDUE: 'mail_overdue',
   MAIL_REASSIGNED: 'mail_reassigned',
   MAIL_COMMENT: 'mail_comment',
-  COMMENT_MENTION: 'comment_mention'
+  COMMENT_MENTION: 'comment_mention',
+  // Conformité RGPD (durées de conservation par catégorie)
+  RGPD_RETENTION_UPCOMING: 'rgpd_retention_upcoming',
+  RGPD_RETENTION_EXPIRED: 'rgpd_retention_expired',
+  RGPD_DOCUMENTS_DELETED: 'rgpd_documents_deleted',
+  RGPD_RETENTION_CHANGED: 'rgpd_retention_changed'
 };
 
 const notificationSchema = new mongoose.Schema({

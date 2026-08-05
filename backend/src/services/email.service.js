@@ -312,6 +312,22 @@ const getDefaultTemplates = (vars) => ({
       </p>
     `)
   },
+  [EMAIL_ACTIONS.RGPD_RETENTION_DIGEST]: {
+    subject: `RGPD - ${vars.expiredCount} document(s) à supprimer (durée de conservation dépassée)`,
+    html: getDefaultTemplate('#b91c1c', '⚖️', 'Conservation RGPD', `
+      <h2>Bonjour ${vars.userFirstName || vars.userName},</h2>
+      <p>Contrôle automatique des durées légales de conservation :</p>
+      <div class="info">
+        <p><strong>Documents à supprimer (durée dépassée) :</strong> ${vars.expiredCount}</p>
+        <p><strong>Échéances proches :</strong> ${vars.upcomingCount}</p>
+        <p><strong>Supprimés automatiquement (corbeille) :</strong> ${vars.deletedCount}</p>
+      </div>
+      ${vars.documentList ? `<div class="info">${vars.documentList}</div>` : ''}
+      <p style="text-align: center;">
+        <a href="${vars.rgpdUrl}" class="button">Ouvrir la conformité RGPD</a>
+      </p>
+    `)
+  },
   [EMAIL_ACTIONS.SUPERVISOR_NEW_MAIL]: {
     subject: `Nouveau courrier pour ${vars.serviceName} - ${vars.mailSubject}`,
     html: getDefaultTemplate('#f59e0b', '📬', `Nouveau courrier - ${vars.serviceName}`, `
@@ -530,6 +546,28 @@ export const sendMailOverdueNotification = async (recipientEmail, recipientName,
     daysOverdue: String(daysOverdue),
     dueDate: new Date(mailInfo.dueDate).toLocaleDateString('fr-FR'),
     mailUrl: `${appUrl}/courriers/${mailInfo._id}`
+  });
+};
+
+// Synthèse RGPD : documents dont la durée légale de conservation est dépassée ou proche
+export const sendRetentionDigestEmail = async (recipientEmail, recipientName, summary) => {
+  const appUrl = await getAppUrl();
+  const rows = (summary.documents || []).slice(0, 25).map(doc => `
+    <p style="margin:4px 0;border-bottom:1px solid #eee;padding-bottom:4px;">
+      <strong>${doc.reference || doc.chronoNumber || '—'}</strong> — ${doc.documentSubject || ''}<br>
+      <span style="color:#666;font-size:12px;">
+        Catégorie : ${doc.categoryName || '—'} · Échéance : ${new Date(doc.expiryDate).toLocaleDateString('fr-FR')}
+      </span>
+    </p>`).join('');
+
+  return sendTemplatedEmail(EMAIL_ACTIONS.RGPD_RETENTION_DIGEST, recipientEmail, {
+    userName: recipientName,
+    userFirstName: (recipientName || '').split(' ')[0],
+    expiredCount: String(summary.expiredCount || 0),
+    upcomingCount: String(summary.upcomingCount || 0),
+    deletedCount: String(summary.deletedCount || 0),
+    documentList: rows,
+    rgpdUrl: `${appUrl}/admin/rgpd`
   });
 };
 

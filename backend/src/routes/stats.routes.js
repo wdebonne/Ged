@@ -1,5 +1,5 @@
 import express from 'express';
-import { Mail, OutgoingMail, User, Service, PendingMail, Delegation, MAIL_STATUS, OUTGOING_MAIL_STATUS, PERMISSIONS } from '../models/index.js';
+import { Mail, OutgoingMail, User, Service, PendingMail, Delegation, RetentionAlert, MAIL_STATUS, OUTGOING_MAIL_STATUS, PERMISSIONS, RETENTION_ALERT_STATUS } from '../models/index.js';
 import { authenticate, authorize } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
@@ -153,6 +153,11 @@ router.get('/', authenticate, async (req, res) => {
       sent: outSent,
       archived: outArchived
     };
+
+    // Documents dépassant la durée légale de conservation (badge RGPD, administrateurs uniquement)
+    if (req.user.group?.name === 'Administrateur') {
+      stats.rgpdExpired = await RetentionAlert.countDocuments({ status: RETENTION_ALERT_STATUS.EXPIRED });
+    }
 
     res.json({
       success: true,

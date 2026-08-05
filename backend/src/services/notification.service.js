@@ -93,6 +93,46 @@ export const notifyNewComment = (mail, recipientUser, authorUser) => createNotif
   actor: authorUser._id
 });
 
+// ---- Conformité RGPD : durées de conservation ----
+
+// Échéance de conservation à venir (rappel J-N configurable par catégorie)
+export const notifyRetentionUpcoming = (user, { count, days }) => createNotification({
+  recipient: user._id || user,
+  type: NOTIFICATION_TYPES.RGPD_RETENTION_UPCOMING,
+  title: 'RGPD — échéance de conservation proche',
+  message: `${count} document(s) atteindront leur durée légale de conservation dans ${days} jour(s)`,
+  link: '/admin/rgpd'
+});
+
+// Durée légale dépassée : ces documents doivent être supprimés
+export const notifyRetentionExpired = (user, { count }) => createNotification({
+  recipient: user._id || user,
+  type: NOTIFICATION_TYPES.RGPD_RETENTION_EXPIRED,
+  title: 'RGPD — documents à supprimer',
+  message: `${count} document(s) ont dépassé leur durée légale de conservation et doivent être supprimés`,
+  link: '/admin/rgpd'
+});
+
+// Suppression automatique effectuée (mise en corbeille)
+export const notifyRetentionDeleted = (user, { count }) => createNotification({
+  recipient: user._id || user,
+  type: NOTIFICATION_TYPES.RGPD_DOCUMENTS_DELETED,
+  title: 'RGPD — documents supprimés automatiquement',
+  message: `${count} document(s) ont été mis en corbeille : durée légale de conservation dépassée`,
+  link: '/admin/rgpd'
+});
+
+// Changement de durée sur une catégorie, avec l'impact rétroactif
+export const notifyRetentionChanged = (user, { categoryName, previousLabel, newLabel, newlyExpiredCount }) => createNotification({
+  recipient: user._id || user,
+  type: NOTIFICATION_TYPES.RGPD_RETENTION_CHANGED,
+  title: `RGPD — durée modifiée : ${categoryName}`,
+  message: newlyExpiredCount > 0
+    ? `${previousLabel} → ${newLabel} : ${newlyExpiredCount} document(s) dépassent désormais la durée légale et doivent être supprimés`
+    : `${previousLabel} → ${newLabel} : aucun document existant n'est immédiatement concerné`,
+  link: '/admin/rgpd'
+});
+
 export const notifyCommentMention = (mail, mentionedUser, authorUser) => createNotification({
   recipient: mentionedUser._id,
   type: NOTIFICATION_TYPES.COMMENT_MENTION,

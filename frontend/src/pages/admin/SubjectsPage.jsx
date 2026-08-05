@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
-import { subjectsAPI } from '../../services/api';
+import { subjectsAPI, categoriesAPI } from '../../services/api';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import Pagination from '../../components/Pagination';
 import {
@@ -14,6 +14,12 @@ import {
   ExclamationTriangleIcon,
   TagIcon
 } from '@heroicons/react/24/outline';
+
+const RETENTION_UNIT_LABELS = {
+  days: 'jour(s)',
+  months: 'mois',
+  years: 'an(s)'
+};
 
 export default function SubjectsPage() {
   const queryClient = useQueryClient();
@@ -142,8 +148,18 @@ export default function SubjectsPage() {
                       </p>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {subject.category ? (
-                        <span className="badge badge-primary">{subject.category}</span>
+                      {subject.categoryRef || subject.category ? (
+                        <div>
+                          <span className="badge badge-primary">
+                            {subject.categoryRef?.name || subject.category}
+                          </span>
+                          {/* La durée de conservation RGPD est portée par la catégorie */}
+                          {subject.categoryRef?.retentionEnabled && subject.categoryRef?.retentionDuration && (
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                              conservation {subject.categoryRef.retentionDuration} {RETENTION_UNIT_LABELS[subject.categoryRef.retentionUnit] || ''}
+                            </p>
+                          )}
+                        </div>
                       ) : (
                         <span className="text-gray-400 dark:text-gray-500">-</span>
                       )}
@@ -252,11 +268,17 @@ function SubjectModal({ subject, onClose }) {
     name: subject?.name || '',
     code: subject?.code || '',
     description: subject?.description || '',
-    category: subject?.category || '',
+    categoryRef: subject?.categoryRef?._id || subject?.categoryRef || '',
     color: subject?.color || '#4F46E5',
     isActive: subject?.isActive ?? true
   });
   const [errors, setErrors] = useState({});
+
+  // Référentiel des catégories (géré par les administrateurs, porte la durée RGPD)
+  const { data: categories } = useQuery({
+    queryKey: ['category-options'],
+    queryFn: async () => (await categoriesAPI.getOptions()).data.data
+  });
 
   const mutation = useMutation({
     mutationFn: async (data) => {
@@ -301,15 +323,7 @@ function SubjectModal({ subject, onClose }) {
     '#F97316', // Orange
   ];
 
-  const categories = [
-    'Facture',
-    'Contrat',
-    'Courrier administratif',
-    'Demande',
-    'Information',
-    'Réclamation',
-    'Autre'
-  ];
+  const selectedCategory = (categories || []).find(c => c._id === formData.categoryRef);
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -371,15 +385,26 @@ function SubjectModal({ subject, onClose }) {
             <div>
               <label className="label">Catégorie</label>
               <select
-                value={formData.category}
-                onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+                value={formData.categoryRef}
+                onChange={(e) => setFormData(prev => ({ ...prev, categoryRef: e.target.value }))}
                 className="input"
               >
                 <option value="">Sélectionner une catégorie</option>
-                {categories.map((cat) => (
-                  <option key={cat} value={cat}>{cat}</option>
+                {(categories || []).map((cat) => (
+                  <option key={cat._id} value={cat._id}>{cat.name}</option>
                 ))}
               </select>
+              {/* La catégorie détermine la durée légale de conservation du document */}
+              {selectedCategory?.retentionEnabled && selectedCategory?.retentionDuration ? (
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Conservation : {selectedCategory.retentionLabel}
+                  {selectedCategory.legalBasis && ` — ${selectedCategory.legalBasis}`}
+                </p>
+              ) : selectedCategory ? (
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  Aucune durée de conservation définie sur cette catégorie.
+                </p>
+              ) : null}
             </div>
 
             <div>

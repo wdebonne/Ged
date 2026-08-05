@@ -37,7 +37,9 @@ import {
   DocumentTextIcon,
   TrashIcon,
   ClipboardDocumentListIcon,
-  MagnifyingGlassIcon
+  MagnifyingGlassIcon,
+  Squares2X2Icon,
+  ScaleIcon
 } from '@heroicons/react/24/outline';
 
 export default function MainLayout() {
@@ -163,6 +165,8 @@ export default function MainLayout() {
     { name: 'Services', href: '/admin/services', icon: BuildingOfficeIcon, permission: 'view_services' },
     { name: 'Contacts', href: '/admin/contacts', icon: UserPlusIcon, permission: 'view_contacts' },
     { name: 'Objets', href: '/admin/objets', icon: TagIcon, permission: 'view_contacts' },
+    { name: 'Catégories', href: '/admin/categories', icon: Squares2X2Icon, adminOnly: true },
+    { name: 'Conformité RGPD', href: '/admin/rgpd', icon: ScaleIcon, adminOnly: true, badge: statsData?.rgpdExpired },
     { name: 'Paramètres', href: '/admin/parametres', icon: Cog6ToothIcon, permission: 'view_settings' },
     { name: 'Sauvegardes', href: '/admin/sauvegardes', icon: CircleStackIcon, permission: 'manage_settings' },
     { name: 'Correspondances LDAP', href: '/admin/correspondances-ldap', icon: LinkIcon, permission: 'manage_ldap' },
@@ -170,10 +174,14 @@ export default function MainLayout() {
     { name: "Journal d'audit", href: '/admin/journal-audit', icon: ClipboardDocumentListIcon, permission: 'view_audit_log' },
   ];
 
+  // Les entrées `adminOnly` (catégories, conformité RGPD) ne s'appuient sur aucune
+  // permission de groupe : elles sont réservées au groupe Administrateur.
   const filteredAdminNav = useMemo(
-    () => adminNavigation.filter(item => hasPermission(item.permission)),
+    () => adminNavigation.filter(item => (
+      item.adminOnly ? user?.group?.name === 'Administrateur' : hasPermission(item.permission)
+    )),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [user?.group?.permissions]
+    [user?.group?.permissions, user?.group?.name, statsData?.rgpdExpired]
   );
 
   return (
@@ -687,6 +695,9 @@ function getPageTitle(pathname) {
     '/courriers/depart/brouillons': 'Brouillons',
     '/courriers/depart/envoyes': 'Courriers envoyés',
     '/courriers/depart/archives': 'Courriers départ archivés',
+    '/admin/objets': 'Gestion des objets',
+    '/admin/categories': 'Gestion des catégories',
+    '/admin/rgpd': 'Conformité RGPD',
     '/admin/parametres': 'Paramètres',
     '/admin/corbeille': 'Corbeille',
     '/admin/journal-audit': "Journal d'audit",

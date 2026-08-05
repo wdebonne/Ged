@@ -14,3 +14,16 @@ export { default as LdapGroupMapping } from './LdapGroupMapping.model.js';
 export { default as Counter, formatChronoNumber } from './Counter.model.js';
 export { default as AuditLog, AUDIT_CATEGORIES } from './AuditLog.model.js';
 export { default as Notification, NOTIFICATION_TYPES } from './Notification.model.js';
+export {
+  default as Category,
+  RETENTION_UNITS,
+  RETENTION_START_POINTS,
+  EXPIRY_ACTIONS,
+  addRetention,
+  retentionUnitLabel
+} from './Category.model.js';
+export {
+  default as RetentionAlert,
+  RETENTION_ALERT_STATUS,
+  RETENTION_DOC_TYPES
+} from './RetentionAlert.model.js';
