@@ -155,8 +155,8 @@ const groupSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Index
-groupSchema.index({ name: 1 });
+// Pas d'index explicite sur `name` : `unique: true` sur le champ en crée déjà un
+// (le déclarer deux fois déclenche un avertissement Mongoose au démarrage).
 
 // Méthode pour vérifier une permission
 groupSchema.methods.hasPermission = function(permission) {

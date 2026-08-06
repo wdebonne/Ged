@@ -7,6 +7,20 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ---
 
+## [3.23.1] - 2026-08-06
+
+### Corrigé
+
+- **OCR des PDF inopérant en production (Docker)** : l'image tournait sous `node:18-alpine`, alors que `pdfjs-dist` (tiré par `pdf-to-img`) exige Node ≥ 20.16 pour `process.getBuiltinModule()`. Sous Node 18, la bibliothèque ne pouvait plus charger son moteur de rendu et échouait à convertir les PDF en images — d'où les avertissements au démarrage (`Cannot access the require function`, `Cannot polyfill DOMMatrix / ImageData / Path2D`) et l'absence de texte extrait. L'image de production et l'étape de build passent à `node:22-alpine`
+- **Avertissement Mongoose au démarrage** (`Duplicate schema index on {"name":1}`) : le modèle `Group` déclarait l'index sur `name` deux fois, via `unique: true` sur le champ et via `groupSchema.index({ name: 1 })`. La déclaration redondante est supprimée
+
+### Technique
+
+- **Dépendance `canvas` retirée** : plus aucun paquet ni aucun fichier source ne l'utilisait. `pdfjs-dist` v5 s'appuie sur `@napi-rs/canvas` (sa dépendance optionnelle), qui fournit des binaires précompilés musl. L'image Docker n'a donc plus besoin de chaîne de compilation ni des bibliothèques de développement associées (`python3`, `make`, `g++`, `cairo-dev`, `pango-dev`, `jpeg-dev`, `giflib-dev`, `librsvg-dev`, `pixman-dev`) : build plus rapide et image nettement plus légère
+- Ajout de `engines: { node: ">=20.16.0" }` dans `backend/package.json` pour signaler la contrainte avant qu'elle ne se manifeste à l'exécution
+
+---
+
 ## [3.23.0] - 2026-08-06
 
 ### Ajouté
