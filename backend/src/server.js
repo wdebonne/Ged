@@ -16,6 +16,7 @@ import { initRetentionScheduler } from './services/retention.service.js';
 // Initialisation de la base
 import { User, Settings, Group, DEFAULT_PERMISSIONS } from './models/index.js';
 import { migrateCategories } from './scripts/migrate-categories.js';
+import { migrateMailTypes } from './scripts/migrate-mailTypes.js';
 import { seedDatabase } from './scripts/seed.js';
 import { buildLdapUrl, isLdapForceDisabled } from './utils/ldap.utils.js';
 
@@ -108,6 +109,13 @@ const startServer = async () => {
     await migrateCategories();
   } catch (err) {
     console.error('Erreur migration catégories:', err.message);
+  }
+
+  // Référentiel des types de document + rattachement des courriers (idempotent)
+  try {
+    await migrateMailTypes();
+  } catch (err) {
+    console.error('Erreur migration types de document:', err.message);
   }
 
   // Charger les settings LDAP de la base vers process.env (priorité sur le .env)

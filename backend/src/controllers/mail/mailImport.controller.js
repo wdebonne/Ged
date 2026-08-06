@@ -10,7 +10,7 @@ import {
   notifyNewMailToCopyRecipient,
   notifyNewMailToServiceSupervisor
 } from '../../services/notification.service.js';
-import { parseTags, resolveDueDate } from './mail.helpers.js';
+import { parseTags, resolveDueDate, resolveMailType } from './mail.helpers.js';
 
 // POST /api/mails - Créer un courrier directement avec upload de fichier
 export async function createMail(req, res) {
@@ -22,6 +22,7 @@ export async function createMail(req, res) {
       subjectId,
       serviceId,
       assignedToId,
+      mailTypeId,
       priority,
       notes,
       receivedDate,
@@ -118,6 +119,7 @@ export async function createMail(req, res) {
       fileName: req.file.originalname,
       fileSize: req.file.size,
       ocrContent,
+      mailType: await resolveMailType(mailTypeId),
       service: serviceId,
       recipient: recipientId,
       receivedDate: mailReceivedDate,
@@ -229,6 +231,7 @@ export async function importPendingMail(req, res) {
       serviceId,
       recipientId,
       recipientsCopyIds = [],
+      mailTypeId,
       receivedDate,
       dueDate,
       notes,
@@ -337,6 +340,7 @@ export async function importPendingMail(req, res) {
       fileName: newFileName,
       fileSize: pendingMail.fileSize,
       ocrContent: pendingMail.ocrContent,
+      mailType: await resolveMailType(mailTypeId),
       service: serviceId,
       recipient: recipientId,
       recipientsCopy: recipientsCopyIds,
@@ -359,6 +363,7 @@ export async function importPendingMail(req, res) {
     const populatedMail = await Mail.findById(mail._id)
       .populate('sender', 'name organization email')
       .populate('service', 'name code')
+      .populate('mailType', 'name color')
       .populate('recipient', 'firstName lastName email')
       .populate('recipientsCopy', 'firstName lastName email');
 

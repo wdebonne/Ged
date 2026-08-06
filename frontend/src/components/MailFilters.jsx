@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { MagnifyingGlassIcon, FunnelIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { servicesAPI, sendersAPI } from '../services/api';
+import { servicesAPI, sendersAPI, mailTypesAPI } from '../services/api';
 
 export default function MailFilters({ filters, onChange }) {
   const [localFilters, setLocalFilters] = useState(filters);
@@ -19,6 +19,14 @@ export default function MailFilters({ filters, onChange }) {
     queryKey: ['senders'],
     queryFn: async () => {
       const response = await sendersAPI.getAll();
+      return response.data.data;
+    }
+  });
+
+  const { data: mailTypes } = useQuery({
+    queryKey: ['mail-type-options'],
+    queryFn: async () => {
+      const response = await mailTypesAPI.getOptions();
       return response.data.data;
     }
   });
@@ -57,6 +65,7 @@ export default function MailFilters({ filters, onChange }) {
       dateTo: '',
       priority: '',
       tag: '',
+      mailType: '',
       overdue: '',
       sortBy: '',
       sortOrder: ''
@@ -164,6 +173,22 @@ export default function MailFilters({ filters, onChange }) {
               <option value="high">Haute (et urgente)</option>
               <option value="normal">Normale</option>
               <option value="low">Basse</option>
+            </select>
+          </div>
+          <div>
+            <label className="label">Type de document</label>
+            <select
+              value={localFilters.mailType || ''}
+              onChange={(e) => handleChange('mailType', e.target.value)}
+              className="input"
+            >
+              <option value="">Tous les types</option>
+              {mailTypes?.map((type) => (
+                <option key={type._id} value={type._id}>
+                  {type.name}
+                </option>
+              ))}
+              <option value="none">— Sans type</option>
             </select>
           </div>
           <div>

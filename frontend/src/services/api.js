@@ -255,6 +255,15 @@ export const categoriesAPI = {
   importReferential: (data) => api.post('/categories/import-referential', data)
 };
 
+// Types de document (Courrier, Email, Note interne…) — administration
+export const mailTypesAPI = {
+  getAll: (params) => api.get('/mail-types', { params }),
+  getOptions: () => api.get('/mail-types/options'),
+  create: (data) => api.post('/mail-types', data),
+  update: (id, data) => api.put(`/mail-types/${id}`, data),
+  delete: (id, { force = false } = {}) => api.delete(`/mail-types/${id}`, { params: { force } })
+};
+
 // Conformité RGPD (durées légales de conservation)
 export const rgpdAPI = {
   getOverview: () => api.get('/rgpd/overview'),

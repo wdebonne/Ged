@@ -32,9 +32,10 @@ vi.mock('../src/services/notification.service.js', stubModule(vi));
 vi.mock('../src/services/excel.service.js', stubModule(vi));
 
 import app from '../src/app.js';
-import { PendingMail, Mail, Contact } from '../src/models/index.js';
+import { PendingMail, Mail, Contact, MailType } from '../src/models/index.js';
 import { connectTestDb, disconnectTestDb } from './helpers/db.js';
 import { createGroup, createService, createUser, tokenFor, MINI_PDF } from './helpers/fixtures.js';
+import { migrateMailTypes } from '../src/scripts/migrate-mailTypes.js';
 
 describe('Import de courriers (upload + import)', () => {
   let admin, agent;
@@ -166,6 +167,55 @@ describe('Import de courriers (upload + import)', () => {
         });
 
       expect(res.status).toBe(404);
+    });
+  });
+
+  describe('Type de document à l’import', () => {
+    const uploadPending = async () => {
+      const res = await request(app)
+        .post('/api/mails/pending/upload')
+        .set('Authorization', `Bearer ${tokenFor(admin)}`)
+        .attach('files', MINI_PDF, { filename: 'courrier.pdf', contentType: 'application/pdf' });
+      return res.body.data[0]._id;
+    };
+
+    const importWith = (pendingMailId, extra) => request(app)
+      .post('/api/mails/import')
+      .set('Authorization', `Bearer ${tokenFor(admin)}`)
+      .send({
+        pendingMailId,
+        subject: 'Courrier typé',
+        senderId: 'Association des Riverains',
+        serviceId: service._id.toString(),
+        recipientId: agent._id.toString(),
+        ...extra
+      });
+
+    beforeAll(async () => {
+      await migrateMailTypes();
+    });
+
+    it('applique le type par défaut quand aucun type n’est transmis', async () => {
+      const res = await importWith(await uploadPending(), {});
+
+      expect(res.status).toBe(201);
+      const courrier = await MailType.findOne({ isDefault: true });
+      expect(String(res.body.data.mailType._id)).toBe(String(courrier._id));
+    });
+
+    it('applique le type choisi', async () => {
+      const note = await MailType.findOne({ name: 'Note interne' });
+      const res = await importWith(await uploadPending(), { mailTypeId: note._id.toString() });
+
+      expect(res.status).toBe(201);
+      expect(res.body.data.mailType.name).toBe('Note interne');
+    });
+
+    it('laisse le courrier sans type quand « aucun type » est choisi explicitement', async () => {
+      const res = await importWith(await uploadPending(), { mailTypeId: '' });
+
+      expect(res.status).toBe(201);
+      expect(res.body.data.mailType).toBeNull();
     });
   });
 

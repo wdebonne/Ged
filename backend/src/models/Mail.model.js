@@ -114,7 +114,15 @@ const mailSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
-  
+  // Nature du document (Courrier, Email, Note interne…) — référentiel administrable.
+  // Facultatif : les courriers enregistrés avant la mise en place du référentiel
+  // restent sans type tant qu'un agent ne leur en attribue pas un.
+  mailType: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'MailType',
+    default: null
+  },
+
   // Document
   filePath: {
     type: String,
@@ -285,6 +293,7 @@ mailSchema.index({ receivedDate: -1 });
 mailSchema.index({ sender: 1 });
 mailSchema.index({ status: 1, dueDate: 1 });
 mailSchema.index({ tags: 1 });
+mailSchema.index({ mailType: 1, receivedDate: -1 });
 mailSchema.index({ deletedAt: 1 });
 
 // Générer une référence unique avant sauvegarde

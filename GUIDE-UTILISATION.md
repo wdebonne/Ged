@@ -126,7 +126,7 @@ Sur chaque page de liste, vous disposez de :
 - 👁️ **Voir** : Consulter le détail du courrier
 - ✏️ **Modifier** : Éditer les informations (si autorisé)
 - 📥 **Télécharger** : Télécharger le fichier PDF
-- 🗑️ **Supprimer** : Déplace le courrier vers la **Corbeille** (admin uniquement) — il reste récupérable, voir [section 11.11](#1111-corbeille)
+- 🗑️ **Supprimer** : Déplace le courrier vers la **Corbeille** (admin uniquement) — il reste récupérable, voir [section 11.12](#1112-corbeille)
 
 #### Sélection multiple et actions groupées
 
@@ -546,7 +546,23 @@ Le **sort final** est rappelé en badge sur chaque catégorie :
 
 **Les changements sont rétroactifs.** Si la durée de conservation des factures passe de 3 ans à 2 ans, les échéances de toutes les factures déjà enregistrées sont recalculées immédiatement : celles qui dépassent la nouvelle durée basculent aussitôt en « à supprimer ». Avant d'enregistrer, le formulaire indique combien de documents existants seraient concernés, avec un échantillon des références. Chaque modification de durée est conservée dans l'historique de la catégorie (ancienne durée, nouvelle durée, motif, auteur).
 
-### 11.7 Conformité RGPD
+### 11.7 Types de document
+
+**Chemin : Administration > Types de document** *(réservé aux administrateurs)*
+
+Le type décrit la **nature du document** enregistré : Courrier, Email, Document, Note interne, Facture, Recommandé, Formulaire, Fax, Autre. Il ne se confond pas avec la catégorie : la catégorie porte le classement archivistique et la durée légale de conservation (11.6), le type sert au tri et à la recherche.
+
+Neuf types sont créés à l'installation. Pour chacun, vous définissez un nom, un code, une description, une couleur (reprise dans les badges), un ordre d'affichage dans les listes déroulantes et son statut actif.
+
+**Type par défaut** : un seul type à la fois peut être marqué comme tel — « Courrier » à l'installation. C'est celui qui est présélectionné à l'enregistrement d'un courrier entrant, et celui qui est appliqué aux courriers arrivés par IMAP. Marquer un autre type par défaut retire automatiquement ce statut au précédent ; désactiver un type le lui retire également.
+
+**À l'enregistrement d'un courrier** (Courriers entrants), la liste « Type de document » est facultative : elle propose d'emblée le type par défaut, l'agent peut en choisir un autre ou sélectionner « Aucun type ».
+
+**À la recherche**, le filtre « Type de document » des listes de courriers (à traiter, traités, archivés) restreint l'affichage à un type, l'entrée « Sans type » permettant de retrouver les courriers non qualifiés. Le type apparaît en badge coloré dans les listes et sur la fiche d'un courrier.
+
+**Suppression** : un type encore utilisé par des courriers demande une confirmation supplémentaire. Les courriers concernés ne sont jamais supprimés — ils perdent simplement leur type et restent modifiables.
+
+### 11.8 Conformité RGPD
 
 **Chemin : Administration > Conformité RGPD** *(réservé aux administrateurs)*
 
@@ -572,7 +588,7 @@ Actions possibles sur un document :
 
 Les alertes arrivent dans la cloche de notifications des administrateurs et, si l'option est activée, par email. Le bouton **Contrôler maintenant** relance le contrôle sans attendre la prochaine échéance planifiée.
 
-### 11.8 Modèles d'emails
+### 11.9 Modèles d'emails
 
 **Chemin : Administration > Modèles d'emails**
 
@@ -583,7 +599,7 @@ Personnalisez les emails automatiques avec :
 - Prévisualisation en temps réel
 - **Pièce jointe PDF** : cochez « Joindre le PDF du courrier » pour inclure le document en PJ (disponible pour les templates liés aux courriers)
 
-### 11.9 Notifications par défaut
+### 11.10 Notifications par défaut
 
 **Chemin : Administration > Paramètres > Notifications**
 
@@ -610,7 +626,7 @@ La même page permet de configurer les **échéances de traitement** :
 
 Les rappels et alertes de retard sont envoyés chaque matin à 8h00 (horaire personnalisable via la variable d'environnement `REMINDER_CRON`).
 
-### 11.10 Paramètres système
+### 11.11 Paramètres système
 
 **Chemin : Administration > Paramètres**
 
@@ -645,7 +661,7 @@ Les rappels et alertes de retard sont envoyés chaque matin à 8h00 (horaire per
 - OneDrive, S3, NextCloud
 - Synchronisation automatique
 
-### 11.11 Corbeille
+### 11.12 Corbeille
 
 **Chemin : Administration > Corbeille**
 
@@ -665,7 +681,7 @@ La suppression d'un courrier (entrant ou sortant, action réservée aux administ
 
 > 💡 Cette page n'est visible que si vous avez la permission **`manage_trash`**.
 
-### 11.12 Journal d'audit
+### 11.13 Journal d'audit
 
 **Chemin : Administration > Journal d'audit**
 

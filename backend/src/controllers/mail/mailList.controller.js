@@ -17,6 +17,7 @@ export async function listMails(req, res) {
       sender = '',
       service = '',
       recipient = '',
+      mailType = '',
       dateFrom = '',
       dateTo = '',
       sortBy = 'receivedDate',
@@ -179,6 +180,11 @@ export async function listMails(req, res) {
       query.service = service;
     }
 
+    // Filtrer par type de document ('none' = courriers sans type)
+    if (mailType) {
+      query.mailType = mailType === 'none' ? null : mailType;
+    }
+
     // Filtrer par destinataire
     if (recipient) {
       if (!query.$or) {
@@ -208,6 +214,7 @@ export async function listMails(req, res) {
       .select('-comments')
       .populate('sender', 'name organization')
       .populate('service', 'name code color')
+      .populate('mailType', 'name color')
       .populate('recipient', 'firstName lastName email avatar')
       .populate('recipientsCopy', 'firstName lastName email')
       .populate('importedBy', 'firstName lastName')
@@ -243,6 +250,7 @@ export async function getMailById(req, res) {
     const mail = await Mail.findById(req.params.id)
       .populate('sender', 'name organization email phone address')
       .populate('service', 'name code color')
+      .populate('mailType', 'name color')
       .populate('recipient', 'firstName lastName email avatar')
       .populate('recipientsCopy', 'firstName lastName email avatar')
       .populate('importedBy', 'firstName lastName')

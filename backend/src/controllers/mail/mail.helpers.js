@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-import { Mail, Settings, MAIL_STATUS, PERMISSIONS, Delegation } from '../../models/index.js';
+import mongoose from 'mongoose';
+import { Mail, MailType, Settings, MAIL_STATUS, PERMISSIONS, Delegation } from '../../models/index.js';
 import { syncArchivedMail as syncToOneDrive } from '../../services/onedrive.service.js';
 import { notifyMailArchived } from '../../services/notification.service.js';
 
@@ -81,6 +82,22 @@ export function parseTags(tags) {
   if (!tags) return [];
   const list = Array.isArray(tags) ? tags : String(tags).split(',');
   return [...new Set(list.map(t => String(t).trim()).filter(Boolean))];
+}
+
+// Résoudre le type de document : valeur choisie si elle désigne un type actif,
+// sinon le type marqué par défaut (« Courrier »). Renvoie null si le référentiel
+// est vide — le type reste facultatif.
+// Champ absent (undefined) : type par défaut. Champ vide ou null : l'agent a
+// explicitement choisi « aucun type », on ne lui en impose pas un.
+export async function resolveMailType(mailTypeId) {
+  if (mailTypeId === '' || mailTypeId === null) return null;
+
+  if (mailTypeId && mongoose.Types.ObjectId.isValid(mailTypeId)) {
+    const chosen = await MailType.findOne({ _id: mailTypeId, isActive: true }).select('_id');
+    if (chosen) return chosen._id;
+  }
+  const fallback = await MailType.findOne({ isDefault: true, isActive: true }).select('_id');
+  return fallback?._id || null;
 }
 
 // Résoudre la date d'échéance : valeur saisie, sinon délai réglementaire

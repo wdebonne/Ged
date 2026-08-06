@@ -33,6 +33,7 @@ export default function MailsPendingPage() {
     dateTo: '',
     priority: '',
     tag: '',
+    mailType: '',
     overdue: overdueParam,
     sortBy: overdueParam ? 'dueDate' : '',
     sortOrder: overdueParam ? 'asc' : ''
@@ -148,6 +149,17 @@ export default function MailsPendingPage() {
                             {mail.chronoNumber || mail.reference}
                           </span>
                           <span className="badge-warning">À traiter</span>
+                          {mail.mailType && (
+                            <span
+                              className="badge"
+                              style={{
+                                backgroundColor: `${mail.mailType.color}20`,
+                                color: mail.mailType.color
+                              }}
+                            >
+                              {mail.mailType.name}
+                            </span>
+                          )}
                           {(mail.priority === 'urgent' || mail.priority === 'high') && (
                             <span className={`badge ${mail.priority === 'urgent' ? 'bg-red-100 text-red-700' : 'bg-orange-100 text-orange-700'}`}>
                               {mail.priority === 'urgent' ? 'Urgent' : 'Prioritaire'}

@@ -4,6 +4,7 @@ export { default as Service } from './Service.model.js';
 export { default as Contact } from './Contact.model.js';
 export { default as Subject } from './Subject.model.js';
 export { default as Mail, MAIL_STATUS, RESPONSE_TYPE } from './Mail.model.js';
+export { default as MailType } from './MailType.model.js';
 export { default as OutgoingMail, OUTGOING_MAIL_STATUS, SENDING_METHOD } from './OutgoingMail.model.js';
 export { default as PendingMail } from './PendingMail.model.js';
 export { default as Settings } from './Settings.model.js';

@@ -37,6 +37,7 @@ export default function MailsArchivedPage() {
     dateTo: '',
     priority: '',
     tag: '',
+    mailType: '',
     overdue: '',
     sortBy: '',
     sortOrder: ''
@@ -168,6 +169,17 @@ export default function MailsArchivedPage() {
                           {mail.chronoNumber || mail.reference}
                         </span>
                         <span className="badge bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">Archivé</span>
+                        {mail.mailType && (
+                          <span
+                            className="badge"
+                            style={{
+                              backgroundColor: `${mail.mailType.color}20`,
+                              color: mail.mailType.color
+                            }}
+                          >
+                            {mail.mailType.name}
+                          </span>
+                        )}
                       </div>
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 truncate">
                         {mail.subject}

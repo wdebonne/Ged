@@ -657,6 +657,17 @@ export default function MailDetailPage() {
                         {showPreview ? <EyeSlashIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
                         <span className="hidden sm:inline">{showPreview ? 'Masquer' : 'Aperçu'}</span>
                       </button>
+                      {mail.mailType && (
+                        <span
+                          className="badge"
+                          style={{
+                            backgroundColor: `${mail.mailType.color}20`,
+                            color: mail.mailType.color
+                          }}
+                        >
+                          {mail.mailType.name}
+                        </span>
+                      )}
                       <span className={`badge ${
                         mail.status === 'pending' ? 'badge-warning' :
                         mail.status === 'processed' ? 'badge-success' :

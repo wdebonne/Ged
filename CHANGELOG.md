@@ -7,6 +7,27 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ---
 
+## [3.24.0] - 2026-08-06
+
+### Ajouté
+
+- **Types de document** (`/admin/types-document`, réservée au groupe Administrateur) : référentiel administrable de la nature des documents enregistrés — Courrier, Email, Document, Note interne, Facture, Recommandé, Formulaire, Fax, Autre — sur le modèle de la page Catégories (création, modification, suppression, recherche, code, couleur, ordre d'affichage, statut actif). Le type décrit la **forme** du document, là où la catégorie porte le classement archivistique et la durée de conservation : les deux référentiels restent indépendants
+  - **Type proposé par défaut** : un seul type à la fois peut être marqué comme tel (« Courrier » à l'installation). Il est présélectionné à l'enregistrement d'un courrier entrant et appliqué aux courriers arrivés par IMAP
+  - **Choix facultatif à l'enregistrement** : la liste « Type de document » du formulaire Courriers entrants est modifiable comme les tags, et l'option « Aucun type » permet de ne pas en attribuer
+  - **Filtre de recherche par type** dans les listes de courriers (à traiter, traités, archivés), avec une entrée « Sans type » pour retrouver les courriers non qualifiés, et affichage du type en badge coloré dans les listes et sur la fiche d'un courrier
+  - **Suppression protégée** : un type encore utilisé ne peut pas être supprimé sans confirmation explicite ; les courriers concernés ne sont jamais supprimés, ils perdent seulement leur type
+- **Rattachement des courriers existants** : au démarrage, les courriers enregistrés avant la mise en place du référentiel reçoivent le type par défaut, pour que le filtre soit exploitable immédiatement
+
+### Technique
+
+- Nouveau modèle `MailType`, nouveau champ `mailType` sur `Mail` (index `{ mailType, receivedDate }`), et migration idempotente `backend/src/scripts/migrate-mailTypes.js` jouée au démarrage
+- Nouveaux endpoints `GET|POST /api/mail-types`, `GET /api/mail-types/options`, `PUT|DELETE /api/mail-types/:id` : lecture ouverte aux utilisateurs authentifiés, écriture réservée aux administrateurs et tracée dans le journal d'audit
+- `GET /api/mails` accepte un filtre `mailType` (`none` pour les courriers sans type) et retourne le type peuplé
+- À l'import, un `mailTypeId` absent applique le type par défaut, une valeur vide signifie « aucun type » explicitement choisi
+- 15 tests supplémentaires (`backend/tests/mailTypes.test.js` et complément de `mails.import.test.js`) : référentiel par défaut, idempotence, rattachement rétroactif limité aux courriers antérieurs au champ (un « aucun type » explicite n'est jamais défait par un redémarrage), cloisonnement administrateur, unicité des noms et du type par défaut, suppression protégée puis forcée, filtres de liste, et type appliqué à l'import — 74 tests au total
+
+---
+
 ## [3.23.1] - 2026-08-06
 
 ### Corrigé

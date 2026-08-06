@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { Document, Page, pdfjs } from 'react-pdf';
-import { mailsAPI, sendersAPI, servicesAPI, subjectsAPI, usersAPI, imapAPI } from '../../services/api';
+import { mailsAPI, sendersAPI, servicesAPI, subjectsAPI, usersAPI, imapAPI, mailTypesAPI } from '../../services/api';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import { Skeleton } from '../../components/Skeleton';
 import TagInput from '../../components/TagInput';
@@ -59,6 +59,8 @@ export default function IncomingMailsPage() {
     service: '',
     assignedTo: '',
     copyTo: [],
+    // null : type non choisi, le type par défaut du référentiel s'applique
+    mailTypeId: null,
     priority: 'normal',
     dueDate: '',
     tags: [],
@@ -201,6 +203,18 @@ export default function IncomingMailsPage() {
     }
   });
 
+  // Récupérer les types de document (référentiel administré)
+  const { data: mailTypes } = useQuery({
+    queryKey: ['mail-type-options'],
+    queryFn: async () => {
+      const response = await mailTypesAPI.getOptions();
+      return response.data.data;
+    }
+  });
+
+  // Type présélectionné tant que l'agent n'en choisit pas un autre
+  const defaultMailTypeId = mailTypes?.find(t => t.isDefault)?._id || '';
+
   // Récupérer les utilisateurs pour destinataires
   const { data: users } = useQuery({
     queryKey: ['users-recipients'],
@@ -314,6 +328,7 @@ export default function IncomingMailsPage() {
         service: '',
         assignedTo: '',
         copyTo: [],
+        mailTypeId: null,
         priority: 'normal',
         dueDate: '',
         tags: [],
@@ -340,6 +355,7 @@ export default function IncomingMailsPage() {
       service: '',
       assignedTo: '',
       copyTo: [],
+      mailTypeId: null,
       priority: 'normal',
       dueDate: '',
       tags: [],
@@ -398,6 +414,8 @@ export default function IncomingMailsPage() {
       recipientId: formData.assignedTo,
       recipientsCopyIds: formData.copyTo,
       priority: formData.priority,
+      // Chaîne vide = « aucun type » explicitement choisi par l'agent
+      mailTypeId: formData.mailTypeId ?? defaultMailTypeId,
       notes: formData.notes,
       ...(formData.dueDate && { dueDate: formData.dueDate }),
       ...(formData.tags.length > 0 && { tags: formData.tags }),
@@ -1018,6 +1036,30 @@ export default function IncomingMailsPage() {
                     </div>
                   )}
                 </div>
+
+                {/* Type de document */}
+                {mailTypes?.length > 0 && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1 dark:text-gray-300">
+                      Type de document (optionnel)
+                    </label>
+                    <select
+                      value={formData.mailTypeId ?? defaultMailTypeId}
+                      onChange={(e) => setFormData({ ...formData, mailTypeId: e.target.value })}
+                      className="input"
+                    >
+                      <option value="">Aucun type</option>
+                      {mailTypes.map((type) => (
+                        <option key={type._id} value={type._id}>
+                          {type.name}{type.isDefault ? ' (par défaut)' : ''}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-gray-400 mt-1 dark:text-gray-500">
+                      Facilite le tri et la recherche (Courrier, Email, Note interne…)
+                    </p>
+                  </div>
+                )}
 
                 {/* Priorité */}
                 <div>

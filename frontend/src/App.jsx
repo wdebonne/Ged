@@ -35,6 +35,7 @@ const ServicesPage = lazy(() => import('./pages/admin/ServicesPage'));
 const ContactsPage = lazy(() => import('./pages/admin/SendersPage'));
 const SubjectsPage = lazy(() => import('./pages/admin/SubjectsPage'));
 const CategoriesPage = lazy(() => import('./pages/admin/CategoriesPage'));
+const MailTypesPage = lazy(() => import('./pages/admin/MailTypesPage'));
 const RgpdPage = lazy(() => import('./pages/admin/RgpdPage'));
 const SettingsPage = lazy(() => import('./pages/admin/SettingsPage'));
 const LdapGroupMappingsPage = lazy(() => import('./pages/admin/LdapGroupMappingsPage'));
@@ -208,6 +209,14 @@ function App() {
             element={
               <ProtectedRoute adminOnly>
                 <CategoriesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/types-document"
+            element={
+              <ProtectedRoute adminOnly>
+                <MailTypesPage />
               </ProtectedRoute>
             }
           />

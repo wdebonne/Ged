@@ -39,7 +39,8 @@ import {
   ClipboardDocumentListIcon,
   MagnifyingGlassIcon,
   Squares2X2Icon,
-  ScaleIcon
+  ScaleIcon,
+  InboxStackIcon
 } from '@heroicons/react/24/outline';
 
 export default function MainLayout() {
@@ -166,6 +167,7 @@ export default function MainLayout() {
     { name: 'Contacts', href: '/admin/contacts', icon: UserPlusIcon, permission: 'view_contacts' },
     { name: 'Objets', href: '/admin/objets', icon: TagIcon, permission: 'view_contacts' },
     { name: 'Catégories', href: '/admin/categories', icon: Squares2X2Icon, adminOnly: true },
+    { name: 'Types de document', href: '/admin/types-document', icon: InboxStackIcon, adminOnly: true },
     { name: 'Conformité RGPD', href: '/admin/rgpd', icon: ScaleIcon, adminOnly: true, badge: statsData?.rgpdExpired },
     { name: 'Paramètres', href: '/admin/parametres', icon: Cog6ToothIcon, permission: 'view_settings' },
     { name: 'Sauvegardes', href: '/admin/sauvegardes', icon: CircleStackIcon, permission: 'manage_settings' },
@@ -697,6 +699,7 @@ function getPageTitle(pathname) {
     '/courriers/depart/archives': 'Courriers départ archivés',
     '/admin/objets': 'Gestion des objets',
     '/admin/categories': 'Gestion des catégories',
+    '/admin/types-document': 'Types de document',
     '/admin/rgpd': 'Conformité RGPD',
     '/admin/parametres': 'Paramètres',
     '/admin/corbeille': 'Corbeille',

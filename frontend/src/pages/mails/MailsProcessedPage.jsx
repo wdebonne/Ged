@@ -36,6 +36,7 @@ export default function MailsProcessedPage() {
     dateTo: '',
     priority: '',
     tag: '',
+    mailType: '',
     overdue: '',
     sortBy: '',
     sortOrder: ''
@@ -151,6 +152,17 @@ export default function MailsProcessedPage() {
                             {mail.chronoNumber || mail.reference}
                           </span>
                           <span className="badge-success">Traité</span>
+                          {mail.mailType && (
+                            <span
+                              className="badge"
+                              style={{
+                                backgroundColor: `${mail.mailType.color}20`,
+                                color: mail.mailType.color
+                              }}
+                            >
+                              {mail.mailType.name}
+                            </span>
+                          )}
                           {mail.responses?.length > 0 && (
                             <span className="badge-primary">
                               {mail.responses.length} réponse(s)
