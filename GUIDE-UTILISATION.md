@@ -523,6 +523,27 @@ Le référentiel des catégories regroupe les objets par nature de document (Fac
 - **À l'échéance** : alerter seulement, ou mettre automatiquement en corbeille
 - **Rappels avant échéance** propres à la catégorie (sinon les seuils globaux s'appliquent)
 
+#### Référentiel type « mairie »
+
+Le bouton **Référentiel mairie** importe 90 catégories prêtes à l'emploi, réparties en 16 domaines (assemblée et actes administratifs, état civil, élections, finances, commande publique, urbanisme, ressources humaines, police et sécurité, cimetière, action sociale, enfance et affaires scolaires, culture et vie associative, voirie et environnement, patrimoine, affaires juridiques, informatique et données personnelles). Chacune arrive avec sa durée d'utilité administrative (DUA), son sort final et sa base légale.
+
+Avant d'importer, un aperçu indique ce qui sera créé et ce qui existe déjà. Vous pouvez restreindre l'import à certains domaines. L'opération est rejouable sans créer de doublon.
+
+Deux garde-fous :
+
+- les **23 catégories à conservation définitive** (délibérations, arrêtés permanents, registres d'état civil, autorisations d'urbanisme, budgets, registre des inhumations, concessions funéraires, listes électorales, plans de réseaux…) sont importées **sans aucune durée** : elles ne peuvent jamais déclencher d'alerte de suppression ;
+- **aucune catégorie importée n'active la suppression automatique** — le référentiel se limite à alerter.
+
+> ⚠️ **Ces durées sont indicatives.** Elles proviennent des instructions DGP/SIAF/2014/006 et DAF/DPACI/RES/2009/018 et des tableaux de gestion publiés par les services d'archives. La DUA se fixe d'un commun accord avec votre service d'archives départementales, et **l'élimination d'archives publiques est subordonnée au visa du directeur des Archives départementales** (Code du patrimoine, art. L212-2 et R212-14) : un bordereau d'élimination doit lui être adressé avant toute destruction. Deux durées demandent en outre un ajustement au cas par cas, leur point de départ réel étant la date de naissance de la personne concernée : les dossiers individuels des agents (80 ans) et les accidents d'enfants (28 ans).
+
+Le **sort final** est rappelé en badge sur chaque catégorie :
+
+| Sort final | Signification | Effet dans l'application |
+|------------|---------------|--------------------------|
+| **Conservation définitive** | Le document est conservé sans limite puis versé aux archives | Aucune durée, jamais d'alerte |
+| **Élimination** | Le document peut être détruit au terme de la DUA | Alerte à l'échéance |
+| **Tri** | Une partie du fonds est conservée, le reste éliminé | Alerte à l'échéance, pour examen — jamais une suppression en bloc |
+
 **Les changements sont rétroactifs.** Si la durée de conservation des factures passe de 3 ans à 2 ans, les échéances de toutes les factures déjà enregistrées sont recalculées immédiatement : celles qui dépassent la nouvelle durée basculent aussitôt en « à supprimer ». Avant d'enregistrer, le formulaire indique combien de documents existants seraient concernés, avec un échantillon des références. Chaque modification de durée est conservée dans l'historique de la catégorie (ancienne durée, nouvelle durée, motif, auteur).
 
 ### 11.7 Conformité RGPD

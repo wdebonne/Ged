@@ -21,8 +21,17 @@ import {
   retentionRuleLabel,
   normalizeThresholds
 } from '../services/retention.service.js';
+import { COMMUNE_CATEGORIES, COMMUNE_DOMAINS, toCategoryPayload } from '../data/communeCategories.js';
 
 const router = express.Router();
+
+// Comparaison de noms tolérante à la casse et aux accents (« État civil » / « etat civil »)
+const DIACRITICS = /[̀-ͯ]/g;
+const normalizeName = (value) => String(value || '')
+  .normalize('NFD')
+  .replace(DIACRITICS, '')
+  .trim()
+  .toLowerCase();
 
 // La gestion des catégories est réservée aux administrateurs ; la lecture reste
 // ouverte aux utilisateurs authentifiés (sélection de la catégorie d'un objet).
@@ -93,6 +102,8 @@ const validators = [
 const readPayload = (body) => ({
   name: body.name,
   code: body.code,
+  domain: body.domain || '',
+  sortFinal: ['C', 'E', 'T'].includes(body.sortFinal) ? body.sortFinal : null,
   description: body.description,
   color: body.color,
   isActive: body.isActive ?? true,
@@ -110,23 +121,26 @@ const readPayload = (body) => ({
 // GET /api/categories - Liste paginée
 router.get('/', authenticate, async (req, res) => {
   try {
-    const { search = '', isActive = '', page = 1, limit = 20 } = req.query;
+    const { search = '', isActive = '', domain = '', page = 1, limit = 20 } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
 
     const query = {};
+    if (domain) query.domain = domain;
     if (search) {
       const safe = escapeRegex(search);
       query.$or = [
         { name: { $regex: safe, $options: 'i' } },
         { code: { $regex: safe, $options: 'i' } },
+        { domain: { $regex: safe, $options: 'i' } },
         { legalBasis: { $regex: safe, $options: 'i' } }
       ];
     }
     if (isActive !== '') query.isActive = isActive === 'true';
 
-    const [categories, total] = await Promise.all([
-      Category.find(query).sort({ name: 1 }).skip(skip).limit(parseInt(limit)).lean(),
-      Category.countDocuments(query)
+    const [categories, total, domains] = await Promise.all([
+      Category.find(query).sort({ domain: 1, name: 1 }).skip(skip).limit(parseInt(limit)).lean(),
+      Category.countDocuments(query),
+      Category.distinct('domain')
     ]);
 
     const ids = categories.map(c => c._id);
@@ -146,6 +160,7 @@ router.get('/', authenticate, async (req, res) => {
     res.json({
       success: true,
       data,
+      domains: domains.filter(Boolean).sort(),
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),
@@ -173,6 +188,162 @@ router.get('/options', authenticate, async (req, res) => {
     });
   } catch (error) {
     console.error('Erreur options catégories:', error);
+    res.status(500).json({ success: false, message: 'Erreur serveur' });
+  }
+});
+
+// GET /api/categories/referential - Aperçu du référentiel type mairie, en indiquant
+// ce qui existe déjà (comparaison par nom, insensible à la casse et aux accents)
+router.get('/referential', ...adminOnly, async (req, res) => {
+  try {
+    const existing = await Category.find({}).select('name').lean();
+    const existingKeys = new Set(existing.map(c => normalizeName(c.name)));
+
+    const entries = COMMUNE_CATEGORIES.map(entry => ({
+      ...toCategoryPayload(entry),
+      alreadyExists: existingKeys.has(normalizeName(entry.name))
+    }));
+
+    res.json({
+      success: true,
+      data: {
+        domains: COMMUNE_DOMAINS,
+        entries,
+        toCreate: entries.filter(e => !e.alreadyExists).length,
+        existing: entries.filter(e => e.alreadyExists).length
+      }
+    });
+  } catch (error) {
+    console.error('Erreur aperçu référentiel:', error);
+    res.status(500).json({ success: false, message: 'Erreur serveur' });
+  }
+});
+
+// POST /api/categories/import-referential - Importer le référentiel type mairie
+// Idempotent : les catégories déjà présentes sont ignorées, sauf si `updateExisting`
+// est demandé (leur durée est alors alignée, avec effet rétroactif sur les documents).
+router.post('/import-referential', ...adminOnly, async (req, res) => {
+  try {
+    const updateExisting = req.body?.updateExisting === true;
+    const onlyDomains = Array.isArray(req.body?.domains) && req.body.domains.length > 0
+      ? new Set(req.body.domains)
+      : null;
+
+    const existing = await Category.find({}).lean();
+    const existingByKey = new Map(existing.map(c => [normalizeName(c.name), c]));
+
+    const created = [];
+    const updated = [];
+    const skipped = [];
+    let newlyExpiredTotal = 0;
+
+    for (const entry of COMMUNE_CATEGORIES) {
+      if (onlyDomains && !onlyDomains.has(entry.domain)) continue;
+
+      const payload = toCategoryPayload(entry);
+      const match = existingByKey.get(normalizeName(entry.name));
+
+      if (!match) {
+        const category = new Category({
+          ...payload,
+          createdBy: req.user._id,
+          updatedBy: req.user._id
+        });
+        if (category.retentionEnabled && category.retentionDuration) {
+          category.retentionHistory.push({
+            enabled: true,
+            duration: category.retentionDuration,
+            unit: category.retentionUnit,
+            reason: 'Import du référentiel type mairie',
+            changedBy: req.user._id,
+            changedByLabel: `${req.user.firstName} ${req.user.lastName}`
+          });
+        }
+        await category.save();
+        created.push(category.name);
+        continue;
+      }
+
+      if (!updateExisting) {
+        skipped.push(match.name);
+        continue;
+      }
+
+      const category = await Category.findById(match._id);
+      const before = {
+        enabled: category.retentionEnabled,
+        duration: category.retentionDuration,
+        unit: category.retentionUnit,
+        startFrom: category.retentionStartFrom,
+        label: retentionRuleLabel(category)
+      };
+
+      // Le nom, la couleur et le code saisis par la collectivité sont préservés :
+      // seule la règle de conservation (et ses métadonnées) est alignée.
+      category.domain = payload.domain;
+      category.sortFinal = payload.sortFinal;
+      category.legalBasis = payload.legalBasis;
+      category.retentionEnabled = payload.retentionEnabled;
+      category.retentionDuration = payload.retentionDuration;
+      category.retentionUnit = payload.retentionUnit;
+      category.retentionStartFrom = payload.retentionStartFrom;
+      category.alertBeforeDays = payload.alertBeforeDays;
+      category.updatedBy = req.user._id;
+
+      const retentionChanged = before.enabled !== category.retentionEnabled
+        || before.duration !== category.retentionDuration
+        || before.unit !== category.retentionUnit
+        || before.startFrom !== category.retentionStartFrom;
+
+      if (retentionChanged) {
+        category.retentionHistory.push({
+          previousEnabled: before.enabled,
+          previousDuration: before.duration,
+          previousUnit: before.unit,
+          enabled: category.retentionEnabled,
+          duration: category.retentionDuration,
+          unit: category.retentionUnit,
+          reason: 'Alignement sur le référentiel type mairie',
+          changedBy: req.user._id,
+          changedByLabel: `${req.user.firstName} ${req.user.lastName}`
+        });
+      }
+
+      await category.save();
+
+      if (retentionChanged) {
+        const impact = await applyRetentionChange(category, {
+          previousLabel: before.label,
+          newLabel: retentionRuleLabel(category),
+          actor: `${req.user.firstName} ${req.user.lastName}`
+        });
+        newlyExpiredTotal += impact.newlyExpired;
+      }
+
+      updated.push(category.name);
+    }
+
+    await logAudit({
+      req,
+      action: 'category.referential_imported',
+      category: AUDIT_CATEGORIES.SETTINGS,
+      entityType: 'Category',
+      entityLabel: 'Référentiel type mairie',
+      metadata: {
+        created: created.length,
+        updated: updated.length,
+        skipped: skipped.length,
+        newlyExpired: newlyExpiredTotal
+      }
+    });
+
+    res.json({
+      success: true,
+      message: `${created.length} catégorie(s) créée(s), ${updated.length} mise(s) à jour, ${skipped.length} ignorée(s)`,
+      data: { created, updated, skipped, newlyExpired: newlyExpiredTotal }
+    });
+  } catch (error) {
+    console.error('Erreur import référentiel:', error);
     res.status(500).json({ success: false, message: 'Erreur serveur' });
   }
 });

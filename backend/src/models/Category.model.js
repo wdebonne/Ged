@@ -21,6 +21,14 @@ export const EXPIRY_ACTIONS = {
   AUTO_TRASH: 'auto_trash'   // mise en corbeille automatique + alerte
 };
 
+// Sort final au sens archivistique : ce que deviennent les documents à l'issue
+// de la durée d'utilité administrative (DUA).
+export const SORT_FINAL = {
+  CONSERVATION: 'C',  // conservation définitive : jamais proposé à la suppression
+  ELIMINATION: 'E',   // élimination après visa des Archives départementales
+  TRI: 'T'            // tri : examen à l'échéance, une partie du fonds est conservée
+};
+
 const RETENTION_UNIT_LABELS = {
   [RETENTION_UNITS.DAYS]: 'jour(s)',
   [RETENTION_UNITS.MONTHS]: 'mois',
@@ -59,6 +67,13 @@ const categorySchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  // Domaine fonctionnel (état civil, urbanisme, finances…) : sert au regroupement
+  // et au filtrage dans l'interface d'administration
+  domain: {
+    type: String,
+    trim: true,
+    default: ''
+  },
   color: {
     type: String,
     default: '#4F46E5'
@@ -66,6 +81,13 @@ const categorySchema = new mongoose.Schema({
   isActive: {
     type: Boolean,
     default: true
+  },
+  // Sort final archivistique, informatif : rappelle pourquoi une catégorie est
+  // sans durée (conservation définitive) ou demande un examen (tri)
+  sortFinal: {
+    type: String,
+    enum: [...Object.values(SORT_FINAL), null],
+    default: null
   },
 
   // ---- Conservation RGPD ----
@@ -115,6 +137,7 @@ const categorySchema = new mongoose.Schema({
 
 categorySchema.index({ name: 1 }, { unique: true, collation: { locale: 'fr', strength: 2 } });
 categorySchema.index({ isActive: 1 });
+categorySchema.index({ domain: 1 });
 
 // Libellé lisible de la durée (« 3 an(s) »)
 categorySchema.methods.retentionLabel = function() {

@@ -19,6 +19,7 @@ export {
   RETENTION_UNITS,
   RETENTION_START_POINTS,
   EXPIRY_ACTIONS,
+  SORT_FINAL,
   addRetention,
   retentionUnitLabel
 } from './Category.model.js';

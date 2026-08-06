@@ -7,6 +7,27 @@ et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
 ---
 
+## [3.23.0] - 2026-08-06
+
+### Ajouté
+
+- **Référentiel type « mairie » : 90 catégories prêtes à l'emploi**, avec leur durée d'utilité administrative (DUA), leur sort final et leur base légale, réparties en 16 domaines : assemblée et actes administratifs, affaires juridiques et assurances, patrimoine communal, finances et comptabilité, commande publique, ressources humaines, état civil et attributions d'État, élections, police et sécurité, urbanisme, voirie/réseaux/environnement, cimetière, enfance et affaires scolaires, action sociale et CCAS, culture/sport/vie associative, informatique et données personnelles
+  - **Import depuis la page Catégories** (bouton « Référentiel mairie »), avec aperçu préalable de ce qui sera créé, sélection facultative des domaines, et option d'alignement des catégories déjà présentes (rétroactif, le nom/code/couleur choisis par la collectivité étant préservés). L'import est idempotent : rejouable sans créer de doublon (comparaison des noms insensible à la casse et aux accents)
+  - **Garde-fou sur les documents à conserver définitivement** : les 23 catégories dont le sort final est la conservation définitive (délibérations, arrêtés permanents, registres d'état civil, autorisations d'urbanisme, budgets, registre des inhumations, concessions funéraires, listes électorales, plans de réseaux…) sont importées **sans aucune durée** — elles ne peuvent jamais déclencher d'alerte de suppression
+  - **Aucune suppression automatique** dans le référentiel : l'élimination d'archives publiques est subordonnée au visa du directeur des Archives départementales (Code du patrimoine, art. L212-2 et R212-14). Toutes les catégories importées sont réglées sur « alerter seulement »
+  - Sources : instructions DGP/SIAF/2014/006 et DAF/DPACI/RES/2009/018, tableaux de gestion publiés par les services d'archives (CDG10, Archives départementales du Finistère), Code du travail, Code civil, Code de la commande publique, Code de la sécurité intérieure
+- **Domaine** et **sort final** sur les catégories : le domaine regroupe et filtre le référentiel dans la page d'administration ; le sort final (conservation définitive / élimination / tri) est affiché en badge et rappelle pourquoi une catégorie est sans durée ou demande un examen plutôt qu'une suppression en bloc
+- **Rappels resserrés pour les DUA courtes** : les catégories d'un an ou moins reçoivent des seuils adaptés (30 et 7 jours, ou 7 et 1 jour pour la vidéoprotection) au lieu des seuils globaux 90/30/7
+
+### Technique
+
+- Nouveau module de données `backend/src/data/communeCategories.js` (référentiel + `toCategoryPayload()`), partagé entre l'API et les tests
+- Nouveaux endpoints `GET /api/categories/referential` (aperçu) et `POST /api/categories/import-referential` (import), réservés aux administrateurs
+- Champs `domain` et `sortFinal` ajoutés au modèle `Category` ; `GET /api/categories` accepte un filtre `domain` et retourne la liste des domaines existants
+- 12 tests supplémentaires (`backend/tests/rgpd.referential.test.js`) : cohérence du référentiel (aucune durée sur une conservation définitive, aucune suppression automatique, noms et codes uniques), cloisonnement administrateur, import complet, import par domaine, idempotence, préservation des durées existantes, et alignement rétroactif — 59 tests au total
+
+---
+
 ## [3.22.0] - 2026-08-05
 
 ### Ajouté

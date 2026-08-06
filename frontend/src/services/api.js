@@ -250,7 +250,9 @@ export const categoriesAPI = {
   create: (data) => api.post('/categories', data),
   update: (id, data) => api.put(`/categories/${id}`, data),
   delete: (id, { force = false } = {}) => api.delete(`/categories/${id}`, { params: { force } }),
-  previewRetention: (id, data) => api.post(`/categories/${id}/retention-preview`, data)
+  previewRetention: (id, data) => api.post(`/categories/${id}/retention-preview`, data),
+  getReferential: () => api.get('/categories/referential'),
+  importReferential: (data) => api.post('/categories/import-referential', data)
 };
 
 // Conformité RGPD (durées légales de conservation)
